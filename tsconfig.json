@@ -4,12 +4,15 @@
     "target": "ES2017",
     "jsx": "react-jsx",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "module": "esnext",
+    "module": "preserve",
     "moduleResolution": "bundler",
     "paths": {
       "@/*": ["./src/*"]
     },
     "resolveJsonModule": true,
+    "types": [
+      "node"
+    ],
     "allowJs": true,
     "strict": true,
     "noEmit": true,

@@ -4,8 +4,12 @@ trustPolicy: no-downgrade
 trustPolicyIgnoreAfter: 43200
 
 overrides:
-  semver: ^7.5.4
+  "@vercel/detect-agent": 1.2.3
 
+  semver: ^7.5.4
 allowBuilds:
+  esbuild: true
+  msgpackr-extract: true
   sharp: false
   unrs-resolver: false
+  workerd: true

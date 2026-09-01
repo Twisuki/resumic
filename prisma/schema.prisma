@@ -1,0 +1,32 @@
+// use prisma-next
+
+model User {
+  id          Int      @id @default(autoincrement())
+  github      String   @unique                  // GitHub login (handle, URL owner 段), 唯一
+  name        String                            // GitHub display name (非唯一), 前端展示
+  status      String   @default("active")       // active / disabled(暂用 String, prisma-next enum 待验证)
+  createdAt   TimestamptzString @default(now())
+
+  // AI 配额(每日)
+  aiCount     Int      @default(0)
+  aiDate      Date?                              // 上次扣量日期, 跨日重置
+
+  // AI 自配(可选)
+  aiKey       String?
+  aiModel     String?
+
+  // 头像配额(累计)
+  avatarBytes BigInt   @default(0)
+
+  resumes     Resume[]
+}
+
+model Resume {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  data      Json                              // Resume 类型(jsonb)
+  createdAt TimestamptzString @default(now())
+  updatedAt temporal.updatedAtString()
+
+  user      User     @relation(fields: [userId], references: [id])
+}
