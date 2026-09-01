@@ -10,6 +10,5 @@ export default antfu({
     html: true,
     markdown: true,
   },
-  unocss: true,
   react: true,
 })
