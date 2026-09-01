@@ -1,0 +1,11 @@
+shellEmulator: true
+
+trustPolicy: no-downgrade
+trustPolicyIgnoreAfter: 43200
+
+overrides:
+  semver: ^7.5.4
+
+allowBuilds:
+  sharp: false
+  unrs-resolver: false
