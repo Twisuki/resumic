@@ -1,18 +1,26 @@
 import antfu from "@antfu/eslint-config"
 
-export default antfu({
-  ignores: [
-    "migrations/**",
-    "prisma/schema.d.ts",
-  ],
-  typescript: true,
-  stylistic: {
-    quotes: "double",
+export default antfu(
+  {
+    ignores: [
+      "migrations/**",
+      "prisma/schema.d.ts",
+    ],
+    typescript: true,
+    stylistic: {
+      quotes: "double",
+    },
+    formatters: {
+      css: true,
+      html: true,
+      markdown: true,
+    },
+    react: true,
   },
-  formatters: {
-    css: true,
-    html: true,
-    markdown: true,
+  {
+    files: ["src/components/ui/**"],
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
   },
-  react: true,
-})
+)
