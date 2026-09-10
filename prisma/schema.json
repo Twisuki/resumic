@@ -106,7 +106,7 @@
               "aiDate": {
                 "nullable": true,
                 "type": {
-                  "codecId": "pg/date-temporal@1",
+                  "codecId": "pg/date-string@1",
                   "kind": "scalar"
                 }
               },
@@ -313,7 +313,7 @@
                   "nullable": false
                 },
                 "aiDate": {
-                  "codecId": "pg/date-temporal@1",
+                  "codecId": "pg/date-string@1",
                   "nativeType": "date",
                   "nullable": true
                 },
@@ -395,7 +395,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "09ac0ed9e2e96b3e2d914b220b8273000e04d534401c0671bcb7f94c976562fc"
+    "storageHash": "5a67d430101bdd7ee21be71552a3a8e1468af2a9154efe35797bec879aa4376a"
   },
   "execution": {
     "executionHash": "5840b31f308379226ef4bc0729c6c48a7c2b85da32f6a5040812eb2bd63c881d",

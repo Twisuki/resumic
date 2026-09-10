@@ -9,7 +9,7 @@ model User {
 
   // AI 配额(每日)
   aiCount     Int      @default(0)
-  aiDate      Date?                              // 上次扣量日期, 跨日重置
+  aiDate      DateString?                        // 上次扣量日期 (YYYY-MM-DD), 跨日重置
 
   // AI 自配(可选)
   aiKey       String?
