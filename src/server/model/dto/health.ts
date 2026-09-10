@@ -1,5 +1,5 @@
 export interface HealthResponse {
-  ok: true
-  version: string
+  hello: string
+  ok: boolean
   db: "up" | "down"
 }
