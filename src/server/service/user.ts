@@ -60,7 +60,7 @@ export const user = {
     return {
       ai: {
         count: u.aiCount,
-        date: u.aiDate ? u.aiDate.toISOString().slice(0, 10) : "",
+        date: u.aiDate ?? "",
         limit: aiLimit(),
       },
       avatar: {

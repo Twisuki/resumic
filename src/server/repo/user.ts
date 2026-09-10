@@ -52,4 +52,19 @@ export const user = {
       .where({ id })
       .update({ aiKey: null, aiModel: null })
   },
+
+  /**
+   * @description 扣 1 点每日 AI 配额 (跨日重置), 未超限才扣, 返是否扣成功
+   */
+  async consumeAiQuota(id: number, limit: number): Promise<boolean> {
+    const u = await this.findById(id)
+    if (!u)
+      return false
+    const today = new Date().toISOString().slice(0, 10)
+    const count = u.aiDate === today ? u.aiCount : 0
+    if (count >= limit)
+      return false
+    await db.orm.public.User.where({ id }).update({ aiCount: count + 1, aiDate: today })
+    return true
+  },
 }

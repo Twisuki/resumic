@@ -17,6 +17,7 @@ export const ErrorCode = {
     NotFound: 30001,
   },
   AI: {
+    QuotaExhausted: 40001,
     UpstreamError: 40002,
   },
   Validation: {
