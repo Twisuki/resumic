@@ -1,10 +1,12 @@
 import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
-import { ok } from "@/server/api"
+import { clearSessionToken } from "@/server/auth/cookie"
 
 /**
- * @description 退出登录并清除会话 cookie
+ * @description 清 cookie + 302 回 /
  */
-export async function POST(_req: NextRequest, _ctx: RouteContext<"/api/auth/logout">): Promise<NextResponse> {
-  return NextResponse.json(ok(null))
+export function POST(_req: NextRequest, _ctx: RouteContext<"/api/auth/logout">): NextResponse {
+  const res = NextResponse.redirect(new URL("/", _req.url))
+  clearSessionToken(res)
+  return res
 }
