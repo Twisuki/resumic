@@ -1,10 +1,20 @@
 import antfu from "@antfu/eslint-config"
 
+const SHADCN_IGNORES = [
+  "src/components/**", // shadcn components
+  "src/hooks/**", // shadcn hooks
+]
+
+const ORM_IGNORES = [
+  "migrations/**", // prisma migrations
+  "prisma/schema.d.ts", // prisma schema
+]
+
 export default antfu(
   {
     ignores: [
-      "migrations/**",
-      "prisma/schema.d.ts",
+      ...SHADCN_IGNORES,
+      ...ORM_IGNORES,
     ],
     typescript: true,
     stylistic: {
@@ -18,7 +28,7 @@ export default antfu(
     react: true,
   },
   {
-    files: ["src/components/ui/**"],
+    files: ["**/contexts/**"],
     rules: {
       "react-refresh/only-export-components": "off",
     },

@@ -3,15 +3,14 @@
 import {
   IconBrandGithub,
   IconLayoutSidebarLeftExpand,
-  IconLayoutSidebarRightExpandFilled,
   IconMenu2,
   IconUser,
   IconWorld,
-  IconX,
 } from "@tabler/icons-react"
 import Image from "next/image"
 import Link from "next/link"
 
+import { useSidebars } from "@/app/(main)/hooks/sidebar"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -70,17 +69,8 @@ function Avatar({
   return <AvatarPlaceholder className={className} />
 }
 
-export default function Navbar({
-  isAgentOpen,
-  isSidebarOpen,
-  onToggleAgent,
-  onToggleSidebar,
-}: Readonly<{
-  isAgentOpen: boolean
-  isSidebarOpen: boolean
-  onToggleAgent: () => void
-  onToggleSidebar: () => void
-}>) {
+export default function Navbar() {
+  const { toggleLeft, toggleRight } = useSidebars()
   const user = CURRENT_USER
 
   return (
@@ -126,33 +116,21 @@ export default function Navbar({
           <Button
             variant="outline"
             size="icon"
-            onClick={onToggleAgent}
-            aria-label="切换 Agent 面板"
-            className="inline-flex md:hidden"
+            onClick={toggleLeft}
+            aria-label="切换左侧面板"
+            className="md:hidden"
           >
-            {isAgentOpen
-              ? (
-                  <IconLayoutSidebarRightExpandFilled />
-                )
-              : (
-                  <IconLayoutSidebarLeftExpand />
-                )}
+            <IconLayoutSidebarLeftExpand />
           </Button>
 
           <Button
             variant="outline"
             size="icon"
-            onClick={onToggleSidebar}
-            aria-label="切换 Sidebar 面板"
-            className="inline-flex md:hidden"
+            onClick={toggleRight}
+            aria-label="切换右侧面板"
+            className="md:hidden"
           >
-            {isSidebarOpen
-              ? (
-                  <IconX />
-                )
-              : (
-                  <IconMenu2 />
-                )}
+            <IconMenu2 />
           </Button>
 
           <DropdownMenu>
