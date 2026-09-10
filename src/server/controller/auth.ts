@@ -2,10 +2,11 @@ import type { GitHubProfile } from "@/server/auth/github"
 import type { ApiResponse } from "@/server/model/api"
 import type { MeResponse } from "@/server/model/dto/auth"
 import { err, ok } from "@/server/api"
-import { auth as authenticate } from "@/server/auth"
 import { exchangeCode, fetchUser } from "@/server/auth/github"
 import { signSession } from "@/server/auth/jwt"
+import { withSession } from "@/server/controller/handle"
 import { repo } from "@/server/repo"
+import { ServiceError } from "@/server/service/error"
 import { ErrorCode } from "@/shared/error-code"
 
 export const auth = {
@@ -49,14 +50,12 @@ export const auth = {
    * @description 调 auth 拿 session, 查 user 返 MeResponse
    */
   async me(): Promise<ApiResponse<MeResponse>> {
-    const authed = await authenticate()
-    if (!authed.ok) {
-      return err(authed.code, authed.msg)
-    }
-    const u = await repo.user.findById(authed.session.userId)
-    if (!u) {
-      return err(ErrorCode.System.Internal, "用户不存在")
-    }
-    return ok({ id: u.id, github: u.github, name: u.name, avatarUrl: null })
+    return withSession(async (session) => {
+      const u = await repo.user.findById(session.userId)
+      if (!u) {
+        throw new ServiceError(ErrorCode.System.Internal, "用户不存在")
+      }
+      return { id: u.id, github: u.github, name: u.name, avatarUrl: null }
+    })
   },
 }
