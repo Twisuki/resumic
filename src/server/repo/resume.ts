@@ -15,12 +15,37 @@ export const resume = {
   },
 
   /**
-   * @description 插入简历记录
+   * @description 按 id 查 Resume
+   */
+  findById(id: number): Promise<ResumeEntity | null> {
+    return db.orm.public.Resume.first({ id })
+  },
+
+  /**
+   * @description 创建简历记录
    */
   create(userId: number, data: Resume): Promise<ResumeEntity> {
     return db.orm.public.Resume.create({
       userId,
       data: data as never,
     })
+  },
+
+  /**
+   * @description 更新 Resume 的 data 字段 (按 id)
+   */
+  update(id: number, data: Resume): Promise<ResumeEntity | null> {
+    return db.orm.public.Resume
+      .where({ id })
+      .update({ data: data as never })
+  },
+
+  /**
+   * @description 删除 Resume (按 id)
+   */
+  delete(id: number): Promise<ResumeEntity | null> {
+    return db.orm.public.Resume
+      .where({ id })
+      .delete()
   },
 }

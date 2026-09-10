@@ -1,31 +1,43 @@
 import type { NextRequest } from "next/server"
+import type { Resume } from "@/server/model/resume"
 import { NextResponse } from "next/server"
-import { ok } from "@/server/api"
+import { err } from "@/server/api"
+import { controller } from "@/server/controller"
+import { ErrorCode } from "@/shared/error-code"
 
 /**
  * @description 获取单份简历
  */
-export async function GET(_req: NextRequest, _ctx: RouteContext<"/api/resume/[id]">): Promise<NextResponse> {
-  return NextResponse.json(ok(null))
+export async function GET(_req: NextRequest, ctx: RouteContext<"/api/resume/[id]">): Promise<NextResponse> {
+  const { id } = await ctx.params
+  const numId = Number(id)
+  if (!Number.isInteger(numId) || numId <= 0) {
+    return NextResponse.json(err(ErrorCode.Resume.NotFound, "简历不存在"))
+  }
+  return NextResponse.json(await controller.resume.getResume(numId))
 }
 
 /**
  * @description 全量更新简历
  */
-export async function PUT(_req: NextRequest, _ctx: RouteContext<"/api/resume/[id]">): Promise<NextResponse> {
-  return NextResponse.json(ok(null))
-}
-
-/**
- * @description 部分更新简历字段
- */
-export async function PATCH(_req: NextRequest, _ctx: RouteContext<"/api/resume/[id]">): Promise<NextResponse> {
-  return NextResponse.json(ok(null))
+export async function PUT(req: NextRequest, ctx: RouteContext<"/api/resume/[id]">): Promise<NextResponse> {
+  const { id } = await ctx.params
+  const numId = Number(id)
+  if (!Number.isInteger(numId) || numId <= 0) {
+    return NextResponse.json(err(ErrorCode.Resume.NotFound, "简历不存在"))
+  }
+  const data = (await req.json()) as Resume
+  return NextResponse.json(await controller.resume.updateResume(numId, data))
 }
 
 /**
  * @description 删除简历
  */
-export async function DELETE(_req: NextRequest, _ctx: RouteContext<"/api/resume/[id]">): Promise<NextResponse> {
-  return NextResponse.json(ok(null))
+export async function DELETE(_req: NextRequest, ctx: RouteContext<"/api/resume/[id]">): Promise<NextResponse> {
+  const { id } = await ctx.params
+  const numId = Number(id)
+  if (!Number.isInteger(numId) || numId <= 0) {
+    return NextResponse.json(err(ErrorCode.Resume.NotFound, "简历不存在"))
+  }
+  return NextResponse.json(await controller.resume.deleteResume(numId))
 }
