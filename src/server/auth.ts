@@ -1,3 +1,5 @@
+import { ErrorCode } from "@/shared/error-code"
+
 export interface Session {
   userId: number
   github: string
@@ -5,8 +7,12 @@ export interface Session {
   status: "active" | "disabled"
 }
 
-export async function auth(): Promise<Session> {
-  throw new Error("auth() not implemented")
+export type AuthResult
+  = | { ok: true, session: Session }
+    | { ok: false, code: typeof ErrorCode.Auth.Required, msg: string }
+
+export async function auth(): Promise<AuthResult> {
+  return { ok: false, code: ErrorCode.Auth.Required, msg: "未登录" }
 }
 
 export async function authOrNull(): Promise<Session | null> {

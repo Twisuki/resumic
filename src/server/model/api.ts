@@ -1,3 +1,5 @@
+import type { ErrorCodeValue } from "@/shared/error-code"
+
 export interface ApiOk<T> {
   code: 0
   data: T
@@ -5,7 +7,7 @@ export interface ApiOk<T> {
 }
 
 export interface ApiErr {
-  code: string
+  code: Exclude<ErrorCodeValue, 0>
   data: null
   msg: string
 }
