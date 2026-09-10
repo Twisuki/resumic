@@ -1,6 +1,8 @@
 import type { CreateResumeResponse, GetResumeResponse, ListResumesResponse, UpdateResumeResponse } from "@/server/model/dto/resume"
 import type { Resume } from "@/server/model/resume"
 import { repo } from "@/server/repo"
+import { ServiceError } from "@/server/service/error"
+import { ErrorCode } from "@/shared/error-code"
 
 export const resume = {
   /**
@@ -24,36 +26,42 @@ export const resume = {
   },
 
   /**
-   * @description 查 Resume 实体并校验 userId 匹配, 不匹配返 null
+   * @description 查 Resume 实体并校验 userId 匹配, 不匹配抛 Resume.NotFound
    */
-  async getByIdForUser(id: number, userId: number): Promise<GetResumeResponse | null> {
+  async getByIdForUser(id: number, userId: number): Promise<GetResumeResponse> {
     const entity = await repo.resume.findById(id)
-    if (!entity || entity.userId !== userId)
-      return null
+    if (!entity || entity.userId !== userId) {
+      throw new ServiceError(ErrorCode.Resume.NotFound, "简历不存在")
+    }
     return entity.data as unknown as Resume
   },
 
   /**
-   * @description 校验 ownership 后更新 Resume 的 data 字段, 失败 (无实体 / 不匹配 / 行已删) 返 null
+   * @description 校验 ownership 后更新 Resume 的 data 字段, 失败 (无实体 / 不匹配 / 行已删) 抛 Resume.NotFound
    */
-  async updateForUser(id: number, userId: number, data: Resume): Promise<UpdateResumeResponse | null> {
+  async updateForUser(id: number, userId: number, data: Resume): Promise<UpdateResumeResponse> {
     const entity = await repo.resume.findById(id)
-    if (!entity || entity.userId !== userId)
-      return null
+    if (!entity || entity.userId !== userId) {
+      throw new ServiceError(ErrorCode.Resume.NotFound, "简历不存在")
+    }
     const updated = await repo.resume.update(id, data)
-    if (!updated)
-      return null
+    if (!updated) {
+      throw new ServiceError(ErrorCode.Resume.NotFound, "简历不存在")
+    }
     return updated.data as unknown as Resume
   },
 
   /**
-   * @description 校验 ownership 后删除 Resume, 返是否成功
+   * @description 校验 ownership 后删除 Resume, 失败抛 Resume.NotFound
    */
-  async deleteForUser(id: number, userId: number): Promise<boolean> {
+  async deleteForUser(id: number, userId: number): Promise<void> {
     const entity = await repo.resume.findById(id)
-    if (!entity || entity.userId !== userId)
-      return false
+    if (!entity || entity.userId !== userId) {
+      throw new ServiceError(ErrorCode.Resume.NotFound, "简历不存在")
+    }
     const deleted = await repo.resume.delete(id)
-    return deleted !== null
+    if (!deleted) {
+      throw new ServiceError(ErrorCode.Resume.NotFound, "简历不存在")
+    }
   },
 }

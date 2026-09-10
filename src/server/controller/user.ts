@@ -22,7 +22,7 @@ export const user = {
     }
     catch (e) {
       if (e instanceof ServiceError) {
-        return err(e.code, e.serviceMsg)
+        return err(e.code, e.msg)
       }
       return err(ErrorCode.System.Internal, "服务异常")
     }
@@ -41,7 +41,7 @@ export const user = {
     }
     catch (e) {
       if (e instanceof ServiceError) {
-        return err(e.code, e.serviceMsg)
+        return err(e.code, e.msg)
       }
       return err(ErrorCode.System.Internal, "服务异常")
     }
@@ -60,7 +60,7 @@ export const user = {
     }
     catch (e) {
       if (e instanceof ServiceError) {
-        return err(e.code, e.serviceMsg)
+        return err(e.code, e.msg)
       }
       return err(ErrorCode.System.Internal, "服务异常")
     }

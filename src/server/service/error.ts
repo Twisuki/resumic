@@ -3,8 +3,8 @@ import type { ErrorCodeFailure } from "@/shared/error-code"
 export class ServiceError extends Error {
   constructor(
     public code: ErrorCodeFailure,
-    public serviceMsg: string,
+    public msg: string,
   ) {
-    super(serviceMsg)
+    super(msg)
   }
 }

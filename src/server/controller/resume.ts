@@ -3,7 +3,7 @@ import type { CreateResumeResponse, GetResumeResponse, ListResumesResponse, Upda
 import type { Resume } from "@/server/model/resume"
 import { err, ok } from "@/server/api"
 import { auth as authenticate } from "@/server/auth"
-import { service } from "@/server/service"
+import { service, ServiceError } from "@/server/service"
 import { ErrorCode } from "@/shared/error-code"
 
 export const resume = {
@@ -15,8 +15,7 @@ export const resume = {
     if (!authed.ok) {
       return err(authed.code, authed.msg)
     }
-    const items = await service.resume.listByUserId(authed.session.userId)
-    return ok(items)
+    return ok(await service.resume.listByUserId(authed.session.userId))
   },
 
   /**
@@ -27,8 +26,7 @@ export const resume = {
     if (!authed.ok) {
       return err(authed.code, authed.msg)
     }
-    const resume = await service.resume.create(authed.session.userId, data)
-    return ok(resume)
+    return ok(await service.resume.create(authed.session.userId, data))
   },
 
   /**
@@ -39,11 +37,15 @@ export const resume = {
     if (!authed.ok) {
       return err(authed.code, authed.msg)
     }
-    const resume = await service.resume.getByIdForUser(id, authed.session.userId)
-    if (!resume) {
-      return err(ErrorCode.Resume.NotFound, "简历不存在")
+    try {
+      return ok(await service.resume.getByIdForUser(id, authed.session.userId))
     }
-    return ok(resume)
+    catch (e) {
+      if (e instanceof ServiceError) {
+        return err(e.code, e.msg)
+      }
+      return err(ErrorCode.System.Internal, "服务异常")
+    }
   },
 
   /**
@@ -54,11 +56,15 @@ export const resume = {
     if (!authed.ok) {
       return err(authed.code, authed.msg)
     }
-    const resume = await service.resume.updateForUser(id, authed.session.userId, data)
-    if (!resume) {
-      return err(ErrorCode.Resume.NotFound, "简历不存在")
+    try {
+      return ok(await service.resume.updateForUser(id, authed.session.userId, data))
     }
-    return ok(resume)
+    catch (e) {
+      if (e instanceof ServiceError) {
+        return err(e.code, e.msg)
+      }
+      return err(ErrorCode.System.Internal, "服务异常")
+    }
   },
 
   /**
@@ -69,10 +75,15 @@ export const resume = {
     if (!authed.ok) {
       return err(authed.code, authed.msg)
     }
-    const deleted = await service.resume.deleteForUser(id, authed.session.userId)
-    if (!deleted) {
-      return err(ErrorCode.Resume.NotFound, "简历不存在")
+    try {
+      await service.resume.deleteForUser(id, authed.session.userId)
+      return ok(null)
     }
-    return ok(null)
+    catch (e) {
+      if (e instanceof ServiceError) {
+        return err(e.code, e.msg)
+      }
+      return err(ErrorCode.System.Internal, "服务异常")
+    }
   },
 }
