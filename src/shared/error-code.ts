@@ -5,6 +5,7 @@ type LeafCodes<T> = T extends number
     : never
 
 export type ErrorCodeValue = LeafCodes<typeof ErrorCode[keyof typeof ErrorCode]>
+export type ErrorCodeFailure = Exclude<ErrorCodeValue, 0>
 
 export const ErrorCode = {
   OK: 0,
@@ -14,6 +15,12 @@ export const ErrorCode = {
   },
   Resume: {
     NotFound: 30001,
+  },
+  AI: {
+    UpstreamError: 40002,
+  },
+  Validation: {
+    InvalidParams: 40004,
   },
   System: {
     Internal: 90001,

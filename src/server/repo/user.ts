@@ -34,4 +34,22 @@ export const user = {
       name,
     })
   },
+
+  /**
+   * @description 设置 user 自配 AI key (已加密) + model
+   */
+  setAiKey(id: number, encryptedKey: string, model: string): Promise<UserEntity | null> {
+    return db.orm.public.User
+      .where({ id })
+      .update({ aiKey: encryptedKey, aiModel: model })
+  },
+
+  /**
+   * @description 清除 user 自配 AI key + model
+   */
+  clearAiKey(id: number): Promise<UserEntity | null> {
+    return db.orm.public.User
+      .where({ id })
+      .update({ aiKey: null, aiModel: null })
+  },
 }

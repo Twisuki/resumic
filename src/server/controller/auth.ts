@@ -1,18 +1,12 @@
 import type { GitHubProfile } from "@/server/auth/github"
 import type { ApiResponse } from "@/server/model/api"
+import type { MeResponse } from "@/server/model/dto/auth"
 import { err, ok } from "@/server/api"
 import { auth as authenticate } from "@/server/auth"
 import { exchangeCode, fetchUser } from "@/server/auth/github"
 import { signSession } from "@/server/auth/jwt"
 import { repo } from "@/server/repo"
 import { ErrorCode } from "@/shared/error-code"
-
-export interface MeResponse {
-  id: number
-  github: string
-  name: string
-  avatarUrl: string | null
-}
 
 export const auth = {
   /**
@@ -52,7 +46,7 @@ export const auth = {
   },
 
   /**
-   * @description 读 session 查 user 返 MeResponse
+   * @description 调 auth 拿 session, 查 user 返 MeResponse
    */
   async me(): Promise<ApiResponse<MeResponse>> {
     const authed = await authenticate()
