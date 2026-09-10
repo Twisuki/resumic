@@ -1,18 +1,60 @@
+import process from "node:process"
+
 export interface GitHubProfile {
   login: string
   name: string | null
 }
 
-/**
- * @description 占位: 用 GitHub 授权 code 换 access token, 下一轮实施
- */
-export async function exchangeCode(_code: string): Promise<string> {
-  throw new Error("exchangeCode not implemented")
+interface TokenResponse {
+  access_token?: string
+  error?: string
+}
+
+interface UserResponse {
+  login: string
+  name: string | null
 }
 
 /**
- * @description 占位: 用 access token 拉 GitHub 用户, 下一轮实施
+ * @description 用 GitHub OAuth code 换 access token
  */
-export async function fetchUser(_token: string): Promise<GitHubProfile> {
-  throw new Error("fetchUser not implemented")
+export async function exchangeCode(code: string): Promise<string> {
+  const res = await fetch("https://github.com/login/oauth/access_token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    },
+    body: JSON.stringify({
+      client_id: process.env.GH_CLIENT_ID,
+      client_secret: process.env.GH_CLIENT_SECRET,
+      code,
+    }),
+  })
+  if (!res.ok) {
+    throw new TypeError(`exchangeCode ${res.status}`)
+  }
+  const data = (await res.json()) as TokenResponse
+  if (!data.access_token) {
+    throw new TypeError(`exchangeCode missing token: ${data.error ?? "unknown"}`)
+  }
+  return data.access_token
+}
+
+/**
+ * @description 用 access token 拉 GitHub 用户
+ */
+export async function fetchUser(accessToken: string): Promise<GitHubProfile> {
+  const res = await fetch("https://api.github.com/user", {
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Accept": "application/vnd.github+json",
+      "User-Agent": "resumic",
+    },
+  })
+  if (!res.ok) {
+    throw new TypeError(`fetchUser ${res.status}`)
+  }
+  const data = (await res.json()) as UserResponse
+  return { login: data.login, name: data.name }
 }
