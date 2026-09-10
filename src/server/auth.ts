@@ -10,9 +10,15 @@ export interface Session {
   status: "active" | "disabled"
 }
 
+type AuthFailureCode = typeof ErrorCode.Auth.Required | typeof ErrorCode.Auth.Forbidden
+
 export type AuthResult
   = | { ok: true, session: Session }
-    | { ok: false, code: typeof ErrorCode.Auth.Required | typeof ErrorCode.Auth.Forbidden, msg: string }
+    | { ok: false, code: AuthFailureCode, msg: string }
+
+function fail(code: AuthFailureCode, msg: string): AuthResult {
+  return { ok: false, code, msg }
+}
 
 /**
  * @description 读 cookie 验 JWT 查 user 返 Session 或 AuthResult
@@ -20,7 +26,7 @@ export type AuthResult
 export async function auth(): Promise<AuthResult> {
   const token = await readSessionToken()
   if (!token) {
-    return { ok: false, code: ErrorCode.Auth.Required, msg: "未登录" }
+    return fail(ErrorCode.Auth.Required, "未登录")
   }
 
   let userId: number
@@ -28,15 +34,15 @@ export async function auth(): Promise<AuthResult> {
     ({ userId } = await verifySession(token))
   }
   catch {
-    return { ok: false, code: ErrorCode.Auth.Required, msg: "会话无效或已过期" }
+    return fail(ErrorCode.Auth.Required, "会话无效或已过期")
   }
 
   const u = await repo.user.findById(userId)
   if (!u) {
-    return { ok: false, code: ErrorCode.Auth.Required, msg: "用户不存在" }
+    return fail(ErrorCode.Auth.Required, "用户不存在")
   }
   if (u.status !== "active") {
-    return { ok: false, code: ErrorCode.Auth.Forbidden, msg: "账号已禁用" }
+    return fail(ErrorCode.Auth.Forbidden, "账号已禁用")
   }
 
   return {
@@ -48,8 +54,4 @@ export async function auth(): Promise<AuthResult> {
       status: u.status as "active" | "disabled",
     },
   }
-}
-
-export async function authOrNull(): Promise<Session | null> {
-  throw new Error("authOrNull() not implemented")
 }
