@@ -10,5 +10,5 @@ export default function Ol({
 }: Readonly<{
   children: ReactNode
 }>) {
-  return <ol className="list-decimal pl-5">{children}</ol>
+  return <ol className="list-decimal space-y-2 pl-5">{children}</ol>
 }

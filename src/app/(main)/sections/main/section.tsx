@@ -8,20 +8,18 @@ export default function Section({
   parts,
 }: Readonly<SectionModel>) {
   return (
-    <section className="flex flex-col">
+    <section className="flex flex-col gap-2">
       <header className="flex items-center gap-2 border-b border-border pb-2">
         <Icon name={icon} className="size-6 shrink-0" />
         <h2 className="text-2xl font-bold">{title}</h2>
       </header>
 
-      <div className="flex flex-col gap-4 pt-3">
-        {parts.map((part, index) => (
-          <Part
-            key={index}
-            {...part}
-          />
-        ))}
-      </div>
+      {parts.map((part, index) => (
+        <Part
+          key={index}
+          {...part}
+        />
+      ))}
     </section>
   )
 }

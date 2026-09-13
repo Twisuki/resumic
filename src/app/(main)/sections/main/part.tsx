@@ -8,20 +8,27 @@ export default function Part({
   date,
   content,
 }: Readonly<PartModel>) {
-  return (
-    <section className="flex flex-col gap-3">
-      <header className="flex flex-col gap-0.5">
-        <div className="flex items-baseline justify-between gap-2">
-          <div className="flex items-baseline gap-3">
-            {title && <h3 className="text-lg font-bold">{title}</h3>}
-            {subtitle && <span className="text-muted-foreground">{subtitle}</span>}
-          </div>
-          {date && <span className="text-muted-foreground">{date}</span>}
-        </div>
-        {link && <span className="text-sm text-muted-foreground">{link}</span>}
-      </header>
+  const hasHeader = Boolean(title || subtitle || link || date)
 
-      <RichContent value={content} />
+  return (
+    <section className="flex flex-col gap-2">
+      {hasHeader && (
+        <header className="flex flex-col">
+          <div className="flex items-end justify-between gap-2">
+            <div className="flex items-end gap-3">
+              {title && <h3 className="text-lg font-bold">{title}</h3>}
+              {subtitle && <span className="text-muted-foreground">{subtitle}</span>}
+            </div>
+            {date && <span className="text-muted-foreground">{date}</span>}
+          </div>
+          {link && <span className="text-sm text-muted-foreground">{link}</span>}
+        </header>
+      )}
+
+      <RichContent
+        value={content}
+        className="space-y-2"
+      />
     </section>
   )
 }
