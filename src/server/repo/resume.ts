@@ -1,5 +1,5 @@
+import type { Resume } from "@shared/model"
 import type { ResumeEntity } from "@/server/model/entity"
-import type { Resume } from "@/server/model/resume"
 import { db } from "@/server/db"
 
 export const resume = {

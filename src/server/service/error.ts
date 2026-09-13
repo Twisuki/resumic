@@ -1,4 +1,4 @@
-import type { ErrorCodeFailure } from "@/shared/error-code"
+import type { ErrorCodeFailure } from "@shared/error-code"
 
 export class ServiceError extends Error {
   constructor(

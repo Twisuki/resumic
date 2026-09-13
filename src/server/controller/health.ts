@@ -1,4 +1,4 @@
-import type { HealthResponse } from "@/server/model/dto/health"
+import type { HealthResponse } from "@shared/model"
 import { service } from "@/server/service"
 
 export const health = {

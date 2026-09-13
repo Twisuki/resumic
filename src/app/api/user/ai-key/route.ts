@@ -1,5 +1,5 @@
+import type { SetAiKeyRequest } from "@shared/model"
 import type { NextRequest } from "next/server"
-import type { SetAiKeyRequest } from "@/server/model/dto/user"
 import { NextResponse } from "next/server"
 import { controller } from "@/server/controller"
 

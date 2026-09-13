@@ -1,5 +1,5 @@
+import type { Resume } from "@shared/model"
 import type { NextRequest } from "next/server"
-import type { Resume } from "@/server/model/resume"
 import { NextResponse } from "next/server"
 import { controller } from "@/server/controller"
 

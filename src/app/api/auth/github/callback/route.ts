@@ -1,9 +1,9 @@
 import type { NextRequest } from "next/server"
+import { ErrorCode } from "@shared/error-code"
 import { NextResponse } from "next/server"
 import { err } from "@/server/api"
 import { setSessionToken } from "@/server/auth/cookie"
 import { controller } from "@/server/controller"
-import { ErrorCode } from "@/shared/error-code"
 
 /**
  * @description 处理 OAuth 回调, 写 cookie + 302 回 next

@@ -1,8 +1,8 @@
 import type { LanguageModel } from "ai"
 import process from "node:process"
 import { createOpenAI } from "@ai-sdk/openai"
+import { ErrorCode } from "@shared/error-code"
 import { ServiceError } from "@/server/service/error"
-import { ErrorCode } from "@/shared/error-code"
 
 /**
  * @description 解析 model 标识 (provider:model) 为 AI SDK 的 model 实例

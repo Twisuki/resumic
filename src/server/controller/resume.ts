@@ -1,6 +1,4 @@
-import type { ApiResponse } from "@/server/model/api"
-import type { CreateResumeResponse, GetResumeResponse, ListResumesResponse, UpdateResumeResponse } from "@/server/model/dto/resume"
-import type { Resume } from "@/server/model/resume"
+import type { ApiResponse, CreateResumeResponse, GetResumeResponse, ListResumesResponse, Resume, UpdateResumeResponse } from "@shared/model"
 import { withSession } from "@/server/controller/handle"
 import { service } from "@/server/service"
 

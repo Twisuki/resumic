@@ -1,8 +1,7 @@
-import type { CreateResumeResponse, GetResumeResponse, ListResumesResponse, UpdateResumeResponse } from "@/server/model/dto/resume"
-import type { Resume } from "@/server/model/resume"
+import type { CreateResumeResponse, GetResumeResponse, ListResumesResponse, Resume, UpdateResumeResponse } from "@shared/model"
+import { ErrorCode } from "@shared/error-code"
 import { repo } from "@/server/repo"
 import { ServiceError } from "@/server/service/error"
-import { ErrorCode } from "@/shared/error-code"
 
 export const resume = {
   /**

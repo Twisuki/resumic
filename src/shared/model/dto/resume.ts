@@ -1,4 +1,4 @@
-import type { Resume } from "@/server/model/resume"
+import type { Resume } from "@shared/model/resume"
 
 export interface ListResumesItem {
   id: number

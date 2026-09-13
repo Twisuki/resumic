@@ -1,9 +1,9 @@
+import type { Resume } from "@shared/model"
 import type { NextRequest } from "next/server"
-import type { Resume } from "@/server/model/resume"
+import { ErrorCode } from "@shared/error-code"
 import { NextResponse } from "next/server"
 import { err } from "@/server/api"
 import { controller } from "@/server/controller"
-import { ErrorCode } from "@/shared/error-code"
 
 /**
  * @description 获取单份简历

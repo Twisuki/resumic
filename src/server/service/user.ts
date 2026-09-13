@@ -1,9 +1,9 @@
-import type { ClearAiKeyResponse, QuotaResponse, SetAiKeyResponse } from "@/server/model/dto/user"
+import type { ClearAiKeyResponse, QuotaResponse, SetAiKeyResponse } from "@shared/model"
 import process from "node:process"
+import { ErrorCode } from "@shared/error-code"
 import { encryptKey } from "@/server/auth/crypto"
 import { repo } from "@/server/repo"
 import { ServiceError } from "@/server/service/error"
-import { ErrorCode } from "@/shared/error-code"
 
 const DEFAULT_AI_DAILY_LIMIT = 20
 const DEFAULT_AVATAR_QUOTA_BYTES = 50 * 1024 * 1024

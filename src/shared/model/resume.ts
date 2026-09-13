@@ -1,5 +1,5 @@
-import type { Avatar } from "@/server/model/avatar"
-import type { Content } from "@/server/model/content"
+import type { Avatar } from "@shared/model/avatar"
+import type { Content } from "@shared/model/content"
 
 export interface Resume extends Profile {
   sections: ResumeSection[]

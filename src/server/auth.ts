@@ -1,7 +1,7 @@
+import { ErrorCode } from "@shared/error-code"
 import { readSessionToken } from "@/server/auth/cookie"
 import { verifySession } from "@/server/auth/jwt"
 import { repo } from "@/server/repo"
-import { ErrorCode } from "@/shared/error-code"
 
 export interface Session {
   userId: number

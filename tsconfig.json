@@ -8,6 +8,7 @@
     "moduleResolution": "bundler",
     "paths": {
       "@/*": ["./src/*"],
+      "@shared/*": ["./src/shared/*"],
       "@prisma/*": ["./prisma/*"]
     },
     "resolveJsonModule": true,

@@ -1,4 +1,4 @@
-import type { ErrorCodeValue } from "@/shared/error-code"
+import type { ErrorCodeValue } from "@shared/error-code"
 
 export interface ApiOk<T> {
   code: 0

@@ -1,0 +1,5 @@
+export * from "@shared/model/api"
+export * from "@shared/model/avatar"
+export * from "@shared/model/content"
+export * from "@shared/model/dto"
+export * from "@shared/model/resume"

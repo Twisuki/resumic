@@ -1,0 +1,5 @@
+export * from "@shared/model/dto/auth"
+export * from "@shared/model/dto/avatar"
+export * from "@shared/model/dto/health"
+export * from "@shared/model/dto/resume"
+export * from "@shared/model/dto/user"

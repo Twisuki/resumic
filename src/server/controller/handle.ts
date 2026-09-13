@@ -1,9 +1,9 @@
+import type { ApiResponse } from "@shared/model"
 import type { AuthResult, Session } from "@/server/auth"
-import type { ApiResponse } from "@/server/model/api"
+import { ErrorCode } from "@shared/error-code"
 import { err, ok } from "@/server/api"
 import { auth as authenticate } from "@/server/auth"
 import { ServiceError } from "@/server/service/error"
-import { ErrorCode } from "@/shared/error-code"
 
 export interface WithSessionOptions<T, AutoAuth extends boolean = true> {
   autoAuthError?: AutoAuth

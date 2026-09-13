@@ -1,9 +1,8 @@
-import type { ApiResponse } from "@/server/model/api"
-import type { ClearAiKeyResponse, QuotaResponse, SetAiKeyRequest, SetAiKeyResponse } from "@/server/model/dto/user"
+import type { ApiResponse, ClearAiKeyResponse, QuotaResponse, SetAiKeyRequest, SetAiKeyResponse } from "@shared/model"
+import { ErrorCode } from "@shared/error-code"
 import { withSession } from "@/server/controller/handle"
 import { service } from "@/server/service"
 import { ServiceError } from "@/server/service/error"
-import { ErrorCode } from "@/shared/error-code"
 
 export const user = {
   /**
