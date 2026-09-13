@@ -52,13 +52,13 @@ export const DEFAULT_RESUME: Resume = {
           date: "",
           content: {
             lines: [
-              { id: "1", content: "普通文本, **粗体**, *斜体*, `行内代码`\n" },
+              { id: "1", content: "普通文本, **粗体**, *斜体*, ~~删除线~~, `行内代码`\n" },
               { id: "2", content: "\n" },
               { id: "3", content: "自定义颜色: <color=red>红</color> / <color=#0a84ff>蓝</color> / <color=rgb(22, 163, 74)>绿</color>\n" },
               { id: "4", content: "\n" },
               { id: "5", content: "自定义字号: <size=0.8>小</size> / 正常 / <size=1.5>大</size> / <size=2.5>更大</size>\n" },
               { id: "6", content: "\n" },
-              { id: "7", content: "组合嵌套: <color=#7c3aed>紫色<size=1.4>又大又紫</size></color>\n" },
+              { id: "7", content: "组合嵌套: <color=#7c3aed>紫色<size=1.4>**又粗**又大又紫</size></color>\n" },
             ],
             orders: ["1", "2", "3", "4", "5", "6", "7"],
           },

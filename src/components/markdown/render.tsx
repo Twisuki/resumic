@@ -1,41 +1,25 @@
 import type { DOMNode, HTMLReactParserOptions } from "html-react-parser"
-import type { CSSProperties, JSX } from "react"
+import type { JSX } from "react"
 import htmlParser, { domToReact } from "html-react-parser"
-import Link from "next/link"
-import { COLOR_ATTR } from "@/components/markdown/color-rule"
-import { SIZE_ATTR, SIZE_MAX, SIZE_MIN } from "@/components/markdown/size-rule"
+import A from "@/components/markdown/components/a"
+import Blockquote from "@/components/markdown/components/blockquote"
+import Br from "@/components/markdown/components/br"
+import Code from "@/components/markdown/components/code"
+import Em from "@/components/markdown/components/em"
+import Heading from "@/components/markdown/components/heading"
+import Hr from "@/components/markdown/components/hr"
+import Li from "@/components/markdown/components/li"
+import Ol from "@/components/markdown/components/ol"
+import P from "@/components/markdown/components/p"
+import S from "@/components/markdown/components/s"
+import Span from "@/components/markdown/components/span"
+import Strong from "@/components/markdown/components/strong"
+import Ul from "@/components/markdown/components/ul"
 
 /**
  * @description 丢弃整棵子树的标签
  */
 const DISCARDED = new Set(["img", "table", "pre", "script", "style", "iframe"])
-
-/**
- * @description a[href] 的协议白名单
- */
-const SAFE_HREF = /^(?:https?:|mailto:)/i
-
-/**
- * @description 合法 CSS 颜色: 命名色 / hex / rgb() / hsl()
- */
-const CSS_COLOR = /^(?:[a-z]{1,20}|#[0-9a-f]{3,8}|(?:rgb|hsl)a?\([\d\s,.%/]+\))$/i
-
-/**
- * @description 纯数字
- */
-const SIZE_NUMBER = /^\d+(?:\.\d+)?$/
-
-function isValidColor(value: string | undefined): value is string {
-  return typeof value === "string" && CSS_COLOR.test(value)
-}
-
-function isValidSize(value: string | undefined): value is string {
-  if (typeof value !== "string" || !SIZE_NUMBER.test(value)) {
-    return false
-  }
-  const size = Number(value)
-  return size >= SIZE_MIN && size <= SIZE_MAX
-}
 
 /**
  * @description 子节点继续交给同一套 options 过滤; Element['children'] 含 CDATA, 实际不会出现
@@ -45,8 +29,9 @@ function childrenOf(domNode: DOMNode, options: HTMLReactParserOptions) {
 }
 
 /**
- * @description 白名单分发. **必须返回合法 React 元素** —— 返回非元素会被 html-react-parser
- * 当作"未替换"而走默认渲染(原生标签 + 原生属性), 白名单即失效
+ * @description 白名单分发, 各标签的具体实现见 components/ 下的同名文件
+ *
+ * 必须返回合法 React 元素, 返回非元素会被 html-react-parser 当作未替换而走默认渲染
  */
 function replaceNode(domNode: DOMNode, options: HTMLReactParserOptions): JSX.Element | undefined {
   // 文本 / 注释 / 指令: 返回非元素走默认处理, 对文本正是所需
@@ -64,54 +49,39 @@ function replaceNode(domNode: DOMNode, options: HTMLReactParserOptions): JSX.Ele
 
   switch (name) {
     case "p":
-      return <p>{children}</p>
+      return <P>{children}</P>
     case "br":
-      return <br />
+      return <Br />
     case "hr":
-      return <hr />
+      return <Hr />
     case "strong":
-      return <strong>{children}</strong>
+      return <Strong>{children}</Strong>
     case "em":
-      return <em>{children}</em>
+      return <Em>{children}</Em>
     case "s":
     case "del":
-      return <s>{children}</s>
+      return <S>{children}</S>
     case "code":
-      return <code>{children}</code>
+      return <Code>{children}</Code>
     case "blockquote":
-      return <blockquote>{children}</blockquote>
+      return <Blockquote>{children}</Blockquote>
     case "ul":
-      return <ul className="list-disc pl-5">{children}</ul>
+      return <Ul>{children}</Ul>
     case "ol":
-      return <ol className="list-decimal pl-5">{children}</ol>
+      return <Ol>{children}</Ol>
     case "li":
-      return <li>{children}</li>
-    // 标题层级归 Section 所有, 富文本里的标题只保留强调, 不抢字号
+      return <Li>{children}</Li>
     case "h1":
     case "h2":
     case "h3":
     case "h4":
     case "h5":
     case "h6":
-      return <p className="font-bold">{children}</p>
-    case "a": {
-      const href = domNode.attribs?.href
-      return href && SAFE_HREF.test(href)
-        ? <Link href={href}>{children}</Link>
-        : <>{children}</>
-    }
-    case "span": {
-      const style: CSSProperties = {}
-      const color = domNode.attribs?.[COLOR_ATTR]
-      const size = domNode.attribs?.[SIZE_ATTR]
-      if (isValidColor(color)) {
-        style.color = color
-      }
-      if (isValidSize(size)) {
-        style.fontSize = `${size}em`
-      }
-      return <span style={style}>{children}</span>
-    }
+      return <Heading level={Number(name.slice(1))}>{children}</Heading>
+    case "a":
+      return <A attribs={domNode.attribs}>{children}</A>
+    case "span":
+      return <Span attribs={domNode.attribs}>{children}</Span>
     default:
       return <>{children}</>
   }
@@ -122,7 +92,7 @@ const OPTIONS: HTMLReactParserOptions = {
 }
 
 /**
- * @description html 字符串 → react dom, 白名单 switch
+ * @description 把 html 字符串渲染为 react dom, 走白名单 switch
  */
 export default function RenderHtml({
   html,
