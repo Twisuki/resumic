@@ -12,14 +12,14 @@ export const DEFAULT_RESUME: Resume = {
   phone: "1xxxxxxxxxx",
   email: "hi@twis.uk",
   details: [
-    { icon: "", content: "湖南大学 | 人工智能" },
-    { icon: "", content: "https://www.twis.uk" },
-    { icon: "", content: "Code 1413h | 952k Lines" },
+    { icon: "school", content: "湖南大学 | 人工智能" },
+    { icon: "world", content: "https://www.twis.uk" },
+    { icon: "code", content: "Code 1413h | 952k Lines" },
   ],
   sections: [
     {
       type: "",
-      icon: "",
+      icon: "star",
       title: "项目经历",
       parts: [
         {
@@ -42,7 +42,7 @@ export const DEFAULT_RESUME: Resume = {
     },
     {
       type: "",
-      icon: "",
+      icon: "puzzle",
       title: "富文本能力演示",
       parts: [
         {

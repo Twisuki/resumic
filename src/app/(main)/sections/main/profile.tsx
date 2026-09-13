@@ -1,5 +1,5 @@
 import type { Profile as ProfileModel } from "@shared/model"
-import { IconAlertCircle, IconMail, IconPhone, IconUser } from "@tabler/icons-react"
+import { IconMail, IconPhone, IconUser } from "@tabler/icons-react"
 import Image from "next/image"
 import Detail from "@/app/(main)/sections/main/detail"
 
@@ -23,16 +23,31 @@ export default function Profile({
 
         <div className="mt-2 flex flex-col items-center gap-y-1">
           <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
-            {baseInfo && <Detail icon={IconUser} content={baseInfo} />}
-            {phone && <Detail icon={IconPhone} content={phone} />}
-            {email && <Detail icon={IconMail} content={email} />}
+            {baseInfo && (
+              <div className="flex items-center gap-1">
+                <IconUser className="size-4 shrink-0" />
+                <span>{baseInfo}</span>
+              </div>
+            )}
+            {phone && (
+              <div className="flex items-center gap-1">
+                <IconPhone className="size-4 shrink-0" />
+                <span>{phone}</span>
+              </div>
+            )}
+            {email && (
+              <div className="flex items-center gap-1">
+                <IconMail className="size-4 shrink-0" />
+                <span>{email}</span>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
             {details.map((detail, index) => (
               <Detail
                 key={index}
-                icon={IconAlertCircle}
+                icon={detail.icon}
                 content={detail.content}
               />
             ))}

@@ -1,15 +1,16 @@
 import type { Section as SectionModel } from "@shared/model"
-import { IconAlertCircle } from "@tabler/icons-react"
 import Part from "@/app/(main)/sections/main/part"
+import Icon from "@/components/icon"
 
 export default function Section({
+  icon,
   title,
   parts,
 }: Readonly<SectionModel>) {
   return (
     <section className="flex flex-col">
       <header className="flex items-center gap-2 border-b border-border pb-2">
-        <IconAlertCircle className="size-6 shrink-0" />
+        <Icon name={icon} className="size-6 shrink-0" />
         <h2 className="text-2xl font-bold">{title}</h2>
       </header>
 

@@ -1,15 +1,15 @@
-import type { TablerIcon } from "@tabler/icons-react"
+import Icon from "@/components/icon"
 
 export default function Detail({
-  icon: Icon,
+  icon,
   content,
 }: Readonly<{
-  icon: TablerIcon
+  icon: string
   content: string
 }>) {
   return (
     <div className="flex items-center gap-1">
-      <Icon className="size-4 shrink-0" />
+      <Icon name={icon} className="size-4 shrink-0" />
       <span>{content}</span>
     </div>
   )
