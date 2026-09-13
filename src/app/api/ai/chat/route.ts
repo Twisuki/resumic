@@ -1,6 +1,6 @@
 import type { UIMessage } from "ai"
 import type { NextRequest } from "next/server"
-import { controller } from "@/server/controller"
+import { controller } from "@server/controller"
 
 /**
  * @description AI 对话流式中继

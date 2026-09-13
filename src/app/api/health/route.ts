@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server"
+import { ok } from "@server/api"
 import { NextResponse } from "next/server"
-import { ok } from "@/server/api"
 
 /**
  * @description 健康检查

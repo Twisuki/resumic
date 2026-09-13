@@ -1,12 +1,12 @@
 import type { UIMessage } from "ai"
 import process from "node:process"
+import { SYSTEM_PROMPT } from "@server/ai/prompt"
+import { resolveModel } from "@server/ai/provider"
+import { decryptKey } from "@server/auth/crypto"
+import { repo } from "@server/repo"
+import { ServiceError } from "@server/service/error"
 import { ErrorCode } from "@shared/error-code"
 import { convertToModelMessages, streamText } from "ai"
-import { SYSTEM_PROMPT } from "@/server/ai/prompt"
-import { resolveModel } from "@/server/ai/provider"
-import { decryptKey } from "@/server/auth/crypto"
-import { repo } from "@/server/repo"
-import { ServiceError } from "@/server/service/error"
 
 const DEFAULT_DAILY_LIMIT = 20
 

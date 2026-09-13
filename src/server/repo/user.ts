@@ -1,5 +1,5 @@
-import type { UserEntity } from "@/server/model/entity"
-import { db } from "@/server/db"
+import type { UserEntity } from "@server/model/entity"
+import { db } from "@server/db"
 
 export const user = {
   /**

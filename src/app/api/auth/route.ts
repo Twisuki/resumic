@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server"
+import { controller } from "@server/controller"
 import { NextResponse } from "next/server"
-import { controller } from "@/server/controller"
 
 /**
  * @description 获取当前会话的用户信息

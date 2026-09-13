@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server"
+import { controller } from "@server/controller"
 import { NextResponse } from "next/server"
-import { controller } from "@/server/controller"
 
 /**
  * @description 探活 endpoint, 返 hello / ok / db 字段, 不鉴权

@@ -1,7 +1,7 @@
 import type { Resume } from "@shared/model"
 import type { NextRequest } from "next/server"
+import { controller } from "@server/controller"
 import { NextResponse } from "next/server"
-import { controller } from "@/server/controller"
 
 /**
  * @description 获取简历列表

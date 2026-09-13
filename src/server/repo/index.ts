@@ -1,5 +1,5 @@
-import { health } from "./health"
-import { resume } from "./resume"
-import { user } from "./user"
+import { health } from "@server/repo/health"
+import { resume } from "@server/repo/resume"
+import { user } from "@server/repo/user"
 
 export const repo = { health, resume, user }

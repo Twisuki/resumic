@@ -1,7 +1,7 @@
 import type { SetAiKeyRequest } from "@shared/model"
 import type { NextRequest } from "next/server"
+import { controller } from "@server/controller"
 import { NextResponse } from "next/server"
-import { controller } from "@/server/controller"
 
 /**
  * @description 设置用户自配 AI key 与模型

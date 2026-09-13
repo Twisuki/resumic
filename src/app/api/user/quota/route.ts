@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server"
+import { controller } from "@server/controller"
 import { NextResponse } from "next/server"
-import { controller } from "@/server/controller"
 
 /**
  * @description 获取当前账号的 AI + 头像配额

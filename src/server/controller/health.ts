@@ -1,5 +1,5 @@
 import type { HealthResponse } from "@shared/model"
-import { service } from "@/server/service"
+import { service } from "@server/service"
 
 export const health = {
   /**

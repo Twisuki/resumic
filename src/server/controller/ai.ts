@@ -1,10 +1,10 @@
 import type { UIMessage } from "ai"
+import { err } from "@server/api"
+import { auth as authenticate } from "@server/auth"
+import { service, ServiceError } from "@server/service"
 import { ErrorCode } from "@shared/error-code"
 import { createUIMessageStreamResponse, toUIMessageStream } from "ai"
 import { NextResponse } from "next/server"
-import { err } from "@/server/api"
-import { auth as authenticate } from "@/server/auth"
-import { service, ServiceError } from "@/server/service"
 
 export const ai = {
   /**

@@ -1,7 +1,7 @@
-import type { Contract } from "./schema.d"
+import type { Contract } from "@prisma/schema.d"
 import process from "node:process"
 import postgres from "@prisma/orm-postgres/runtime"
-import contractJson from "./schema.json" with { type: "json" }
+import contractJson from "@prisma/schema.json" with { type: "json" }
 import "dotenv/config"
 
 export const db = postgres<Contract>({

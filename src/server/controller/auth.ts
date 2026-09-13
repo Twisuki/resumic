@@ -1,12 +1,12 @@
+import type { GitHubProfile } from "@server/auth/github"
 import type { ApiResponse, MeResponse } from "@shared/model"
-import type { GitHubProfile } from "@/server/auth/github"
+import { err, ok } from "@server/api"
+import { exchangeCode, fetchUser } from "@server/auth/github"
+import { signSession } from "@server/auth/jwt"
+import { withSession } from "@server/controller/handle"
+import { repo } from "@server/repo"
+import { ServiceError } from "@server/service/error"
 import { ErrorCode } from "@shared/error-code"
-import { err, ok } from "@/server/api"
-import { exchangeCode, fetchUser } from "@/server/auth/github"
-import { signSession } from "@/server/auth/jwt"
-import { withSession } from "@/server/controller/handle"
-import { repo } from "@/server/repo"
-import { ServiceError } from "@/server/service/error"
 
 export const auth = {
   /**

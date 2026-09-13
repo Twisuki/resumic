@@ -1,4 +1,4 @@
-import { repo } from "@/server/repo"
+import { repo } from "@server/repo"
 
 export const health = {
   /**

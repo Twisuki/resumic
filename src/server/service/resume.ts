@@ -1,7 +1,7 @@
 import type { CreateResumeResponse, GetResumeResponse, ListResumesResponse, Resume, UpdateResumeResponse } from "@shared/model"
+import { repo } from "@server/repo"
+import { ServiceError } from "@server/service/error"
 import { ErrorCode } from "@shared/error-code"
-import { repo } from "@/server/repo"
-import { ServiceError } from "@/server/service/error"
 
 export const resume = {
   /**

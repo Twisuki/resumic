@@ -1,6 +1,6 @@
 import type { ApiResponse, CreateResumeResponse, GetResumeResponse, ListResumesResponse, Resume, UpdateResumeResponse } from "@shared/model"
-import { withSession } from "@/server/controller/handle"
-import { service } from "@/server/service"
+import { withSession } from "@server/controller/handle"
+import { service } from "@server/service"
 
 export const resume = {
   /**

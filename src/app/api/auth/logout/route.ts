@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server"
+import { clearSessionToken } from "@server/auth/cookie"
 import { NextResponse } from "next/server"
-import { clearSessionToken } from "@/server/auth/cookie"
 
 /**
  * @description 清 cookie + 302 回 /
