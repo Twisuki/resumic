@@ -1,13 +1,5 @@
-import type { Content, Part as PartModel } from "@shared/model"
-
-/**
- * @description 占位: 把 Content 按 orders 顺序拼回纯文本. 后续换成自研 markdown 解析器
- */
-function toPlainText(content: Content): string {
-  return content.orders
-    .map(id => content.lines.find(line => line.id === id)?.content ?? "")
-    .join("")
-}
+import type { Part as PartModel } from "@shared/model"
+import { RichContent } from "@/components/rich-content"
 
 export default function Part({
   title,
@@ -29,7 +21,7 @@ export default function Part({
         {link && <span className="text-sm text-muted-foreground">{link}</span>}
       </header>
 
-      <p className="whitespace-pre-wrap">{toPlainText(content)}</p>
+      <RichContent value={content} />
     </section>
   )
 }
