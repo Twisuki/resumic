@@ -41,6 +41,7 @@ import {
   IconRocket,
   IconSchool,
   IconServer,
+  IconSettings,
   IconSparkles,
   IconStar,
   IconTarget,
@@ -114,6 +115,7 @@ export default function Icon({
     case "palette": return <IconPalette {...props} />
     case "camera": return <IconCamera {...props} />
     case "tool": return <IconTool {...props} />
+    case "settings": return <IconSettings {...props} />
 
     // 荣誉 / 成果
     case "trophy": return <IconTrophy {...props} />

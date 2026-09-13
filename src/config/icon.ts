@@ -16,7 +16,7 @@ export const ICON_GROUPS = [
   },
   {
     type: "技能 / 技术",
-    icons: ["code", "terminal", "database", "server", "cloud", "device-laptop", "cpu", "robot", "brain", "palette", "camera", "tool"],
+    icons: ["code", "terminal", "database", "server", "cloud", "device-laptop", "cpu", "robot", "brain", "palette", "camera", "tool", "settings"],
   },
   {
     type: "荣誉 / 成果",
