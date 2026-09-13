@@ -54,7 +54,7 @@ export const auth = {
       if (!u) {
         throw new ServiceError(ErrorCode.System.Internal, "用户不存在")
       }
-      return { id: u.id, github: u.github, name: u.name, avatarUrl: null }
+      return { id: u.id, github: u.github, name: u.name }
     })
   },
 }

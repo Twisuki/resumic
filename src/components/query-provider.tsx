@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 
 function createQueryClient(): QueryClient {
   return new QueryClient({
@@ -39,6 +40,8 @@ export default function QueryProvider({
   return (
     <QueryClientProvider client={getQueryClient()}>
       {children}
+      {/* 包内部按 NODE_ENV 自判, 生产构建里是 no-op 且会被 tree-shake */}
+      <ReactQueryDevtools />
     </QueryClientProvider>
   )
 }

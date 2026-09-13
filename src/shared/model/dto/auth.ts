@@ -11,5 +11,4 @@ export interface MeResponse {
   id: number
   github: string
   name: string
-  avatarUrl: string | null
 }

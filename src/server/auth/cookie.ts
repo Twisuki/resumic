@@ -2,9 +2,11 @@ import type { NextResponse } from "next/server"
 import process from "node:process"
 import { cookies } from "next/headers"
 
+// env 里的空值(`KEY=`)要当未设置处理, `??` 会把空字符串当有效值
+const CUSTOM_COOKIE_NAME = process.env.SESSION_COOKIE_NAME?.trim()
+
 export const SESSION_COOKIE_NAME
-  = process.env.SESSION_COOKIE_NAME
-    ?? (process.env.NODE_ENV === "production" ? "__Host-session" : "session")
+  = CUSTOM_COOKIE_NAME || (process.env.NODE_ENV === "production" ? "__Host-session" : "session")
 
 /**
  * @description 从 request cookie 读 session token
