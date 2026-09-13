@@ -3,15 +3,22 @@ import { repo } from "@server/repo"
 import { ServiceError } from "@server/service/error"
 import { ErrorCode } from "@shared/error-code"
 
+/**
+ * @description 简历条目名: title 为空则回退人名, 再空则回退占位文案
+ */
+function entryTitle(data: Resume): string {
+  return data.title || data.name || "未命名简历"
+}
+
 export const resume = {
   /**
-   * @description 取用户简历摘要列表 (id + name + updatedAt)
+   * @description 取用户简历摘要列表 (id + title + updatedAt)
    */
   async listByUserId(userId: number): Promise<ListResumesResponse> {
     const rows = await repo.resume.listByUserId(userId)
     return rows.map(r => ({
       id: r.id,
-      name: (r.data as unknown as Resume).name,
+      title: entryTitle(r.data as unknown as Resume),
       updatedAt: r.updatedAt,
     }))
   },

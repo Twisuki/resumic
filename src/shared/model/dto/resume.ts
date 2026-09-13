@@ -2,7 +2,7 @@ import type { Resume } from "@shared/model/resume"
 
 export interface ListResumesItem {
   id: number
-  name: string
+  title: string
   updatedAt: string
 }
 
@@ -19,11 +19,3 @@ export interface UpdateResumeRequest extends Resume {
 }
 
 export type UpdateResumeResponse = Resume
-
-export interface PatchResumeRequest {
-  name?: string
-}
-
-export interface PatchResumeResponse {
-  name: string
-}

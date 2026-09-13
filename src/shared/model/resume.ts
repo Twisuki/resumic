@@ -2,21 +2,18 @@ import type { Avatar } from "@shared/model/avatar"
 import type { Content } from "@shared/model/content"
 
 export interface Resume extends Profile {
+  title: string
   sections: ResumeSection[]
 }
 
 export interface Profile {
   name: string
-  email?: string
-  phone?: string
+  headline?: string
   avatar?: Avatar
-  age?: string
-  school?: string
-  major?: string
-  customs: ProfileItem[]
+  details: ProfileDetail[]
 }
 
-export interface ProfileItem {
+export interface ProfileDetail {
   icon: string
   content: string
 }
