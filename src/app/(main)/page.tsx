@@ -5,6 +5,7 @@ import Left from "@/app/(main)/sections/left"
 import Main from "@/app/(main)/sections/main"
 import Navbar from "@/app/(main)/sections/navbar"
 import Right from "@/app/(main)/sections/right"
+import { DEFAULT_RESUME } from "@/config/resume"
 
 export default function Page() {
   return (
@@ -13,7 +14,7 @@ export default function Page() {
         <Navbar />
         <div className="w-full flex-1 flex mx-auto max-w-screen-2xl min-h-0">
           <Left />
-          <Main />
+          <Main {...DEFAULT_RESUME} />
           <Right />
         </div>
       </div>

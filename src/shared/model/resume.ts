@@ -9,6 +9,10 @@ export interface Resume extends Profile {
 export interface Profile {
   name: string
   headline?: string
+  age?: string
+  gender?: string
+  phone?: string
+  email?: string
   avatar?: Avatar
   details: ProfileDetail[]
 }

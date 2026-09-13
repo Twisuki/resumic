@@ -1,7 +1,21 @@
-export default function Main() {
+import type { Resume } from "@shared/model"
+import Profile from "@/app/(main)/sections/main/profile"
+import Section from "@/app/(main)/sections/main/section"
+
+export default function Main({
+  title,
+  sections,
+  ...profile
+}: Readonly<Resume>) {
   return (
-    <main className="flex-1 min-w-0 h-full flex flex-col bg-sky-500">
-      main
+    <main className="flex-1 min-w-0 h-full flex flex-col gap-6 overflow-y-auto p-6">
+      <Profile {...profile} />
+      {sections.map((section, index) => (
+        <Section
+          key={index}
+          {...section}
+        />
+      ))}
     </main>
   )
 }

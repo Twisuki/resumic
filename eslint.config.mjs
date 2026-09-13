@@ -33,4 +33,9 @@ export default antfu(
       "react-refresh/only-export-components": "off",
     },
   },
+  {
+    rules: {
+      "react/no-array-index-key": "off",
+    },
+  },
 )
