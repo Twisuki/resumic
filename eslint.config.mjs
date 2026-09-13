@@ -1,11 +1,11 @@
 import antfu from "@antfu/eslint-config"
 
 const SHADCN_IGNORES = [
-  "src/components/**", // shadcn components
-  "src/hooks/**", // shadcn hooks
+  "src/components/ui/**", // shadcn components
+  "src/hooks/use-mobile.ts", // shadcn hooks
 ]
 
-const ORM_IGNORES = [
+const PRISMA_IGNORES = [
   "migrations/**", // prisma migrations
   "prisma/schema.d.ts", // prisma schema
 ]
@@ -14,7 +14,7 @@ export default antfu(
   {
     ignores: [
       ...SHADCN_IGNORES,
-      ...ORM_IGNORES,
+      ...PRISMA_IGNORES,
     ],
     typescript: true,
     stylistic: {
