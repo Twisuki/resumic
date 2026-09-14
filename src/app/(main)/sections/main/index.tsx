@@ -1,22 +1,27 @@
-import type { Resume as ResumeModel } from "@shared/model"
 import { useScale } from "@/app/(main)/hooks/scale"
 import { Resume } from "@/components/resume"
+import { useResumeStore } from "@/stores/resume"
 
 export default function Main({
   zoom,
-  resume,
 }: Readonly<{
   zoom: number
-  resume: ResumeModel
 }>) {
   const { scale, ref } = useScale<HTMLDivElement>()
+  const current = useResumeStore(state => state.current)
 
   return (
     <main
       ref={ref}
-      className="flex-1 min-w-0 h-full flex justify-center overflow-y-auto overflow-x-hidden no-scrollbar"
+      className="flex-1 min-w-0 h-full flex overflow-y-auto overflow-x-hidden no-scrollbar"
     >
-      <Resume scale={scale} zoom={zoom} {...resume} />
+      {current
+        ? <Resume scale={scale} zoom={zoom} {...current} />
+        : (
+            <div className="w-full h-full flex items-center justify-center text-sm text-muted-foreground">
+              未加载简历
+            </div>
+          )}
     </main>
   )
 }
