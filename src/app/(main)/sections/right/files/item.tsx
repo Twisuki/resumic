@@ -5,6 +5,7 @@ import DeleteDialog from "@/app/(main)/sections/right/files/delete-dialog"
 import IconAction from "@/app/(main)/sections/right/files/icon-action"
 import { buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useResumeRename } from "@/hooks/query/resume"
 import { cn } from "@/lib/utils"
 
 export default function Item({
@@ -18,11 +19,17 @@ export default function Item({
   loading: boolean
   onOpen: (id: number) => void
 }>) {
+  const rename = useResumeRename()
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(item.title)
 
   function confirmEdit() {
+    const title = draft.trim()
     setEditing(false)
+    if (!title || title === item.title) {
+      return
+    }
+    rename.mutate({ id: item.id, title })
   }
 
   function startEdit() {

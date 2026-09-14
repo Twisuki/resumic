@@ -3,6 +3,8 @@ import type {
   CreateResumeResponse,
   GetResumeResponse,
   ListResumesResponse,
+  RenameResumeRequest,
+  RenameResumeResponse,
   UpdateResumeRequest,
   UpdateResumeResponse,
 } from "@shared/model"
@@ -31,6 +33,12 @@ export const resume = {
    */
   update: (id: number, data: UpdateResumeRequest, options?: RequestOptions) =>
     request<UpdateResumeResponse>(`/resume/${id}`, { ...options, method: "PUT", body: data }),
+
+  /**
+   * @description 重命名简历
+   */
+  rename: (id: number, data: RenameResumeRequest, options?: RequestOptions) =>
+    request<RenameResumeResponse>(`/resume/${id}`, { ...options, method: "PATCH", body: data }),
 
   /**
    * @description 删除简历

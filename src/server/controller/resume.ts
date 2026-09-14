@@ -1,4 +1,4 @@
-import type { ApiResponse, CreateResumeResponse, GetResumeResponse, ListResumesResponse, Resume, UpdateResumeResponse } from "@shared/model"
+import type { ApiResponse, CreateResumeResponse, GetResumeResponse, ListResumesResponse, RenameResumeResponse, Resume, UpdateResumeResponse } from "@shared/model"
 import { withSession } from "@server/controller/handle"
 import { service } from "@server/service"
 
@@ -29,6 +29,13 @@ export const resume = {
    */
   async updateResume(id: number, data: Resume): Promise<ApiResponse<UpdateResumeResponse>> {
     return withSession(session => service.resume.updateForUser(id, session.userId, data))
+  },
+
+  /**
+   * @description 调 auth 拿 session, 委托 service.resume.renameForUser 重命名简历 (带 ownership 校验)
+   */
+  async renameResume(id: number, title: string): Promise<ApiResponse<RenameResumeResponse>> {
+    return withSession(session => service.resume.renameForUser(id, session.userId, title))
   },
 
   /**

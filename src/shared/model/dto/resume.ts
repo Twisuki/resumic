@@ -22,3 +22,9 @@ export interface UpdateResumeRequest extends Resume {
 }
 
 export type UpdateResumeResponse = Resume
+
+export interface RenameResumeRequest {
+  title: string
+}
+
+export type RenameResumeResponse = Resume

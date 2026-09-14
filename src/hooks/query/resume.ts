@@ -57,3 +57,20 @@ export function useResumeDelete() {
     },
   })
 }
+
+/**
+ * @description 重命名简历, 若改的是当前打开项则同步 store, 并刷新列表
+ */
+export function useResumeRename() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, title }: { id: number, title: string }) => api.resume.rename(id, { title }),
+    onSuccess: (data, { id }) => {
+      const store = useResumeStore.getState()
+      if (store.currentId === id) {
+        store.open(id, data)
+      }
+      void queryClient.invalidateQueries({ queryKey: keys.resume.lists() })
+    },
+  })
+}

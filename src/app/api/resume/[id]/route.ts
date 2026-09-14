@@ -1,4 +1,4 @@
-import type { Resume } from "@shared/model"
+import type { RenameResumeRequest, Resume } from "@shared/model"
 import type { NextRequest } from "next/server"
 import { err } from "@server/api"
 import { controller } from "@server/controller"
@@ -28,6 +28,19 @@ export async function PUT(req: NextRequest, ctx: RouteContext<"/api/resume/[id]"
   }
   const data = (await req.json()) as Resume
   return NextResponse.json(await controller.resume.updateResume(numId, data))
+}
+
+/**
+ * @description 重命名简历
+ */
+export async function PATCH(req: NextRequest, ctx: RouteContext<"/api/resume/[id]">): Promise<NextResponse> {
+  const { id } = await ctx.params
+  const numId = Number(id)
+  if (!Number.isInteger(numId) || numId <= 0) {
+    return NextResponse.json(err(ErrorCode.Resume.NotFound, "简历不存在"))
+  }
+  const { title } = (await req.json()) as RenameResumeRequest
+  return NextResponse.json(await controller.resume.renameResume(numId, title))
 }
 
 /**

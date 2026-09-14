@@ -1,4 +1,4 @@
-import type { CreateResumeResponse, GetResumeResponse, ListResumesResponse, Resume, UpdateResumeResponse } from "@shared/model"
+import type { CreateResumeResponse, GetResumeResponse, ListResumesResponse, RenameResumeResponse, Resume, UpdateResumeResponse } from "@shared/model"
 import { repo } from "@server/repo"
 import { ServiceError } from "@server/service/error"
 import { ErrorCode } from "@shared/error-code"
@@ -51,6 +51,22 @@ export const resume = {
       throw new ServiceError(ErrorCode.Resume.NotFound, "简历不存在")
     }
     const updated = await repo.resume.update(id, data)
+    if (!updated) {
+      throw new ServiceError(ErrorCode.Resume.NotFound, "简历不存在")
+    }
+    return updated.data as unknown as Resume
+  },
+
+  /**
+   * @description 校验 ownership 后只改 Resume 的 title (读全量 → 合并 → 整列写回), 失败抛 Resume.NotFound
+   */
+  async renameForUser(id: number, userId: number, title: string): Promise<RenameResumeResponse> {
+    const entity = await repo.resume.findById(id)
+    if (!entity || entity.userId !== userId) {
+      throw new ServiceError(ErrorCode.Resume.NotFound, "简历不存在")
+    }
+    const data = entity.data as unknown as Resume
+    const updated = await repo.resume.update(id, { ...data, title })
     if (!updated) {
       throw new ServiceError(ErrorCode.Resume.NotFound, "简历不存在")
     }
