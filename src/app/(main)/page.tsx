@@ -14,7 +14,7 @@ export default function Page() {
         <Navbar />
         <div className="w-full flex-1 flex mx-auto max-w-screen-2xl min-h-0">
           <Left />
-          <Main {...DEFAULT_RESUME} />
+          <Main scale={1} resume={DEFAULT_RESUME} />
           <Right />
         </div>
       </div>

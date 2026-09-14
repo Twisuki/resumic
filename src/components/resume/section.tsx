@@ -1,6 +1,6 @@
 import type { Section as SectionModel } from "@shared/model"
-import Part from "@/app/(main)/sections/main/part"
 import Icon from "@/components/icon"
+import Part from "@/components/resume/part"
 import { flatten } from "@/lib/collection"
 
 export default function Section({

@@ -1,7 +1,7 @@
 import type { Profile as ProfileModel } from "@shared/model"
 import { IconMail, IconPhone, IconUser } from "@tabler/icons-react"
 import Image from "next/image"
-import Detail from "@/app/(main)/sections/main/detail"
+import Detail from "@/components/resume/detail"
 import { flatten } from "@/lib/collection"
 
 export default function Profile({
