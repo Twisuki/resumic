@@ -124,3 +124,24 @@ export const DEFAULT_RESUME: Resume = {
     orders: ["1"],
   },
 }
+
+/**
+ * @description 空白简历模板
+ */
+export const EMPTY_RESUME: Resume = {
+  title: "空白简历",
+  name: "",
+  headline: "",
+  age: "",
+  gender: "",
+  phone: "",
+  email: "",
+  detail: {
+    items: [],
+    orders: [],
+  },
+  page: {
+    items: [],
+    orders: [],
+  },
+}
