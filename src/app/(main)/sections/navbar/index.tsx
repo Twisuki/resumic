@@ -21,7 +21,7 @@ export default function Navbar() {
             variant="outline"
             size="icon"
             asChild
-            className="hidden md:inline-flex"
+            className="hidden lg:inline-flex"
           >
             <Link
               href="https://github.com/Twisuki/resumic"
@@ -37,7 +37,7 @@ export default function Navbar() {
             variant="outline"
             size="icon"
             asChild
-            className="hidden md:inline-flex"
+            className="hidden lg:inline-flex"
           >
             <Link
               href="https://www.twis.uk"
@@ -54,7 +54,7 @@ export default function Navbar() {
             size="icon"
             onClick={toggleLeft}
             aria-label="切换左侧面板"
-            className="md:hidden"
+            className="lg:hidden"
           >
             <IconLayoutSidebarLeftExpand />
           </Button>
@@ -64,7 +64,7 @@ export default function Navbar() {
             size="icon"
             onClick={toggleRight}
             aria-label="切换右侧面板"
-            className="md:hidden"
+            className="lg:hidden"
           >
             <IconMenu2 />
           </Button>
