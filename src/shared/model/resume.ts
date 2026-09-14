@@ -47,10 +47,15 @@ export interface Section {
   part: Collection<Part>
 }
 
+export interface Page {
+  id: string
+  section: Collection<Section>
+}
+
 /**
  * @description 完整简历
  */
 export interface Resume extends Profile {
   title: string
-  section: Collection<Section>
+  page: Collection<Page>
 }

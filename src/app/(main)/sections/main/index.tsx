@@ -1,6 +1,6 @@
 import type { Resume as ResumeModel } from "@shared/model"
 import { useScale } from "@/app/(main)/hooks/scale"
-import { Paper, Resume } from "@/components/resume"
+import { Resume } from "@/components/resume"
 
 export default function Main({
   zoom,
@@ -14,15 +14,9 @@ export default function Main({
   return (
     <main
       ref={ref}
-      className="flex-1 min-w-0 h-full flex justify-center"
+      className="flex-1 min-w-0 h-full flex justify-center overflow-y-auto overflow-x-hidden no-scrollbar"
     >
-      <div
-        style={{ transform: `scale(${scale})`, transformOrigin: "top center" }}
-      >
-        <Paper>
-          <Resume zoom={zoom} {...resume} />
-        </Paper>
-      </div>
+      <Resume scale={scale} zoom={zoom} {...resume} />
     </main>
   )
 }
