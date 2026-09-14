@@ -10,7 +10,10 @@ export type ListResumesResponse = ListResumesItem[]
 
 export type CreateResumeRequest = Resume
 
-export type CreateResumeResponse = Resume
+export interface CreateResumeResponse {
+  id: number
+  data: Resume
+}
 
 export type GetResumeResponse = Resume
 

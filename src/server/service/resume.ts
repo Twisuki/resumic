@@ -28,7 +28,7 @@ export const resume = {
    */
   async create(userId: number, data: Resume): Promise<CreateResumeResponse> {
     const row = await repo.resume.create(userId, data)
-    return row.data as unknown as Resume
+    return { id: row.id, data: row.data as unknown as Resume }
   },
 
   /**
