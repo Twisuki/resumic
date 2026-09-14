@@ -1,11 +1,19 @@
 import type { Avatar } from "@shared/model/avatar"
-import type { Content } from "@shared/model/content"
+import type { Collection } from "@shared/model/collection"
+import type { RichContent } from "@shared/model/rich-content"
 
-export interface Resume extends Profile {
-  title: string
-  sections: ResumeSection[]
+/**
+ * @description Profile 自定义信息项目
+ */
+export interface Detail {
+  id: string
+  icon: string
+  content: string
 }
 
+/**
+ * @description 个人信息基础字段
+ */
 export interface Profile {
   name: string
   headline?: string
@@ -14,28 +22,35 @@ export interface Profile {
   phone?: string
   email?: string
   avatar?: Avatar
-  details: ProfileDetail[]
+  detail: Collection<Detail>
 }
 
-export interface ProfileDetail {
-  icon: string
-  content: string
-}
-
-export interface Section {
-  icon: string
-  title: string
-  parts: Part[]
-}
-
-export interface ResumeSection extends Section {
-  type: string
-}
-
+/**
+ * @description 简历章节模块
+ */
 export interface Part {
+  id: string
   title: string
   subtitle: string
   link: string
   date: string
-  content: Content
+  content: RichContent
+}
+
+/**
+ * @description 简历章节
+ */
+export interface Section {
+  id: string
+  icon: string
+  title: string
+  part: Collection<Part>
+}
+
+/**
+ * @description 完整简历
+ */
+export interface Resume extends Profile {
+  title: string
+  section: Collection<Section>
 }

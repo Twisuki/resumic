@@ -1,16 +1,16 @@
-import type { Content } from "@shared/model"
+import type { RichContent as RichContentModel } from "@shared/model"
 import Markdown from "@/components/markdown/display"
-import { serializeContent } from "@/components/rich-content/serialize"
+import { flatten } from "@/lib/collection"
 
 /**
- * @description 富文本展示组件, 吃 Content 结构, 序列化成 md 字符串后交给 markdown 层渲染
+ * @description 富文本展示组件, 接收 RichContent Collection 结构, flatten 展平后传入 markdown 层渲染
  */
 export default function RichContent({
   value,
   className,
 }: Readonly<{
-  value: Content
+  value: RichContentModel
   className?: string
 }>) {
-  return <Markdown source={serializeContent(value)} className={className} />
+  return <Markdown source={flatten(value).map(line => line.content).join("")} className={className} />
 }

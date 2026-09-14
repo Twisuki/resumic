@@ -2,6 +2,7 @@ import type { Profile as ProfileModel } from "@shared/model"
 import { IconMail, IconPhone, IconUser } from "@tabler/icons-react"
 import Image from "next/image"
 import Detail from "@/app/(main)/sections/main/detail"
+import { flatten } from "@/lib/collection"
 
 export default function Profile({
   name,
@@ -11,9 +12,10 @@ export default function Profile({
   phone,
   email,
   avatar,
-  details,
+  detail,
 }: Readonly<ProfileModel>) {
   const baseInfo = [gender, age].filter(Boolean).join(" | ")
+  const details = flatten(detail)
 
   return (
     <section className="flex items-center gap-6">
@@ -44,11 +46,10 @@ export default function Profile({
           </div>
 
           <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
-            {details.map((detail, index) => (
+            {details.map(d => (
               <Detail
-                key={index}
-                icon={detail.icon}
-                content={detail.content}
+                key={d.id}
+                {...d}
               />
             ))}
           </div>
