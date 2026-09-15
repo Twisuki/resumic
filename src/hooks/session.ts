@@ -23,7 +23,6 @@ export function useSession(): SessionState {
     queryFn: ({ signal }) => api.auth.me({ signal }),
     // 登录态只在全页导航后变, 不需要重新过期
     staleTime: Infinity,
-    retry: (count, error) => !isAuthError(error) && count < 1,
   })
 
   const status: SessionStatus = isPending

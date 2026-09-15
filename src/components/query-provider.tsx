@@ -3,6 +3,7 @@
 import type { ReactNode } from "react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
+import { ApiClientError, isAuthError } from "@/lib/request"
 
 function createQueryClient(): QueryClient {
   return new QueryClient({
@@ -11,6 +12,8 @@ function createQueryClient(): QueryClient {
         staleTime: 30_000,
         // 编辑器有未保存状态, 焦点回来重拉会打架
         refetchOnWindowFocus: false,
+        // 业务错(鉴权失败 / 找不到简历等)直接展示, 不重试耗时长
+        retry: (count, error) => !(error instanceof ApiClientError && isAuthError(error)) && count < 1,
       },
     },
   })
