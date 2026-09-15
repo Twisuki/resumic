@@ -1,8 +1,8 @@
 import type { LanguageModel } from "ai"
-import process from "node:process"
 import { createOpenAI } from "@ai-sdk/openai"
 import { ServiceError } from "@server/service/error"
 import { ErrorCode } from "@shared/error-code"
+import { ENV } from "@/config/env"
 
 /**
  * @description 解析 model 标识 (provider:model) 为 AI SDK 的 model 实例
@@ -18,7 +18,7 @@ export function resolveModel(spec: string, apiKey: string): LanguageModel {
     case "openai":
       return createOpenAI({
         apiKey,
-        baseURL: process.env.AI_OPENAI_BASE_URL || undefined,
+        baseURL: ENV.AI.OPENAI_BASE_URL || undefined,
       }).chat(modelId)
     default:
       throw new ServiceError(ErrorCode.AI.UpstreamError, `不支持的 provider: ${provider}`)

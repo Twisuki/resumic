@@ -1,5 +1,4 @@
 import type { UIMessage } from "ai"
-import process from "node:process"
 import { SYSTEM_PROMPT } from "@server/ai/prompt"
 import { resolveModel } from "@server/ai/provider"
 import { decryptKey } from "@server/auth/crypto"
@@ -7,16 +6,7 @@ import { repo } from "@server/repo"
 import { ServiceError } from "@server/service/error"
 import { ErrorCode } from "@shared/error-code"
 import { convertToModelMessages, streamText } from "ai"
-
-const DEFAULT_DAILY_LIMIT = 20
-
-function requireEnv(name: string): string {
-  const v = process.env[name]
-  if (!v) {
-    throw new ServiceError(ErrorCode.AI.UpstreamError, `未配置 ${name}`)
-  }
-  return v
-}
+import { ENV } from "@/config/env"
 
 export const ai = {
   /**
@@ -29,12 +19,11 @@ export const ai = {
     }
 
     const own = u.aiKey && u.aiModel ? { key: u.aiKey, model: u.aiModel } : null
-    const apiKey = own ? decryptKey(own.key) : requireEnv("AI_DEFAULT_KEY")
-    const model = own ? own.model : requireEnv("AI_DEFAULT_MODEL")
+    const apiKey = own ? decryptKey(own.key) : ENV.AI.DEFAULT_KEY
+    const model = own ? own.model : ENV.AI.DEFAULT_MODEL
 
     if (!own) {
-      const limit = Number(process.env.AI_DAILY_LIMIT ?? DEFAULT_DAILY_LIMIT)
-      const allowed = await repo.user.consumeAiQuota(userId, limit)
+      const allowed = await repo.user.consumeAiQuota(userId, ENV.AI.DAILY_LIMIT)
       if (!allowed) {
         throw new ServiceError(ErrorCode.AI.QuotaExhausted, "今日免费额度已用完")
       }

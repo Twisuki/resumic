@@ -1,11 +1,8 @@
-import process from "node:process"
 import { jwtVerify, SignJWT } from "jose"
+import { ENV } from "@/config/env"
 
 function key(): Uint8Array {
-  const secret = process.env.JWT_SECRET
-  if (!secret)
-    throw new Error("JWT_SECRET not set")
-  return new TextEncoder().encode(secret)
+  return new TextEncoder().encode(ENV.JWT.SECRET)
 }
 
 /**
@@ -15,7 +12,7 @@ export async function signSession(userId: number): Promise<string> {
   return await new SignJWT({ userId })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime(process.env.JWT_TTL?.trim() || "7d")
+    .setExpirationTime(ENV.JWT.TTL)
     .sign(key())
 }
 

@@ -1,4 +1,4 @@
-import process from "node:process"
+import { ENV } from "@/config/env"
 
 export interface GitHubProfile {
   login: string
@@ -26,8 +26,8 @@ export async function exchangeCode(code: string): Promise<string> {
       "Accept": "application/json",
     },
     body: JSON.stringify({
-      client_id: process.env.GH_CLIENT_ID,
-      client_secret: process.env.GH_CLIENT_SECRET,
+      client_id: ENV.GH_CLIENT.ID,
+      client_secret: ENV.GH_CLIENT.SECRET,
       code,
     }),
   })

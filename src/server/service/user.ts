@@ -1,33 +1,16 @@
 import type { ClearAiKeyResponse, QuotaResponse, SetAiKeyResponse } from "@shared/model"
-import process from "node:process"
 import { encryptKey } from "@server/auth/crypto"
 import { repo } from "@server/repo"
 import { ServiceError } from "@server/service/error"
 import { ErrorCode } from "@shared/error-code"
-
-const DEFAULT_AI_DAILY_LIMIT = 20
-const DEFAULT_AVATAR_QUOTA_BYTES = 50 * 1024 * 1024
-
-function aiLimit(): number {
-  const v = process.env.AI_DAILY_LIMIT
-  return v ? Number(v) : DEFAULT_AI_DAILY_LIMIT
-}
-
-function avatarLimit(): number {
-  const v = process.env.AVATAR_QUOTA_BYTES
-  return v ? Number(v) : DEFAULT_AVATAR_QUOTA_BYTES
-}
-
-function allowlist(): string[] {
-  return (process.env.AI_MODEL_ALLOWLIST ?? "").split(",").map(s => s.trim()).filter(Boolean)
-}
+import { ENV } from "@/config/env"
 
 export const user = {
   /**
    * @description 设 AI key (加密后存) + model, 校验 model 在 allowlist
    */
   async setAiKey(userId: number, key: string, model: string): Promise<SetAiKeyResponse> {
-    if (!allowlist().includes(model)) {
+    if (!ENV.AI.MODEL_ALLOWLIST.includes(model)) {
       throw new ServiceError(ErrorCode.AI.UpstreamError, "model 不在白名单")
     }
     const encrypted = encryptKey(key)
@@ -50,7 +33,7 @@ export const user = {
   },
 
   /**
-   * @description 查 user AI + avatar 配额 (从 DB 读每日计数, 从 env 读限额)
+   * @description 查 user AI + avatar 配额 (从 DB 读每日计数, 从 ENV 读限额)
    */
   async getQuota(userId: number): Promise<QuotaResponse> {
     const u = await repo.user.findById(userId)
@@ -61,11 +44,11 @@ export const user = {
       ai: {
         count: u.aiCount,
         date: u.aiDate ?? "",
-        limit: aiLimit(),
+        limit: ENV.AI.DAILY_LIMIT,
       },
       avatar: {
         bytes: Number(u.avatarBytes),
-        limit: avatarLimit(),
+        limit: ENV.AVATAR_QUOTA_BYTES,
       },
     }
   },

@@ -1,6 +1,6 @@
 import { Buffer } from "node:buffer"
 import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto"
-import process from "node:process"
+import { ENV } from "@/config/env"
 
 const ALGO = "aes-256-gcm"
 const KEY_LEN = 32
@@ -8,10 +8,7 @@ const IV_LEN = 12
 const TAG_LEN = 16
 
 function getKey(): Buffer {
-  const secret = process.env.AI_KEY_ENCRYPTION_SECRET
-  if (!secret)
-    throw new Error("AI_KEY_ENCRYPTION_SECRET not set")
-  const key = Buffer.from(secret, "base64")
+  const key = Buffer.from(ENV.AI.KEY_ENCRYPTION_SECRET, "base64")
   if (key.length !== KEY_LEN) {
     throw new Error(`AI_KEY_ENCRYPTION_SECRET must decode to ${KEY_LEN} bytes (base64 of 32 random bytes)`)
   }
