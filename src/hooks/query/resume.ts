@@ -1,4 +1,4 @@
-import type { ListResumesResponse, Resume } from "@shared/model"
+import type { ListResumesResponse, Resume, UpdateResumeRequest, UpdateResumeResponse } from "@shared/model"
 import type { ApiClientError } from "@/lib/request"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/api"
@@ -72,5 +72,14 @@ export function useResumeRename() {
       }
       void queryClient.invalidateQueries({ queryKey: keys.resume.lists() })
     },
+  })
+}
+
+/**
+ * @description 全量更新简历, 持久化快照
+ */
+export function useResumeUpdate() {
+  return useMutation<UpdateResumeResponse, ApiClientError, { id: number, data: UpdateResumeRequest }>({
+    mutationFn: ({ id, data }) => api.resume.update(id, data),
   })
 }
