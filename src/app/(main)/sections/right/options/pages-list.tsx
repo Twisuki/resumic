@@ -3,12 +3,22 @@
 import { IconPlus } from "@tabler/icons-react"
 import PageCard from "@/app/(main)/sections/right/options/page-card"
 import { Button } from "@/components/ui/button"
+import { useHistory } from "@/hooks/history"
 import { flatten } from "@/lib/collection"
+import { genId } from "@/lib/id"
 import { useResumeStore } from "@/stores/resume"
 
 export default function PagesList() {
   const resume = useResumeStore(s => s.current)
   const pages = resume ? flatten(resume.page) : []
+  const { patch } = useHistory()
+
+  function handleAddPage() {
+    patch("item_add", ["page"], {
+      id: genId(),
+      section: { items: [], orders: [] },
+    })
+  }
 
   return (
     <div className="p-2 flex flex-col gap-2">
@@ -36,7 +46,7 @@ export default function PagesList() {
         <Button
           variant="outline"
           className="w-full justify-start gap-2 border-dashed text-muted-foreground"
-          // TODO: 接 useHistoryStore().patch('item_add', ['page'], { id: nanoid(), section: { items: [], orders: [] } })
+          onClick={handleAddPage}
         >
           <IconPlus className="size-4" />
           <span>新建分页</span>

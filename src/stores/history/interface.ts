@@ -1,5 +1,5 @@
 import type { Resume } from "@shared/model"
-import type { Patch } from "@shared/model/patch"
+import type { Patch, PatchAction } from "@shared/model/patch"
 
 /**
  * @description 编辑历史栈与自动保存协调
@@ -10,7 +10,7 @@ export interface HistoryStore {
   isSaving: boolean
   saveFn: ((snapshot: Resume) => void) | null
 
-  patch: ((type: "field_set", path: string[], value: unknown) => void) & ((type: "item_add", path: string[], item: { id: string }, at?: number) => void) & ((type: "item_remove", path: string[], id: string) => void) & ((type: "item_update", path: string[], newItem: unknown) => void) & ((type: "reorder", path: string[], newOrders: string[]) => void)
+  patch: (type: PatchAction, path: string[], ...args: unknown[]) => void
 
   commit: (patch: Patch) => void
   undo: () => void

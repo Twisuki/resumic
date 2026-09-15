@@ -35,13 +35,13 @@ export default function SectionRow({
           {section.title || <span className="text-muted-foreground italic">未命名章节</span>}
         </span>
 
-        {/* edit, hover 显现 */}
+        {/* edit, 常驻 (移动端不能靠 hover) */}
         <Button
           variant="ghost"
           size="icon-xs"
           aria-label="编辑章节"
           onClick={() => setEditOpen(true)}
-          className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 shrink-0"
+          className="shrink-0"
         >
           <IconPencil className="size-3" />
         </Button>
