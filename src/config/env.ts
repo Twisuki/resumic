@@ -10,6 +10,11 @@ function csvList(s: string) {
 
 const schema = z.object({
   /**
+   * @description 当前运行环境, dev 拼裸 cookie 名, prod 拼 __Host- 前缀
+   */
+  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+
+  /**
    * @description 数据库连接字符串, Prisma 用
    */
   DATABASE_URL: z.string().min(1),
@@ -33,11 +38,9 @@ const schema = z.object({
 
   SESSION: z.object({
     /**
-     * @description session cookie 名, env 空时按 NODE_ENV 推 (dev 用 session, prod 用 __Host-session)
+     * @description session cookie 后缀名, 未设时走默认 "session"; prod 调用层会拼 __Host- 前缀
      */
-    COOKIE_NAME: z.string().default(
-      process.env.NODE_ENV === "production" ? "__Host-session" : "session",
-    ),
+    COOKIE_NAME: z.string().default("session"),
   }),
 
   JWT: z.object({
@@ -95,6 +98,7 @@ const schema = z.object({
  */
 function nest(raw: NodeJS.ProcessEnv) {
   return {
+    NODE_ENV: raw.NODE_ENV,
     DATABASE_URL: raw.DATABASE_URL,
     APP_URL: raw.APP_URL,
     AVATAR_QUOTA_BYTES: raw.AVATAR_QUOTA_BYTES,
