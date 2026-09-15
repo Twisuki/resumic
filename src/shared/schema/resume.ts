@@ -51,6 +51,7 @@ const pageSchema = z.object({
  */
 export const resumeSchema: z.ZodType<Resume> = z.object({
   title: z.string(),
+  zoom: z.number(),
   name: z.string(),
   headline: z.string().optional(),
   age: z.string().optional(),

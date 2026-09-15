@@ -5,6 +5,7 @@ import type { Resume } from "@shared/model"
  */
 export const DEFAULT_RESUME: Resume = {
   title: "默认简历",
+  zoom: 1,
   name: "苏阳",
   headline: "Hi, this is Twisuki",
   age: "20岁",
@@ -130,6 +131,7 @@ export const DEFAULT_RESUME: Resume = {
  */
 export const EMPTY_RESUME: Resume = {
   title: "空白简历",
+  zoom: 1,
   name: "",
   headline: "",
   age: "",

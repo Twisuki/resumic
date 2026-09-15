@@ -13,7 +13,7 @@ export default function Page() {
         <Navbar />
         <div className="w-full flex-1 flex mx-auto max-w-screen-2xl min-h-0">
           <Left />
-          <Main zoom={1} />
+          <Main />
           <Right />
         </div>
       </div>

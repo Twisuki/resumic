@@ -1,4 +1,3 @@
-export { default as Paper } from "@/components/resume/paper"
 /**
  * @description resume 组件库对外入口
  */

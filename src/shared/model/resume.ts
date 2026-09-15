@@ -57,5 +57,6 @@ export interface Page {
  */
 export interface Resume extends Profile {
   title: string
+  zoom: number
   page: Collection<Page>
 }
