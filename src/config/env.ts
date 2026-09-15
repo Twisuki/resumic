@@ -91,6 +91,36 @@ const schema = z.object({
 })
 
 /**
+ * @description 将 flat env var 重新组装为嵌套对象, 供 schema.parse 校验
+ */
+function nest(raw: NodeJS.ProcessEnv) {
+  return {
+    DATABASE_URL: raw.DATABASE_URL,
+    APP_URL: raw.APP_URL,
+    AVATAR_QUOTA_BYTES: raw.AVATAR_QUOTA_BYTES,
+    GH_CLIENT: {
+      ID: raw.GH_CLIENT_ID,
+      SECRET: raw.GH_CLIENT_SECRET,
+    },
+    SESSION: {
+      COOKIE_NAME: raw.SESSION_COOKIE_NAME,
+    },
+    JWT: {
+      SECRET: raw.JWT_SECRET,
+      TTL: raw.JWT_TTL,
+    },
+    AI: {
+      KEY_ENCRYPTION_SECRET: raw.AI_KEY_ENCRYPTION_SECRET,
+      DAILY_LIMIT: raw.AI_DAILY_LIMIT,
+      DEFAULT_KEY: raw.AI_DEFAULT_KEY,
+      DEFAULT_MODEL: raw.AI_DEFAULT_MODEL,
+      MODEL_ALLOWLIST: raw.AI_MODEL_ALLOWLIST,
+      OPENAI_BASE_URL: raw.AI_OPENAI_BASE_URL,
+    },
+  }
+}
+
+/**
  * @description 应用统一环境变量, 启动时一次性加载并校验
  */
-export const ENV = schema.parse(process.env)
+export const ENV = schema.parse(nest(process.env))
