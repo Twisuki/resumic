@@ -5,6 +5,7 @@ import DeleteDialog from "@/app/(main)/sections/right/files/delete-dialog"
 import IconAction from "@/app/(main)/sections/right/files/icon-action"
 import { buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useResumeRename } from "@/hooks/query/resume"
 import { cn } from "@/lib/utils"
 
@@ -41,7 +42,7 @@ export default function Item({
     <div
       className={cn(
         buttonVariants({ variant: active ? "secondary" : "outline" }),
-        "group/item justify-start gap-1 pr-1",
+        "justify-start gap-1 pr-1",
       )}
     >
       {editing
@@ -62,14 +63,21 @@ export default function Item({
             />
           )
         : (
-            <button
-              type="button"
-              disabled={loading}
-              onClick={() => onOpen(item.id)}
-              className="min-w-0 flex-1 truncate text-left outline-none disabled:pointer-events-none"
-            >
-              {item.title}
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={() => onOpen(item.id)}
+                  className="min-w-0 flex-1 truncate text-left outline-none disabled:pointer-events-none"
+                >
+                  {item.title}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right" sideOffset={6}>
+                {item.title}
+              </TooltipContent>
+            </Tooltip>
           )}
 
       <div className="ml-auto flex shrink-0 items-center gap-0.5">
@@ -83,7 +91,7 @@ export default function Item({
         )}
 
         {!loading && !editing && (
-          <div className="invisible flex items-center gap-0.5 group-hover/item:visible group-focus-within/item:visible">
+          <div className="flex items-center gap-0.5">
             <IconAction aria-label="编辑" onClick={startEdit}><IconPencil /></IconAction>
 
             <DeleteDialog id={item.id} title={item.title}>
