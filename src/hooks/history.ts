@@ -13,6 +13,7 @@ export function useHistory() {
       reset: s.reset,
       registerSave: s.registerSave,
       finishSave: s.finishSave,
+      isSaving: s.isSaving,
     })),
   )
 }

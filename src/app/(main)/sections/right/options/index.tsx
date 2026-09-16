@@ -2,8 +2,9 @@
 
 import { DndContext, DragOverlay } from "@dnd-kit/core"
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
-import { IconPencil } from "@tabler/icons-react"
+import { IconDeviceFloppy, IconPencil } from "@tabler/icons-react"
 import { useEffect, useRef, useState } from "react"
+import { toast } from "sonner"
 import OptionsDragOverlay from "@/app/(main)/sections/right/options/options-drag-overlay"
 import PagesList from "@/app/(main)/sections/right/options/pages-list"
 import ProfileEditDialog from "@/app/(main)/sections/right/options/profile-edit-dialog"
@@ -12,12 +13,32 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Slider } from "@/components/ui/slider"
 import { useHistory } from "@/hooks/history"
+import { useResumeUpdate } from "@/hooks/query/resume"
 import { useResumeStore } from "@/stores/resume"
 
 export default function Options() {
   const zoom = useResumeStore(s => s.current?.zoom ?? 1)
-  const { patch } = useHistory()
+  const { patch, isSaving } = useHistory()
   const [profileOpen, setProfileOpen] = useState(false)
+
+  // 手动保存: 全量 PUT 当前快照
+  const update = useResumeUpdate()
+  const currentId = useResumeStore(s => s.currentId)
+  const current = useResumeStore(s => s.current)
+
+  function handleSave() {
+    if (!currentId || !current) {
+      toast.error("没有可保存的简历")
+      return
+    }
+    update.mutate(
+      { id: currentId, data: { ...current, autosave: false } },
+      {
+        onSuccess: () => toast.success("已保存"),
+        onError: e => toast.error(`保存失败: ${e.message}`),
+      },
+    )
+  }
 
   const {
     drag,
@@ -87,14 +108,26 @@ export default function Options() {
             />
           </div>
 
-          <Button
-            variant="outline"
-            className="w-full justify-start gap-2"
-            onClick={() => setProfileOpen(true)}
-          >
-            <IconPencil className="size-4" />
-            <span>编辑个人信息</span>
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              className="flex-1 justify-start gap-2"
+              onClick={() => setProfileOpen(true)}
+              disabled={!currentId}
+            >
+              <IconPencil className="size-4" />
+              <span>编辑个人信息</span>
+            </Button>
+
+            <Button
+              className="flex-1 justify-start gap-2"
+              onClick={handleSave}
+              disabled={!currentId || update.isPending || isSaving}
+            >
+              <IconDeviceFloppy className="size-4" />
+              <span>{update.isPending || isSaving ? "保存中..." : "保存"}</span>
+            </Button>
+          </div>
         </div>
 
         <Separator />
