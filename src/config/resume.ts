@@ -14,9 +14,9 @@ export const DEFAULT_RESUME: Resume = {
   email: "hi@twis.uk",
   detail: {
     items: [
-      { id: "detail-1", icon: "", content: "湖南大学 | 人工智能" },
-      { id: "detail-2", icon: "", content: "https://www.twis.uk" },
-      { id: "detail-3", icon: "", content: "Code 1413h | 952k Lines" },
+      { id: "detail-1", icon: "school", content: "湖南大学 | 人工智能" },
+      { id: "detail-2", icon: "home", content: "https://www.twis.uk" },
+      { id: "detail-3", icon: "code", content: "Code 1413h | 952k Lines" },
     ],
     orders: ["detail-1", "detail-2", "detail-3"],
   },
@@ -96,7 +96,7 @@ export const DEFAULT_RESUME: Resume = {
                         { id: "page-1/section-3/part-1/line-1", content: "基于 **Next.js 16**, **Vercel AI SDK v7** 的全栈简历制作器, 提供 AI 驱动和所见即所得的编辑体验\n" },
                         { id: "page-1/section-3/part-1/line-2", content: "- 基于 **React 19**, 使用 **shadcn** 组件库和 **Tailwind CSS** 的原子化样式方案\n" },
                         { id: "page-1/section-3/part-1/line-3", content: "- 使用 **markdown-it** 和 **html-react-parser** 手动实现既开发友好又 **XSS** 安全的富文本编辑器\n" },
-                        { id: "page-1/section-3/part-1/line-4", content: "- ~~实现了完成的历史记录功能(开发中)~~\n" },
+                        { id: "page-1/section-3/part-1/line-4", content: "- 自研 **Patch** 和有序 **Collection** 数据结构, 实现高性能历史记录能力\n" },
                         { id: "page-1/section-3/part-1/line-5", content: "- ~~提供了 Agent 功能, 实现了可配置的 AI 对接能力~~\n" },
                       ],
                       orders: [
