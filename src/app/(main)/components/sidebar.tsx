@@ -54,7 +54,7 @@ export function Sidebar({
       data-slot="sidebar"
       data-side={side}
       className={cn(
-        "hidden lg:flex w-64 shrink-0 flex-col bg-sidebar text-sidebar-foreground",
+        "hidden lg:flex min-w-0 flex-col bg-sidebar text-sidebar-foreground",
         side === "left"
           ? "lg:border-r border-sidebar-border"
           : "lg:border-l border-sidebar-border",

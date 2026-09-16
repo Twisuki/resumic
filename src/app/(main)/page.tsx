@@ -43,7 +43,10 @@ export default function Page() {
     <SidebarsProvider>
       <div className="w-screen h-screen flex flex-col">
         <Navbar />
-        <div className="w-full flex-1 flex mx-auto max-w-screen-2xl min-h-0">
+        <div
+          className="w-full flex-1 grid min-h-0"
+          style={{ gridTemplateColumns: "minmax(16rem, 1fr) minmax(0, 794px) minmax(16rem, 1fr)" }}
+        >
           <Left />
           <Main />
           <Right />
