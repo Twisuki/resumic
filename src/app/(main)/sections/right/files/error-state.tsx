@@ -11,7 +11,7 @@ export default function ErrorState({
   const auth = isAuthError(error)
 
   return (
-    <div className="px-1 py-6 flex flex-col items-start gap-2 text-sm text-muted-foreground">
+    <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-2 text-center text-sm text-muted-foreground">
       <span>{auth ? "登录后查看简历" : "列表加载失败"}</span>
       {auth && (
         <Button
