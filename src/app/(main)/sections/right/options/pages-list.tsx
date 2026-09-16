@@ -1,5 +1,7 @@
 "use client"
 
+import type { DragState } from "@/app/(main)/sections/right/options/use-options-drag"
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { IconPlus } from "@tabler/icons-react"
 import PageCard from "@/app/(main)/sections/right/options/page-card"
 import { Button } from "@/components/ui/button"
@@ -8,10 +10,13 @@ import { flatten } from "@/lib/collection"
 import { genId } from "@/lib/id"
 import { useResumeStore } from "@/stores/resume"
 
-export default function PagesList() {
+export default function PagesList({ drag }: Readonly<{ drag: DragState }>) {
   const resume = useResumeStore(s => s.current)
   const pages = resume ? flatten(resume.page) : []
   const { patch } = useHistory()
+
+  // 用 string[] 喂给 SortableContext (dnd-kit 要求 UniqueIdentifier[])
+  const sortableIds = pages.map(p => `page:${p.id}`)
 
   function handleAddPage() {
     patch("item_add", ["page"], {
@@ -34,13 +39,18 @@ export default function PagesList() {
         </div>
       )}
 
-      {pages.map((page, i) => (
-        <PageCard
-          key={page.id}
-          page={page}
-          index={i}
-        />
-      ))}
+      {pages.length > 0 && (
+        <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
+          {pages.map((page, i) => (
+            <PageCard
+              key={page.id}
+              page={page}
+              index={i}
+              drag={drag}
+            />
+          ))}
+        </SortableContext>
+      )}
 
       {resume && (
         <Button
