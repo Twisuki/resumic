@@ -100,16 +100,19 @@ function readLine(tree: Tree, id: string): string {
  */
 function buildPartNode(map: Map<string, Node>, part: Part): string {
   const { content, ...self } = part
-  const children = content.split("\n").map(c => buildLineNode(map, c))
+  const segments = content.split("\n")
+  const children = segments
+    .map((c, i) => (i < segments.length - 1 ? `${c}\n` : c))
+    .map(c => buildLineNode(map, c))
   return buildNode(map, self, children)
 }
 
 /**
- * @description 读取一个 part 节点, line 子节点按换行拼回 content
+ * @description 读取一个 part 节点, line 子节点直接拼回 content
  */
 function readPart(tree: Tree, id: string): Part {
   const node = mustGet(tree, id) as PartNode
-  const content = node.children.map(cid => readLine(tree, cid)).join("\n")
+  const content = node.children.map(cid => readLine(tree, cid)).join("")
   return { ...node.self, content }
 }
 
