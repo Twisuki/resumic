@@ -1,68 +1,45 @@
-/**
- * @description patch 类型标识
- */
-export type PatchAction = "field_set" | "item_add" | "item_remove" | "item_update" | "reorder"
+import type { Node } from "@shared/model/node"
 
 /**
- * @description 原子路径
+ * @description Patch 行为
  */
-export type PathStep = string
+export type PatchAction = "UPDATE" | "ADD" | "REMOVE" | "REORDER"
 
 /**
- * @description 从 root 到目标字段的路径
+ * @description Patch 基底
  */
-export type Path = PathStep[]
-
-/**
- * @description 所有 patch 的统一基底
- */
-export interface BasePatch<T, D> {
-  type: PatchAction
-  path: Path
-  payload: T
-  before: D
-  after: D
+export interface BasePatch<A extends PatchAction, P, T> {
+  type: A
+  id: string
+  payload: P
+  before: T
+  after: T
 }
 
 /**
- * @description 普通字段整体替换
- *
- * payload 为空, before/after 为字段原值与新值
+ * @description 更新字段 Patch
  */
-export type FieldSetPatch = BasePatch<null, unknown>
+export type UpdatePatch = BasePatch<"UPDATE", string, unknown>
 
 /**
- * @description collection 新增项
- *
- * payload 为新增项, before/after 为 orders 修改前与修改后
+ * @description 新增节点 Patch
  */
-export type ItemAddPatch = BasePatch<{ id: string }, string[]>
+export type AddPatch = BasePatch<"ADD", Node, string[]>
 
 /**
- * @description collection 删除项
- *
- * payload 为被删项, before/after 为 orders 修改前与修改后
+ * @description 删除节点 Patch
  */
-export type ItemRemovePatch = BasePatch<{ id: string }, string[]>
+export type RemovePatch = BasePatch<"REMOVE", Node, string[]>
 
 /**
- * @description collection 项整体替换
- *
- * payload 为空, before/after 为 item 原整体与新整体
+ * @description 顺序调整 Patch
  */
-export type ItemUpdatePatch = BasePatch<null, unknown>
-
-/**
- * @description collection 顺序调整
- *
- * payload 为空, before/after 为 orders 修改前与修改后
- */
-export type ReorderPatch = BasePatch<null, string[]>
+export type ReorderPatch = BasePatch<"REORDER", null, string[]>
 
 /**
  * @description 简历变更行为
  */
-export type Patch = FieldSetPatch | ItemAddPatch | ItemRemovePatch | ItemUpdatePatch | ReorderPatch
+export type Patch = UpdatePatch | AddPatch | RemovePatch | ReorderPatch
 
 /**
  * @description 编辑历史栈

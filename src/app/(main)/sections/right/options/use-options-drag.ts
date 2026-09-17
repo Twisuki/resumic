@@ -1,6 +1,7 @@
 "use client"
 
 import type { CollisionDetection, DragEndEvent, DragOverEvent, DragStartEvent, UniqueIdentifier } from "@dnd-kit/core"
+import type { SectionNode } from "@shared/model/node"
 import {
   closestCorners,
 
@@ -15,7 +16,7 @@ import {
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable"
 import { useState } from "react"
 import { useHistory } from "@/hooks/history"
-import { flatten } from "@/lib/collection"
+import { deepCloneNode, mustGet } from "@/lib/tree"
 import { useResumeStore } from "@/stores/resume"
 
 export type DragType = "page" | "section"
@@ -54,10 +55,6 @@ function decodeSectionId(id: UniqueIdentifier): string | null {
   return null
 }
 
-/**
- * @description Options 区拖拽协调: 本地 state + sensors + 自定义 collision + handlers.
- *              预览状态不入 resume store, 仅 onDragEnd 时按需 patch (1~2 次).
- */
 export function useOptionsDrag() {
   const { patch } = useHistory()
   const [drag, setDrag] = useState<DragState>(initial)
@@ -120,17 +117,18 @@ export function useOptionsDrag() {
     if (!activePageId || !overPageId || activePageId === overPageId)
       return
 
-    const resume = useResumeStore.getState().current
+    const { resume } = useResumeStore.getState()
     if (!resume)
       return
-    const orders = resume.page.orders
+    const root = mustGet(resume, resume.rootId)
+    const orders = root.children
     const oldIndex = orders.indexOf(activePageId)
     const newIndex = orders.indexOf(overPageId)
     if (oldIndex < 0 || newIndex < 0 || oldIndex === newIndex)
       return
 
     const newOrders = arrayMove(orders, oldIndex, newIndex)
-    patch("reorder", ["page"], newOrders)
+    patch.reorder(resume.rootId, newOrders)
   }
 
   function handleSectionDragEnd(
@@ -155,45 +153,30 @@ export function useOptionsDrag() {
     if (!targetPageId)
       return
 
-    const resume = useResumeStore.getState().current
+    const { resume } = useResumeStore.getState()
     if (!resume)
-      return
-    const pages = flatten(resume.page)
-    const sourcePage = pages.find(p => p.id === sourcePageId)
-    if (!sourcePage)
-      return
-    const sections = flatten(sourcePage.section)
-    const section = sections.find(s => s.id === activeSectionId)
-    if (!section)
       return
 
     if (sourcePageId === targetPageId) {
-      // 同 page 重排
       const overSectionId = decodeSectionId(overId)
       if (!overSectionId)
         return
-      const orders = sourcePage.section.orders as string[]
+      const pageNode = mustGet(resume, sourcePageId)
+      const orders = pageNode.children
       const oldIndex = orders.indexOf(activeSectionId)
       const newIndex = orders.indexOf(overSectionId)
       if (oldIndex < 0 || newIndex < 0 || oldIndex === newIndex)
         return
       const newOrders = arrayMove(orders, oldIndex, newIndex)
-      patch("reorder", ["page", "items", sourcePageId, "section"], newOrders)
+      patch.reorder(sourcePageId, newOrders)
     }
     else {
-      // 跨 page: remove + add (用户拍板两个 patch)
-      patch("item_remove", ["page", "items", sourcePageId, "section"], activeSectionId)
-      patch("item_add", ["page", "items", targetPageId, "section"], section)
+      const sectionNode = mustGet(resume, activeSectionId) as SectionNode
+      patch.remove(sourcePageId, activeSectionId)
+      patch.add(targetPageId, deepCloneNode(sectionNode))
     }
   }
 
-  /**
-   * @description 按 active 类型分流 collision:
-   *              - page 只撞 page
-   *              - section: 优先 pointerWithin (指针位置最准),
-   *                fallback 到 closestCorners 但 page-receive 优先于 section
-   *                (cursor 在 gap 时 page-receive 是用户意图的跨 page 目标)
-   */
   const collisionDetection: CollisionDetection = (args) => {
     const activeType = args.active.data.current?.type as DragType | undefined
 
@@ -207,15 +190,12 @@ export function useOptionsDrag() {
       const isSectionOrReceive = (id: UniqueIdentifier) =>
         String(id).startsWith(SECTION_PREFIX) || String(id).startsWith(RECEIVE_PREFIX)
 
-      // 第一优先: pointerWithin (指针在哪就是哪)
       const pointerHits = pointerWithin(args)
         .filter(c => c.id !== args.active.id)
         .filter(c => isSectionOrReceive(c.id))
       if (pointerHits.length > 0)
         return pointerHits
 
-      // Fallback: closestCorners, 但 page-receive 优先于 section
-      // (cursor 在 gap 时, page-receive 是正确的跨 page 目标)
       const cornerHits = closestCorners(args).filter(c => c.id !== args.active.id)
       const pageReceive = cornerHits.find(c => String(c.id).startsWith(RECEIVE_PREFIX))
       if (pageReceive)

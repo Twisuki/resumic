@@ -1,42 +1,42 @@
 "use client"
 
-import type { Page as PageModel, Section as SectionModel } from "@shared/model"
+import type { PageNode, SectionNode } from "@shared/model/node"
 import type { DragType } from "@/app/(main)/sections/right/options/use-options-drag"
 import { useDndContext } from "@dnd-kit/core"
 import { IconGripVertical } from "@tabler/icons-react"
 import Icon from "@/components/icon"
+import { useNode } from "@/hooks/node"
 import { cn } from "@/lib/utils"
 
 interface DragData {
   type?: DragType
-  page?: PageModel
-  section?: SectionModel
+  id?: string
   pageId?: string
+  index?: number
 }
 
-/**
- * @description DragOverlay 内容: 根据 active.data.current.type 分发 page/section 预览
- */
 export default function OptionsDragOverlay() {
   const { active } = useDndContext()
   if (!active)
     return null
 
   const data = active.data.current as DragData | undefined
-  if (!data?.type)
+  if (!data?.type || !data.id)
     return null
 
-  if (data.type === "page" && data.page) {
-    return <PagePreview page={data.page} />
+  if (data.type === "page") {
+    return <PagePreview id={data.id} index={data.index ?? 0} />
   }
-  if (data.type === "section" && data.section) {
-    return <SectionPreview section={data.section} />
+  if (data.type === "section") {
+    return <SectionPreview id={data.id} />
   }
   return null
 }
 
-function PagePreview({ page }: { page: PageModel }) {
-  const sectionCount = page.section.orders.length
+function PagePreview({ id, index }: { id: string, index: number }) {
+  const node = useNode(id) as PageNode | undefined
+  const sectionCount = node?.children.length ?? 0
+
   return (
     <div className={cn(
       "rounded-md border border-sidebar-border bg-card text-card-foreground shadow-xl",
@@ -47,6 +47,7 @@ function PagePreview({ page }: { page: PageModel }) {
         <IconGripVertical className="size-3.5 text-muted-foreground" />
         <span className="text-xs font-medium">
           分页
+          {index + 1}
         </span>
         <span className="text-xs text-muted-foreground">
           (
@@ -58,7 +59,14 @@ function PagePreview({ page }: { page: PageModel }) {
   )
 }
 
-function SectionPreview({ section }: { section: SectionModel }) {
+function SectionPreview({ id }: { id: string }) {
+  const node = useNode(id) as SectionNode | undefined
+
+  if (!node)
+    return null
+
+  const { icon, title } = node.self
+
   return (
     <div className={cn(
       "rounded-md border border-sidebar-border bg-card text-card-foreground shadow-xl",
@@ -67,11 +75,11 @@ function SectionPreview({ section }: { section: SectionModel }) {
     >
       <IconGripVertical className="size-3.5 text-muted-foreground shrink-0" />
       <Icon
-        name={section.icon}
+        name={icon}
         className="size-3.5 shrink-0 text-muted-foreground"
       />
       <span className="min-w-0 flex-1 truncate text-xs">
-        {section.title || <span className="text-muted-foreground italic">未命名章节</span>}
+        {title || <span className="text-muted-foreground italic">未命名章节</span>}
       </span>
     </div>
   )

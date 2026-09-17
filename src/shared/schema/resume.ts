@@ -1,52 +1,36 @@
 import type { Resume } from "@shared/model/resume"
 import { z } from "zod"
 
-function collection<T extends z.ZodType>(item: T) {
-  return z.object({
-    items: z.array(item),
-    orders: z.array(z.string()),
-  })
-}
-
 const avatarSchema = z.object({
   url: z.string(),
   uploadedAt: z.string(),
 })
 
 const detailSchema = z.object({
-  id: z.string(),
   icon: z.string(),
-  content: z.string(),
-})
-
-const contentLineSchema = z.object({
-  id: z.string(),
   content: z.string(),
 })
 
 const partSchema = z.object({
-  id: z.string(),
   title: z.string(),
   subtitle: z.string(),
   link: z.string(),
   date: z.string(),
-  content: collection(contentLineSchema),
+  content: z.string(),
 })
 
 const sectionSchema = z.object({
-  id: z.string(),
   icon: z.string(),
   title: z.string(),
-  part: collection(partSchema),
+  part: z.array(partSchema),
 })
 
 const pageSchema = z.object({
-  id: z.string(),
-  section: collection(sectionSchema),
+  section: z.array(sectionSchema),
 })
 
 /**
- * @description Resume 的 schema
+ * @description Resume 的 schema (纯数组形态)
  * @see Resume
  */
 export const resumeSchema: z.ZodType<Resume> = z.object({
@@ -59,6 +43,6 @@ export const resumeSchema: z.ZodType<Resume> = z.object({
   phone: z.string().optional(),
   email: z.string().optional(),
   avatar: avatarSchema.optional(),
-  detail: collection(detailSchema),
-  page: collection(pageSchema),
+  detail: z.array(detailSchema),
+  page: z.array(pageSchema),
 })

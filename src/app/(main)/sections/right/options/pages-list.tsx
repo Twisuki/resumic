@@ -1,50 +1,55 @@
 "use client"
 
+import type { PageNode, RootNode } from "@shared/model/node"
 import type { DragState } from "@/app/(main)/sections/right/options/use-options-drag"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { IconPlus } from "@tabler/icons-react"
 import PageCard from "@/app/(main)/sections/right/options/page-card"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/hooks/history"
-import { flatten } from "@/lib/collection"
+import { useNode } from "@/hooks/node"
+import { useResume } from "@/hooks/resume"
 import { genId } from "@/lib/id"
-import { useResumeStore } from "@/stores/resume"
 
 export default function PagesList({ drag }: Readonly<{ drag: DragState }>) {
-  const resume = useResumeStore(s => s.current)
-  const pages = resume ? flatten(resume.page) : []
+  const { resumeRootId } = useResume()
+  const root = useNode(resumeRootId ?? "") as RootNode | undefined
+  const pageIds = root?.children ?? []
+  const sortableIds = pageIds.map(pid => `page:${pid}`)
+
   const { patch } = useHistory()
 
-  // 用 string[] 喂给 SortableContext (dnd-kit 要求 UniqueIdentifier[])
-  const sortableIds = pages.map(p => `page:${p.id}`)
-
   function handleAddPage() {
-    patch("item_add", ["page"], {
+    if (!resumeRootId)
+      return
+    const newPage: PageNode = {
       id: genId(),
-      section: { items: [], orders: [] },
-    })
+      self: null,
+      children: [],
+    }
+    patch.add(resumeRootId, newPage)
   }
 
   return (
     <div className="p-2 flex flex-col gap-2">
-      {!resume && (
+      {!resumeRootId && (
         <div className="py-8 text-center text-xs text-muted-foreground">
           未加载简历
         </div>
       )}
 
-      {resume && pages.length === 0 && (
+      {resumeRootId && pageIds.length === 0 && (
         <div className="py-8 text-center text-xs text-muted-foreground">
           还没有分页, 点下方"新建分页"
         </div>
       )}
 
-      {pages.length > 0 && (
+      {pageIds.length > 0 && (
         <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
-          {pages.map((page, i) => (
+          {pageIds.map((pid, i) => (
             <PageCard
-              key={page.id}
-              page={page}
+              key={pid}
+              id={pid}
               index={i}
               drag={drag}
             />
@@ -52,7 +57,7 @@ export default function PagesList({ drag }: Readonly<{ drag: DragState }>) {
         </SortableContext>
       )}
 
-      {resume && (
+      {resumeRootId && (
         <Button
           variant="outline"
           className="w-full justify-start gap-2 border-dashed text-muted-foreground"

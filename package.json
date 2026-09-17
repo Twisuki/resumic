@@ -27,6 +27,7 @@
     "clsx": "^2.1.1",
     "cn": "^0.2.6",
     "html-react-parser": "^6.1.7",
+    "immer": "^11.1.18",
     "jose": "^6.2.12",
     "lucide-react": "^1.37.0",
     "markdown-it": "^15.0.2",

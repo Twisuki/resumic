@@ -1,12 +1,9 @@
 import type { Avatar } from "@shared/model/avatar"
-import type { Collection } from "@shared/model/collection"
-import type { RichContent } from "@shared/model/rich-content"
 
 /**
  * @description Profile 自定义信息项目
  */
 export interface Detail {
-  id: string
   icon: string
   content: string
 }
@@ -22,34 +19,34 @@ export interface Profile {
   phone?: string
   email?: string
   avatar?: Avatar
-  detail: Collection<Detail>
+  detail: Detail[]
 }
 
 /**
  * @description 简历章节模块
  */
 export interface Part {
-  id: string
   title: string
   subtitle: string
   link: string
   date: string
-  content: RichContent
+  content: string
 }
 
 /**
  * @description 简历章节
  */
 export interface Section {
-  id: string
   icon: string
   title: string
-  part: Collection<Part>
+  part: Part[]
 }
 
+/**
+ * @description 简历分页
+ */
 export interface Page {
-  id: string
-  section: Collection<Section>
+  section: Section[]
 }
 
 /**
@@ -58,5 +55,5 @@ export interface Page {
 export interface Resume extends Profile {
   title: string
   zoom: number
-  page: Collection<Page>
+  page: Page[]
 }

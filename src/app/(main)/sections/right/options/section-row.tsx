@@ -1,6 +1,6 @@
 "use client"
 
-import type { Section as SectionModel } from "@shared/model"
+import type { SectionNode } from "@shared/model/node"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { IconGripVertical, IconPencil } from "@tabler/icons-react"
@@ -8,26 +8,33 @@ import { useState } from "react"
 import SectionEditDialog from "@/app/(main)/sections/right/options/section-edit-dialog"
 import Icon from "@/components/icon"
 import { Button } from "@/components/ui/button"
+import { useNode } from "@/hooks/node"
 import { cn } from "@/lib/utils"
 
 export default function SectionRow({
-  section,
+  id,
   pageId,
 }: Readonly<{
-  section: SectionModel
+  id: string
   pageId: string
 }>) {
+  const node = useNode(id) as SectionNode | undefined
   const [editOpen, setEditOpen] = useState(false)
 
   const sortable = useSortable({
-    id: `section:${section.id}`,
-    data: { type: "section", pageId, section },
+    id: `section:${id}`,
+    data: { type: "section", pageId, id },
   })
 
   const style = {
     transform: CSS.Transform.toString(sortable.transform),
     transition: sortable.transition,
   }
+
+  if (!node)
+    return null
+
+  const { icon, title } = node.self
 
   return (
     <>
@@ -39,7 +46,6 @@ export default function SectionRow({
           sortable.isDragging && "opacity-30",
         )}
       >
-        {/* drag handle, 只这里接 sortable listeners */}
         <button
           type="button"
           aria-label="拖拽章节"
@@ -50,16 +56,14 @@ export default function SectionRow({
           <IconGripVertical className="size-3.5" />
         </button>
 
-        {/* icon + title */}
         <Icon
-          name={section.icon}
+          name={icon}
           className="size-3.5 shrink-0 text-muted-foreground"
         />
         <span className="min-w-0 flex-1 truncate text-xs">
-          {section.title || <span className="text-muted-foreground italic">未命名章节</span>}
+          {title || <span className="text-muted-foreground italic">未命名章节</span>}
         </span>
 
-        {/* edit, 常驻 (移动端不能靠 hover) */}
         <Button
           variant="ghost"
           size="icon-xs"
@@ -74,7 +78,7 @@ export default function SectionRow({
       <SectionEditDialog
         open={editOpen}
         onOpenChange={setEditOpen}
-        sectionId={section.id}
+        sectionId={id}
       />
     </>
   )

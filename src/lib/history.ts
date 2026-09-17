@@ -1,51 +1,45 @@
-import type { Resume } from "@shared/model"
 import type { History, Patch } from "@shared/model/patch"
 import { KEEP_AFTER_SAVE } from "@/config/history"
-import { applyPatch } from "@/lib/patch/apply"
-import { inverse } from "@/lib/patch/inverse"
 
 /**
- * @description 提交 patch, 应用到 resume 并推入 history, 清空 future
+ * @description 提交 patch 到 history 栈, 清空 future
  */
-export function commit(resume: Resume, patch: Patch, history: History): { resume: Resume, history: History } {
+export function commit(history: History, newPatch: Patch): History {
   return {
-    resume: applyPatch(resume, patch),
-    history: {
-      past: [...history.past, patch],
-      future: [],
-    },
+    past: [...history.past, newPatch],
+    future: [],
   }
 }
 
 /**
- * @description 撤销最近一条, 应用 inverse 并移到 future
+ * @description 撤销最近一条, 移到 future, 返回该 patch
  */
-export function undo(resume: Resume, history: History): { resume: Resume, history: History } | null {
+export function undo(history: History): { history: History, patch: Patch } | null {
   if (history.past.length === 0)
     return null
   const last = history.past[history.past.length - 1]
   return {
-    resume: applyPatch(resume, inverse(last)),
     history: {
       past: history.past.slice(0, -1),
       future: [...history.future, last],
     },
+    patch: last,
   }
 }
 
 /**
- * @description 重做最近一条, 应用原 patch 并移回 past
+ * @description 重做最近一条, 推回 past, 返回该 patch
  */
-export function redo(resume: Resume, history: History): { resume: Resume, history: History } | null {
+export function redo(history: History): { history: History, patch: Patch } | null {
   if (history.future.length === 0)
     return null
   const last = history.future[history.future.length - 1]
   return {
-    resume: applyPatch(resume, last),
     history: {
       past: [...history.past, last],
       future: history.future.slice(0, -1),
     },
+    patch: last,
   }
 }
 

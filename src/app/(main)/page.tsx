@@ -9,13 +9,13 @@ import Navbar from "@/app/(main)/sections/navbar"
 import Right from "@/app/(main)/sections/right"
 import { useHistory } from "@/hooks/history"
 import { useResumeUpdate } from "@/hooks/query/resume"
-import { useResumeStore } from "@/stores/resume"
+import { useResume } from "@/hooks/resume"
 
 export default function Page() {
   // 自动保存: history store 提交阈值达 50 时调 saveFn 全量 PUT
   const update = useResumeUpdate()
   const { registerSave, finishSave } = useHistory()
-  const currentId = useResumeStore(s => s.currentId)
+  const currentId = useResume().id
 
   // ref 保持最新值, 避免 registerSave 闭包过期 (currentId / mutation 切换简历时可能变)
   const ctxRef = useRef({ currentId, update, finishSave })

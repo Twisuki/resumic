@@ -1,16 +1,22 @@
-import type { RichContent as RichContentModel } from "@shared/model"
+import type { LineNode } from "@shared/model/node"
 import Markdown from "@/components/markdown/display"
-import { flatten } from "@/lib/collection"
+import { useResumeStore } from "@/stores/resume"
 
-/**
- * @description 富文本展示组件, 接收 RichContent Collection 结构, flatten 展平后传入 markdown 层渲染
- */
 export default function RichContent({
-  value,
+  ids,
   className,
 }: Readonly<{
-  value: RichContentModel
+  ids: string[]
   className?: string
 }>) {
-  return <Markdown source={flatten(value).map(line => line.content).join("")} className={className} />
+  const trees = useResumeStore.getState()
+
+  const source = ids
+    .map((id) => {
+      const node = trees.profile?.nodes.get(id) ?? trees.resume?.nodes.get(id)
+      return (node as LineNode | undefined)?.self.content ?? ""
+    })
+    .join("")
+
+  return <Markdown source={source} className={className} />
 }

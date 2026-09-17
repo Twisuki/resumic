@@ -1,5 +1,6 @@
 "use client"
 
+import type { RootNode } from "@shared/model/node"
 import { DndContext, DragOverlay } from "@dnd-kit/core"
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import { IconDeviceFloppy, IconPencil } from "@tabler/icons-react"
@@ -13,31 +14,25 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Slider } from "@/components/ui/slider"
 import { useHistory } from "@/hooks/history"
-import { useResumeUpdate } from "@/hooks/query/resume"
-import { useResumeStore } from "@/stores/resume"
+import { useNode } from "@/hooks/node"
+import { useResume } from "@/hooks/resume"
 
 export default function Options() {
-  const zoom = useResumeStore(s => s.current?.zoom ?? 1)
-  const { patch, isSaving } = useHistory()
+  const { resumeRootId } = useResume()
+  const root = useNode(resumeRootId ?? "") as RootNode | undefined
+  const zoom = root?.self.zoom ?? 1
+
+  const { patch, save, isSaving } = useHistory()
   const [profileOpen, setProfileOpen] = useState(false)
 
-  // 手动保存: 全量 PUT 当前快照
-  const update = useResumeUpdate()
-  const currentId = useResumeStore(s => s.currentId)
-  const current = useResumeStore(s => s.current)
+  const currentId = useResume().id
 
   function handleSave() {
-    if (!currentId || !current) {
+    if (!currentId) {
       toast.error("没有可保存的简历")
       return
     }
-    update.mutate(
-      { id: currentId, data: { ...current, autosave: false } },
-      {
-        onSuccess: () => toast.success("已保存"),
-        onError: e => toast.error(`保存失败: ${e.message}`),
-      },
-    )
+    save()
   }
 
   const {
@@ -71,7 +66,8 @@ export default function Options() {
       clearTimeout(debounceRef.current)
     }
     debounceRef.current = setTimeout(() => {
-      patch("field_set", ["zoom"], v)
+      if (resumeRootId)
+        patch.update(resumeRootId, "zoom", v)
     }, 150)
   }
 
@@ -122,10 +118,10 @@ export default function Options() {
             <Button
               className="flex-1 justify-start gap-2"
               onClick={handleSave}
-              disabled={!currentId || update.isPending || isSaving}
+              disabled={!currentId || isSaving}
             >
               <IconDeviceFloppy className="size-4" />
-              <span>{update.isPending || isSaving ? "保存中..." : "保存"}</span>
+              <span>{isSaving ? "保存中..." : "保存"}</span>
             </Button>
           </div>
         </div>

@@ -1,14 +1,16 @@
-import type { Section as SectionModel } from "@shared/model"
+import type { SectionNode } from "@shared/model/node"
 import Icon from "@/components/icon"
 import Part from "@/components/resume/part"
-import { flatten } from "@/lib/collection"
+import { useNode } from "@/hooks/node"
 
-export default function Section({
-  icon,
-  title,
-  part,
-}: Readonly<SectionModel>) {
-  const parts = flatten(part)
+export default function Section({ id }: Readonly<{ id: string }>) {
+  const node = useNode(id) as SectionNode | undefined
+
+  if (!node)
+    return null
+
+  const { icon, title } = node.self
+  const partIds = node.children
 
   return (
     <section className="flex flex-col gap-2">
@@ -17,11 +19,8 @@ export default function Section({
         <h2 className="text-2xl font-bold">{title}</h2>
       </header>
 
-      {parts.map(p => (
-        <Part
-          key={p.id}
-          {...p}
-        />
+      {partIds.map(id => (
+        <Part key={id} id={id} />
       ))}
     </section>
   )

@@ -3,15 +3,12 @@ import ErrorState from "@/app/(main)/sections/right/files/error-state"
 import Item from "@/app/(main)/sections/right/files/item"
 import ListSkeleton from "@/app/(main)/sections/right/files/skeleton"
 import { useResumeList, useResumeOpen } from "@/hooks/query/resume"
-import { useResumeStore } from "@/stores/resume"
+import { useResume } from "@/hooks/resume"
 
-/**
- * @description 简历列表, 点击拉取该份简历, 高亮当前打开项
- */
 export default function Files() {
   const list = useResumeList()
   const open = useResumeOpen()
-  const currentId = useResumeStore(state => state.currentId)
+  const currentId = useResume().id
 
   return (
     <div className="w-full h-72 shrink-0 flex flex-col border-b border-sidebar-border">

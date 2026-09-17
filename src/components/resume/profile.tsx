@@ -1,21 +1,21 @@
-import type { Profile as ProfileModel } from "@shared/model"
+import type { ProfileNode } from "@shared/model/node"
 import { IconMail, IconPhone, IconUser } from "@tabler/icons-react"
 import Image from "next/image"
 import Detail from "@/components/resume/detail"
-import { flatten } from "@/lib/collection"
+import { useNode } from "@/hooks/node"
+import { useResume } from "@/hooks/resume"
 
-export default function Profile({
-  name,
-  headline,
-  gender,
-  age,
-  phone,
-  email,
-  avatar,
-  detail,
-}: Readonly<ProfileModel>) {
+export default function Profile() {
+  const { profileRootId } = useResume()
+  const node = useNode(profileRootId ?? "") as ProfileNode | undefined
+
+  if (!node)
+    return null
+
+  const { name, headline, gender, age, phone, email, avatar } = node.self
+  const detailIds = node.children
+
   const baseInfo = [gender, age].filter(Boolean).join(" | ")
-  const details = flatten(detail)
 
   return (
     <section className="flex items-center gap-6">
@@ -46,11 +46,8 @@ export default function Profile({
           </div>
 
           <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
-            {details.map(d => (
-              <Detail
-                key={d.id}
-                {...d}
-              />
+            {detailIds.map(id => (
+              <Detail key={id} id={id} />
             ))}
           </div>
         </div>

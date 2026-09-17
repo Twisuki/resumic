@@ -1,13 +1,15 @@
-import type { Part as PartModel } from "@shared/model"
+import type { PartNode } from "@shared/model/node"
 import { RichContent } from "@/components/rich-content"
+import { useNode } from "@/hooks/node"
 
-export default function Part({
-  title,
-  subtitle,
-  link,
-  date,
-  content,
-}: Readonly<PartModel>) {
+export default function Part({ id }: Readonly<{ id: string }>) {
+  const node = useNode(id) as PartNode | undefined
+
+  if (!node)
+    return null
+
+  const { title, subtitle, link, date } = node.self
+
   const hasHeader = Boolean(title || subtitle || link || date)
 
   return (
@@ -26,7 +28,7 @@ export default function Part({
       )}
 
       <RichContent
-        value={content}
+        ids={node.children}
         className="space-y-2"
       />
     </section>

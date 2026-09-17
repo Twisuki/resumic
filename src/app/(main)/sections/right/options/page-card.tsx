@@ -1,6 +1,6 @@
 "use client"
 
-import type { Page as PageModel } from "@shared/model"
+import type { PageNode, SectionNode } from "@shared/model/node"
 import type { DragState } from "@/app/(main)/sections/right/options/use-options-drag"
 import { useDroppable } from "@dnd-kit/core"
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
@@ -11,48 +11,50 @@ import { toast } from "sonner"
 import SectionRow from "@/app/(main)/sections/right/options/section-row"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/hooks/history"
-import { flatten } from "@/lib/collection"
+import { useNode } from "@/hooks/node"
+import { useResume } from "@/hooks/resume"
 import { genId } from "@/lib/id"
 import { cn } from "@/lib/utils"
 
 export default function PageCard({
-  page,
+  id,
   index,
   drag,
 }: Readonly<{
-  page: PageModel
+  id: string
   index: number
   drag: DragState
 }>) {
-  const sections = flatten(page.section)
-  const sectionSortableIds = sections.map(s => `section:${s.id}`)
+  const node = useNode(id) as PageNode | undefined
+  const sectionIds = node?.children ?? []
+  const sectionSortableIds = sectionIds.map(sid => `section:${sid}`)
   const [collapsed, setCollapsed] = useState(false)
 
-  // 跨 page 拖入: 检测 sections 增长, 折叠页自动展开让用户看到新章节
-  const prevSectionCountRef = useRef(sections.length)
+  const prevSectionCountRef = useRef(sectionIds.length)
   useEffect(() => {
-    if (sections.length > prevSectionCountRef.current) {
+    if (sectionIds.length > prevSectionCountRef.current) {
       setCollapsed(false)
     }
-    prevSectionCountRef.current = sections.length
-  }, [sections.length])
+    prevSectionCountRef.current = sectionIds.length
+  }, [sectionIds.length])
+
   const { patch } = useHistory()
+  const { resumeRootId } = useResume()
 
   const sortable = useSortable({
-    id: `page:${page.id}`,
-    data: { type: "page", pageId: page.id, page, index },
+    id: `page:${id}`,
+    data: { type: "page", pageId: id, id, index },
   })
 
-  // 拖 section 中且不是源 page → 所有目标 page 都直接显示接收蒙版
   const isReceiving
     = drag.activeType === "section"
       && drag.sourcePageId !== null
-      && drag.sourcePageId !== page.id
+      && drag.sourcePageId !== id
 
   const droppable = useDroppable({
-    id: `page-receive:${page.id}`,
+    id: `page-receive:${id}`,
     disabled: !isReceiving,
-    data: { type: "page-receive", pageId: page.id },
+    data: { type: "page-receive", pageId: id },
   })
 
   const style = {
@@ -61,25 +63,28 @@ export default function PageCard({
   }
 
   function handleAddSection() {
-    patch(
-      "item_add",
-      ["page", "items", page.id, "section"],
-      {
-        id: genId(),
-        icon: "star",
-        title: "新章节",
-        part: { items: [], orders: [] },
-      },
-    )
+    if (!resumeRootId)
+      return
+    const newSection: SectionNode = {
+      id: genId(),
+      self: { icon: "star", title: "新章节" },
+      children: [],
+    }
+    patch.add(id, newSection)
   }
 
   function handleDeletePage() {
-    if (sections.length > 0) {
+    if (sectionIds.length > 0) {
       toast.warning("分页内还有章节, 请先删除或移走章节")
       return
     }
-    patch("item_remove", ["page"], page.id)
+    if (!resumeRootId)
+      return
+    patch.remove(resumeRootId, id)
   }
+
+  if (!node)
+    return null
 
   return (
     <div
@@ -109,7 +114,7 @@ export default function PageCard({
 
           <span className="text-xs text-muted-foreground">
             (
-            {sections.length}
+            {sectionIds.length}
             )
           </span>
 
@@ -137,19 +142,19 @@ export default function PageCard({
 
         {!collapsed && (
           <div className="p-1.5 flex flex-col gap-1">
-            {sections.length === 0 && (
+            {sectionIds.length === 0 && (
               <div className="py-3 text-center text-xs text-muted-foreground">
                 还没有章节
               </div>
             )}
 
-            {sections.length > 0 && (
+            {sectionIds.length > 0 && (
               <SortableContext items={sectionSortableIds} strategy={verticalListSortingStrategy}>
-                {sections.map(s => (
+                {sectionIds.map(sid => (
                   <SectionRow
-                    key={s.id}
-                    section={s}
-                    pageId={page.id}
+                    key={sid}
+                    id={sid}
+                    pageId={id}
                   />
                 ))}
               </SortableContext>
@@ -168,7 +173,6 @@ export default function PageCard({
         )}
       </div>
 
-      {/* 接收态蒙版: 拖 section 中且非源 page, 所有 page 都展示 */}
       {isReceiving && (
         collapsed
           ? (
