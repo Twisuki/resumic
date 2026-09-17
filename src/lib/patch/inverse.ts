@@ -3,7 +3,7 @@ import type { Patch } from "@shared/model/patch"
 /**
  * @description 反演 patch
  */
-export function inverse(patch: Patch): Patch {
+export function inversePatch(patch: Patch): Patch {
   switch (patch.type) {
     case "UPDATE":
       return {

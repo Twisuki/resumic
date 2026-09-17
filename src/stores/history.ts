@@ -4,12 +4,12 @@ import type { Resume } from "@shared/model/resume"
 import { create } from "zustand"
 import { SAVE_THRESHOLD } from "@/config/history"
 import {
-  commit as commitHistory,
-  redo as redoHistory,
+  commit as commitFn,
+  redo as redoFn,
   truncateAfterSave,
-  undo as undoHistory,
+  undo as undoFn,
 } from "@/lib/history"
-import { patch as libPatch } from "@/lib/patch"
+import { applyPatch, inversePatch } from "@/lib/patch"
 import { deserialize } from "@/lib/tree"
 import { useResumeStore } from "@/stores/resume"
 
@@ -30,56 +30,28 @@ export interface HistoryStore {
   finishSave: (success: boolean) => void
 }
 
+type RoutedTree = "profile" | "resume"
+
 /**
- * @description 对应方向应用 patch 到正确树, 返回新树 (只含被改的那棵)
+ * @description 把 patch 路由到正确的树
  */
-function applyToTrees(
-  profile: Tree,
-  resume: Tree,
-  p: Patch,
-  direction: "inverse" | "forward",
-): { profile?: Tree, resume?: Tree } {
-  const treeKey = p.type === "UPDATE"
-    ? (profile.nodes.has(p.id) ? "profile" : "resume")
-    : (p.id === profile.rootId ? "profile" : "resume")
-
-  const tree = treeKey === "profile" ? profile : resume
-
-  let newTree: Tree
-  if (direction === "inverse") {
-    switch (p.type) {
-      case "UPDATE":
-        newTree = libPatch.update(tree, p.id, p.payload, p.before)!.tree
-        break
-      case "ADD":
-        newTree = libPatch.remove(tree, p.id, p.payload.id)!.tree
-        break
-      case "REMOVE":
-        newTree = libPatch.add(tree, p.id, p.payload).tree
-        break
-      case "REORDER":
-        newTree = libPatch.reorder(tree, p.id, p.before)!.tree
-        break
-    }
+function routePatch(profile: Tree, resume: Tree, p: Patch): { which: RoutedTree, tree: Tree } {
+  if (p.type === "UPDATE") {
+    return profile.nodes.has(p.id)
+      ? { which: "profile", tree: profile }
+      : { which: "resume", tree: resume }
   }
-  else {
-    switch (p.type) {
-      case "UPDATE":
-        newTree = libPatch.update(tree, p.id, p.payload, p.after)!.tree
-        break
-      case "ADD":
-        newTree = libPatch.add(tree, p.id, p.payload).tree
-        break
-      case "REMOVE":
-        newTree = libPatch.remove(tree, p.id, p.payload.id)!.tree
-        break
-      case "REORDER":
-        newTree = libPatch.reorder(tree, p.id, p.after)!.tree
-        break
-    }
-  }
+  return p.id === profile.rootId
+    ? { which: "profile", tree: profile }
+    : { which: "resume", tree: resume }
+}
 
-  return { [treeKey]: newTree }
+/**
+ * @description 应用 patch 到正确的树并返回新值
+ */
+function computeHistoryPatch(profile: Tree, resume: Tree, patch: Patch): { which: RoutedTree, tree: Tree } {
+  const { which, tree } = routePatch(profile, resume, patch)
+  return { which, tree: applyPatch(tree, patch) }
 }
 
 export const useHistoryStore = create<HistoryStore>()((set, get) => ({
@@ -94,7 +66,7 @@ export const useHistoryStore = create<HistoryStore>()((set, get) => ({
    * @description 推入 history, 清空 future, 阈值触发自动保存
    */
   commit(patch) {
-    set(state => ({ history: commitHistory(state.history, patch) }))
+    set(state => ({ history: commitFn(state.history, patch) }))
 
     const { history, isSaving, saveFn } = get()
     if (history.past.length >= SAVE_THRESHOLD && !isSaving && saveFn) {
@@ -110,16 +82,16 @@ export const useHistoryStore = create<HistoryStore>()((set, get) => ({
    * @description 撤销最近一条: 应用 inverse 到树 + 移到 future
    */
   undo() {
-    const result = undoHistory(get().history)
+    const result = undoFn(get().history)
     if (!result)
       return
 
-    const trees = useResumeStore.getState()
-    if (!trees.profile || !trees.resume)
+    const { profile, resume } = useResumeStore.getState()
+    if (!profile || !resume)
       return
 
-    const newTrees = applyToTrees(trees.profile, trees.resume, result.patch, "inverse")
-    useResumeStore.setState({ ...trees, ...newTrees })
+    const { which, tree } = computeHistoryPatch(profile, resume, inversePatch(result.patch))
+    useResumeStore.setState(which === "profile" ? { profile: tree } : { resume: tree })
     set({ history: result.history })
   },
 
@@ -127,16 +99,16 @@ export const useHistoryStore = create<HistoryStore>()((set, get) => ({
    * @description 重做最近一条: 应用 forward 到树 + 推回 past
    */
   redo() {
-    const result = redoHistory(get().history)
+    const result = redoFn(get().history)
     if (!result)
       return
 
-    const trees = useResumeStore.getState()
-    if (!trees.profile || !trees.resume)
+    const { profile, resume } = useResumeStore.getState()
+    if (!profile || !resume)
       return
 
-    const newTrees = applyToTrees(trees.profile, trees.resume, result.patch, "forward")
-    useResumeStore.setState({ ...trees, ...newTrees })
+    const { which, tree } = computeHistoryPatch(profile, resume, result.patch)
+    useResumeStore.setState(which === "profile" ? { profile: tree } : { resume: tree })
     set({ history: result.history })
   },
 
