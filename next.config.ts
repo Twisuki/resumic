@@ -8,6 +8,7 @@ export default (phase: PHASE_TYPE): NextConfig => ({
     remotePatterns: [
       { protocol: "https", hostname: "github.com" },
       { protocol: "https", hostname: "avatars.githubusercontent.com" },
+      { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
     ],
   },
 })

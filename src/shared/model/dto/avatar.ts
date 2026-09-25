@@ -1,13 +1,9 @@
-export interface UploadAvatarResponse {
+/**
+ * @description 头像槽位
+ */
+export interface AvatarSlotResponse {
+  id: number
   url: string
-  uploadedAt: string
 }
 
-export interface DeleteAvatarRequest {
-  url: string
-}
-
-export interface AvatarQuotaResponse {
-  bytes: number
-  limit: number
-}
+export type ListAvatarsResponse = AvatarSlotResponse[]

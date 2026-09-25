@@ -24,6 +24,11 @@ const schema = z.object({
    */
   APP_URL: z.url().default("http://localhost:3000"),
 
+  /**
+   * @description Vercel Blob 读写 token, 头像上传用
+   */
+  BLOB_READ_WRITE_TOKEN: z.string().min(1),
+
   GH_CLIENT: z.object({
     /**
      * @description GitHub OAuth client id
@@ -86,11 +91,6 @@ const schema = z.object({
      */
     OPENAI_BASE_URL: z.string().default(""),
   }),
-
-  /**
-   * @description 头像上传配额 (字节), 默认 50 MiB
-   */
-  AVATAR_QUOTA_BYTES: z.coerce.number().int().positive().default(52428800),
 })
 
 /**
@@ -101,7 +101,7 @@ function nest(raw: NodeJS.ProcessEnv) {
     NODE_ENV: raw.NODE_ENV,
     DATABASE_URL: raw.DATABASE_URL,
     APP_URL: raw.APP_URL,
-    AVATAR_QUOTA_BYTES: raw.AVATAR_QUOTA_BYTES,
+    BLOB_READ_WRITE_TOKEN: raw.BLOB_READ_WRITE_TOKEN,
     GH_CLIENT: {
       ID: raw.GH_CLIENT_ID,
       SECRET: raw.GH_CLIENT_SECRET,

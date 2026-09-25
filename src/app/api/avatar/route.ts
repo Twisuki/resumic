@@ -1,24 +1,17 @@
 import type { NextRequest } from "next/server"
-import { ok } from "@server/api"
+import { controller } from "@server/controller"
 import { NextResponse } from "next/server"
 
 /**
- * @description 上传头像文件
- */
-export async function POST(_req: NextRequest, _ctx: RouteContext<"/api/avatar">): Promise<NextResponse> {
-  return NextResponse.json(ok(null))
-}
-
-/**
- * @description 删除已上传的头像
- */
-export async function DELETE(_req: NextRequest, _ctx: RouteContext<"/api/avatar">): Promise<NextResponse> {
-  return NextResponse.json(ok(null))
-}
-
-/**
- * @description 查看头像配额
+ * @description 列出当前用户的头像槽位
  */
 export async function GET(_req: NextRequest, _ctx: RouteContext<"/api/avatar">): Promise<NextResponse> {
-  return NextResponse.json(ok(null))
+  return NextResponse.json(await controller.avatar.listAvatars())
+}
+
+/**
+ * @description 上传新头像槽位 (multipart: file)
+ */
+export async function POST(req: NextRequest, _ctx: RouteContext<"/api/avatar">): Promise<NextResponse> {
+  return NextResponse.json(await controller.avatar.uploadAvatar(await req.formData()))
 }

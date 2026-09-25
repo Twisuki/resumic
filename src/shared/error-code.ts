@@ -16,6 +16,13 @@ export const ErrorCode = {
   Resume: {
     NotFound: 30001,
   },
+  Avatar: {
+    NotFound: 50001,
+    TooLarge: 50002,
+    TooMany: 50003,
+    UnsupportedType: 50004,
+    Forbidden: 50005,
+  },
   AI: {
     QuotaExhausted: 40001,
     UpstreamError: 40002,
