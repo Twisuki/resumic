@@ -133,9 +133,9 @@ export default function Options() {
         <DragOverlay>
           <OptionsDragOverlay />
         </DragOverlay>
-
-        <ProfileEditDialog open={profileOpen} onOpenChange={setProfileOpen} />
       </DndContext>
+
+      <ProfileEditDialog open={profileOpen} onOpenChange={setProfileOpen} />
     </div>
   )
 }

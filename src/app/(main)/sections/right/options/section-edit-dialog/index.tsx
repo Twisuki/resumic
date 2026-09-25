@@ -1,13 +1,18 @@
 "use client"
 
+import BaseInfo from "@/app/(main)/sections/right/options/section-edit-dialog/base-info"
+import PartSection from "@/app/(main)/sections/right/options/section-edit-dialog/part-section"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Separator } from "@/components/ui/separator"
 
+/**
+ * @description 编辑章节弹窗
+ */
 export default function SectionEditDialog({
   open,
   onOpenChange,
@@ -19,20 +24,15 @@ export default function SectionEditDialog({
 }>) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>编辑章节</DialogTitle>
-          <DialogDescription>
-            id:
-            {" "}
-            {sectionId}
-            {" "}
-            · icon / title / part 字段编辑 (后续设计)
-          </DialogDescription>
         </DialogHeader>
 
-        <div className="py-8 text-center text-sm text-muted-foreground">
-          编辑表单待设计
+        <div className="flex max-h-[70vh] flex-col gap-4 overflow-y-auto pr-1">
+          <BaseInfo id={sectionId} />
+          <Separator />
+          <PartSection id={sectionId} />
         </div>
       </DialogContent>
     </Dialog>
