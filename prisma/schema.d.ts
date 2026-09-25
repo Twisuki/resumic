@@ -33,7 +33,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'5a67d430101bdd7ee21be71552a3a8e1468af2a9154efe35797bec879aa4376a'>;
+  StorageHashBase<'9f7b009c047f212dc6fdee29936b72ecdfe5284d4ada6f86984e8b05b95ab9ec'>;
 export type ExecutionHash =
   ExecutionHashBase<'5840b31f308379226ef4bc0729c6c48a7c2b85da32f6a5040812eb2bd63c881d'>;
 export type ProfileHash =
@@ -241,6 +241,11 @@ type DefaultLiteralValue<CodecId extends string, Encoded> = CodecId extends keyo
 
 export type FieldOutputTypes = {
   readonly public: {
+    readonly Avatar: {
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly userId: CodecTypes['pg/int4@1']['output'];
+      readonly url: CodecTypes['pg/text@1']['output'];
+    };
     readonly Resume: {
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly userId: CodecTypes['pg/int4@1']['output'];
@@ -258,12 +263,16 @@ export type FieldOutputTypes = {
       readonly aiDate: CodecTypes['pg/date-string@1']['output'] | null;
       readonly aiKey: CodecTypes['pg/text@1']['output'] | null;
       readonly aiModel: CodecTypes['pg/text@1']['output'] | null;
-      readonly avatarBytes: CodecTypes['pg/int8@1']['output'];
     };
   };
 };
 export type FieldInputTypes = {
   readonly public: {
+    readonly Avatar: {
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly userId: CodecTypes['pg/int4@1']['input'];
+      readonly url: CodecTypes['pg/text@1']['input'];
+    };
     readonly Resume: {
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly userId: CodecTypes['pg/int4@1']['input'];
@@ -281,12 +290,16 @@ export type FieldInputTypes = {
       readonly aiDate: CodecTypes['pg/date-string@1']['input'] | null;
       readonly aiKey: CodecTypes['pg/text@1']['input'] | null;
       readonly aiModel: CodecTypes['pg/text@1']['input'] | null;
-      readonly avatarBytes: CodecTypes['pg/int8@1']['input'];
     };
   };
 };
 export type StorageColumnTypes = {
   readonly public: {
+    readonly avatar: {
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly url: CodecTypes['pg/text@1']['output'];
+      readonly userId: CodecTypes['pg/int4@1']['output'];
+    };
     readonly resume: {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly data: CodecTypes['pg/json@1']['output'];
@@ -299,7 +312,6 @@ export type StorageColumnTypes = {
       readonly aiDate: CodecTypes['pg/date-string@1']['output'] | null;
       readonly aiKey: CodecTypes['pg/text@1']['output'] | null;
       readonly aiModel: CodecTypes['pg/text@1']['output'] | null;
-      readonly avatarBytes: CodecTypes['pg/int8@1']['output'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly github: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
@@ -310,6 +322,11 @@ export type StorageColumnTypes = {
 };
 export type StorageColumnInputTypes = {
   readonly public: {
+    readonly avatar: {
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly url: CodecTypes['pg/text@1']['input'];
+      readonly userId: CodecTypes['pg/int4@1']['input'];
+    };
     readonly resume: {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly data: CodecTypes['pg/json@1']['input'];
@@ -322,7 +339,6 @@ export type StorageColumnInputTypes = {
       readonly aiDate: CodecTypes['pg/date-string@1']['input'] | null;
       readonly aiKey: CodecTypes['pg/text@1']['input'] | null;
       readonly aiModel: CodecTypes['pg/text@1']['input'] | null;
-      readonly avatarBytes: CodecTypes['pg/int8@1']['input'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly github: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
@@ -349,6 +365,53 @@ type ContractBase = Omit<
         readonly kind: 'postgres-schema';
         readonly entries: {
           readonly table: {
+            readonly avatar: {
+              columns: {
+                readonly id: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                };
+                readonly userId: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly url: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [{ readonly columns: readonly ['url'] }];
+              indexes: readonly [
+                {
+                  readonly name: 'avatar_userId_idx_a489d58a';
+                  readonly prefix: 'avatar_userId_idx';
+                  readonly columns: readonly ['userId'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'avatar';
+                    readonly columns: readonly ['userId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'user';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
             readonly resume: {
               columns: {
                 readonly id: {
@@ -467,15 +530,6 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/text@1';
                   readonly nullable: true;
                 };
-                readonly avatarBytes: {
-                  readonly nativeType: 'int8';
-                  readonly codecId: 'pg/int8@1';
-                  readonly nullable: false;
-                  readonly default: {
-                    readonly kind: 'literal';
-                    readonly value: DefaultLiteralValue<'pg/int8@1', '0'>;
-                  };
-                };
               };
               primaryKey: { readonly columns: readonly ['id'] };
               uniques: readonly [{ readonly columns: readonly ['github'] }];
@@ -494,12 +548,48 @@ type ContractBase = Omit<
   readonly targetFamily: 'sql';
   readonly roots: {
     readonly user: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+    readonly avatar: { readonly namespace: 'public' & NamespaceId; readonly model: 'Avatar' };
     readonly resume: { readonly namespace: 'public' & NamespaceId; readonly model: 'Resume' };
   };
   readonly domain: {
     readonly namespaces: {
       readonly public: {
         readonly models: {
+          readonly Avatar: {
+            readonly fields: {
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly userId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly url: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+            };
+            readonly relations: {
+              readonly user: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly on: {
+                  readonly localFields: readonly ['userId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'avatar';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly id: { readonly column: 'id' };
+                readonly userId: { readonly column: 'userId' };
+                readonly url: { readonly column: 'url' };
+              };
+            };
+          };
           readonly Resume: {
             readonly fields: {
               readonly id: {
@@ -592,12 +682,19 @@ type ContractBase = Omit<
                 readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
-              readonly avatarBytes: {
-                readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int8@1' };
-              };
             };
             readonly relations: {
+              readonly avatars: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Avatar';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['userId'];
+                };
+              };
               readonly resumes: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
@@ -623,7 +720,6 @@ type ContractBase = Omit<
                 readonly aiDate: { readonly column: 'aiDate' };
                 readonly aiKey: { readonly column: 'aiKey' };
                 readonly aiModel: { readonly column: 'aiModel' };
-                readonly avatarBytes: { readonly column: 'avatarBytes' };
               };
             };
           };

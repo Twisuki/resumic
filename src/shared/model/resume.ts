@@ -1,5 +1,3 @@
-import type { Avatar } from "@shared/model/avatar"
-
 /**
  * @description Profile 自定义信息项目
  */
@@ -18,7 +16,7 @@ export interface Profile {
   gender?: string
   phone?: string
   email?: string
-  avatar?: Avatar
+  avatar?: string
   detail: Detail[]
 }
 

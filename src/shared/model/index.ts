@@ -1,5 +1,4 @@
 export * from "@shared/model/api"
-export * from "@shared/model/avatar"
 export * from "@shared/model/dto"
 export * from "@shared/model/node"
 export * from "@shared/model/patch"

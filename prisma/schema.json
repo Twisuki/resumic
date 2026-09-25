@@ -4,6 +4,10 @@
   "target": "postgres",
   "profileHash": "3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2",
   "roots": {
+    "avatar": {
+      "model": "Avatar",
+      "namespace": "public"
+    },
     "resume": {
       "model": "Resume",
       "namespace": "public"
@@ -17,6 +21,63 @@
     "namespaces": {
       "public": {
         "models": {
+          "Avatar": {
+            "fields": {
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "url": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "user": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "userId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "id": {
+                  "column": "id"
+                },
+                "url": {
+                  "column": "url"
+                },
+                "userId": {
+                  "column": "userId"
+                }
+              },
+              "namespaceId": "public",
+              "table": "avatar"
+            }
+          },
           "Resume": {
             "fields": {
               "createdAt": {
@@ -124,13 +185,6 @@
                   "kind": "scalar"
                 }
               },
-              "avatarBytes": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/int8@1",
-                  "kind": "scalar"
-                }
-              },
               "createdAt": {
                 "nullable": false,
                 "type": {
@@ -168,6 +222,21 @@
               }
             },
             "relations": {
+              "avatars": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "userId"
+                  ]
+                },
+                "to": {
+                  "model": "Avatar",
+                  "namespace": "public"
+                }
+              },
               "resumes": {
                 "cardinality": "1:N",
                 "on": {
@@ -198,9 +267,6 @@
                 "aiModel": {
                   "column": "aiModel"
                 },
-                "avatarBytes": {
-                  "column": "avatarBytes"
-                },
                 "createdAt": {
                   "column": "createdAt"
                 },
@@ -230,6 +296,69 @@
       "public": {
         "entries": {
           "table": {
+            "avatar": {
+              "columns": {
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "url": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "userId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "source": {
+                    "columns": [
+                      "userId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "avatar"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "user"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "userId"
+                  ],
+                  "name": "avatar_userId_idx_a489d58a",
+                  "prefix": "avatar_userId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "url"
+                  ]
+                }
+              ]
+            },
             "resume": {
               "columns": {
                 "createdAt": {
@@ -327,15 +456,6 @@
                   "nativeType": "text",
                   "nullable": true
                 },
-                "avatarBytes": {
-                  "codecId": "pg/int8@1",
-                  "default": {
-                    "kind": "literal",
-                    "value": "0"
-                  },
-                  "nativeType": "int8",
-                  "nullable": false
-                },
                 "createdAt": {
                   "codecId": "pg/timestamptz-string@1",
                   "default": {
@@ -395,7 +515,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "5a67d430101bdd7ee21be71552a3a8e1468af2a9154efe35797bec879aa4376a"
+    "storageHash": "9f7b009c047f212dc6fdee29936b72ecdfe5284d4ada6f86984e8b05b95ab9ec"
   },
   "execution": {
     "executionHash": "5840b31f308379226ef4bc0729c6c48a7c2b85da32f6a5040812eb2bd63c881d",

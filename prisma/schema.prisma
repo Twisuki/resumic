@@ -15,10 +15,18 @@ model User {
   aiKey       String?
   aiModel     String?
 
-  // 头像配额(累计)
-  avatarBytes BigInt   @default(0)
+  // 头像槽位(用户级, 文件存 Vercel Blob)
+  avatars     Avatar[]
 
   resumes     Resume[]
+}
+
+model Avatar {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  url         String   @unique                  // 固定公网 URL, 既是展示地址也是 Blob 定位
+
+  user        User     @relation(fields: [userId], references: [id])
 }
 
 model Resume {

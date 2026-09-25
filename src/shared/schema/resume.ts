@@ -1,11 +1,6 @@
 import type { Resume } from "@shared/model/resume"
 import { z } from "zod"
 
-const avatarSchema = z.object({
-  url: z.string(),
-  uploadedAt: z.string(),
-})
-
 const detailSchema = z.object({
   icon: z.string(),
   content: z.string(),
@@ -42,7 +37,7 @@ export const resumeSchema: z.ZodType<Resume> = z.object({
   gender: z.string().optional(),
   phone: z.string().optional(),
   email: z.string().optional(),
-  avatar: avatarSchema.optional(),
+  avatar: z.string().optional(),
   detail: z.array(detailSchema),
   page: z.array(pageSchema),
 })

@@ -1,6 +1,5 @@
 export interface QuotaResponse {
   ai: { count: number, date: string, limit: number }
-  avatar: { bytes: number, limit: number }
 }
 
 export interface SetAiKeyRequest {

@@ -57,7 +57,7 @@ export default function Profile() {
         {avatar
           ? (
               <Image
-                src={avatar.url}
+                src={avatar}
                 alt={name}
                 fill
                 sizes="6rem"

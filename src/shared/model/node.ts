@@ -1,5 +1,3 @@
-import type { Avatar } from "@shared/model/avatar"
-
 /**
  * @description 节点基底
  */
@@ -24,7 +22,7 @@ export type ProfileNode = BaseNode<{
   gender?: string
   phone?: string
   email?: string
-  avatar?: Avatar
+  avatar?: string
 }>
 
 /**

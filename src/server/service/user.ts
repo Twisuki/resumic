@@ -33,7 +33,7 @@ export const user = {
   },
 
   /**
-   * @description 查 user AI + avatar 配额 (从 DB 读每日计数, 从 ENV 读限额)
+   * @description 查 user AI 配额 (从 DB 读每日计数, 从 ENV 读限额)
    */
   async getQuota(userId: number): Promise<QuotaResponse> {
     const u = await repo.user.findById(userId)
@@ -45,10 +45,6 @@ export const user = {
         count: u.aiCount,
         date: u.aiDate ?? "",
         limit: ENV.AI.DAILY_LIMIT,
-      },
-      avatar: {
-        bytes: Number(u.avatarBytes),
-        limit: ENV.AVATAR_QUOTA_BYTES,
       },
     }
   },
