@@ -37,17 +37,8 @@ export default function BaseInfo({ id }: Readonly<{ id: string }>) {
 
         <Input
           id={inputId}
-          value={title.value}
           placeholder="例如: 教育经历"
-          onChange={e => title.onChange(e.target.value)}
-          onFocus={title.onFocus}
-          onBlur={title.onBlur}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault()
-              e.currentTarget.blur()
-            }
-          }}
+          {...title}
         />
       </div>
     </Field>

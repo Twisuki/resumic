@@ -10,8 +10,11 @@ import Right from "@/app/(main)/sections/right"
 import { useHistory } from "@/hooks/history"
 import { useResumeUpdate } from "@/hooks/query/resume"
 import { useResume } from "@/hooks/resume"
+import { useShortcuts } from "@/hooks/shortcuts"
 
 export default function Page() {
+  useShortcuts()
+
   // 只注册保存传输: 何时保存 / 保存完怎么处理由 history hook 决定
   const update = useResumeUpdate()
   const { registerSave } = useHistory()

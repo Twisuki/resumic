@@ -3,7 +3,7 @@
 import type { RootNode } from "@shared/model/node"
 import { DndContext, DragOverlay } from "@dnd-kit/core"
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
-import { IconDeviceFloppy, IconPencil } from "@tabler/icons-react"
+import { IconArrowBackUp, IconArrowForwardUp, IconDeviceFloppy, IconPencil } from "@tabler/icons-react"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import OptionsDragOverlay from "@/app/(main)/sections/right/options/options-drag-overlay"
@@ -22,7 +22,7 @@ export default function Options() {
   const root = useNode(resumeRootId ?? "") as RootNode | undefined
   const zoom = root?.self.zoom ?? 1
 
-  const { patch, save, isSaving } = useHistory()
+  const { patch, save, isSaving, undo, redo, canUndo, canRedo } = useHistory()
   const [profileOpen, setProfileOpen] = useState(false)
 
   const currentId = useResume().id
@@ -82,8 +82,32 @@ export default function Options() {
         onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >
-        <header className="h-12 shrink-0 px-3 flex items-center text-sm font-semibold">
-          简历选项
+        <header className="h-12 shrink-0 px-3 flex items-center justify-between text-sm font-semibold">
+          <span>简历选项</span>
+
+          <div className="flex items-center gap-0.5">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label="撤销"
+              title="撤销"
+              disabled={!canUndo}
+              onClick={undo}
+            >
+              <IconArrowBackUp className="size-4" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label="重做"
+              title="重做"
+              disabled={!canRedo}
+              onClick={redo}
+            >
+              <IconArrowForwardUp className="size-4" />
+            </Button>
+          </div>
         </header>
 
         <div className="shrink-0 p-3 flex flex-col gap-4">

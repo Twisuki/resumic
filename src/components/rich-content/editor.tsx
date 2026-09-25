@@ -5,14 +5,14 @@ import { useEffect, useRef, useState } from "react"
 import { MarkdownEditor } from "@/components/markdown"
 import { diffLines, splitLines } from "@/components/rich-content/diff"
 import { Field, FieldLabel } from "@/components/ui/field"
-import { useHistory } from "@/hooks/history"
+import { registerFlush, useHistory } from "@/hooks/history"
 import { useRichContent } from "@/hooks/rich-content"
 import { useResumeStore } from "@/stores/resume"
 
 /**
- * @description 停止输入后落 patch 的延迟
+ * @description 没有词边界 / 合成结束时, 长停顿兜底提交的延迟
  */
-const COMMIT_DELAY = 400
+const FALLBACK_DELAY = 1200
 
 /**
  * @description 命令式读取父节点下的行 (undo / redo 后取最新树)
@@ -34,7 +34,7 @@ function readPartSource(parentId: string): string {
 }
 
 /**
- * @description 富文本编辑: 只做 Content(node) ⇄ md 字符串 + diff → patch, 编辑能力由 MarkdownEditor 提供
+ * @description 富文本编辑: 只做 Content(node) ⇄ md 字符串 + diff → patch, 编辑能力与落库时机由 MarkdownEditor 提供
  */
 export default function RichContentEditor({
   ids,
@@ -45,19 +45,35 @@ export default function RichContentEditor({
 }>) {
   const source = useRichContent(ids)
   const [local, setLocal] = useState(source)
+  const localRef = useRef(source)
   const dirtyRef = useRef(false)
-  const pendingRef = useRef<string | null>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { patch, undo, redo } = useHistory()
+  const flushRef = useRef<() => void>(() => {})
+
+  // 向 history 注册 flush, 使 Ctrl+Z / 保存前先落地未提交内容
+  useEffect(() => {
+    flushRef.current = flush
+  })
+  useEffect(() => registerFlush(() => flushRef.current()), [])
 
   // 外部源变化 (undo / redo / 切换) 时同步; 有未提交输入时不覆盖
   useEffect(() => {
     if (!dirtyRef.current) {
       setLocal(source)
+      localRef.current = source
     }
   }, [source])
 
+  function clearTimer() {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
+  }
+
   function applyCommit(next: string) {
+    clearTimer()
     dirtyRef.current = false
     const diff = diffLines(readPartLines(parentId), splitLines(next))
     for (const edit of diff.edits)
@@ -70,37 +86,43 @@ export default function RichContentEditor({
   }
 
   function flush() {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current)
-      timerRef.current = null
-    }
-    const next = pendingRef.current
-    pendingRef.current = null
-    if (next !== null)
-      applyCommit(next)
+    if (dirtyRef.current)
+      applyCommit(localRef.current)
+    else
+      clearTimer()
   }
 
   function handleChange(next: string) {
     setLocal(next)
+    localRef.current = next
     dirtyRef.current = true
-    pendingRef.current = next
-    if (timerRef.current)
-      clearTimeout(timerRef.current)
-    timerRef.current = setTimeout(flush, COMMIT_DELAY)
+    clearTimer()
+    timerRef.current = setTimeout(applyCommit, FALLBACK_DELAY, localRef.current)
+  }
+
+  function handleCommit(next: string) {
+    setLocal(next)
+    localRef.current = next
+    dirtyRef.current = true
+    applyCommit(next)
   }
 
   function handleUndo() {
     flush()
     undo()
     dirtyRef.current = false
-    setLocal(readPartSource(parentId))
+    const next = readPartSource(parentId)
+    setLocal(next)
+    localRef.current = next
   }
 
   function handleRedo() {
     flush()
     redo()
     dirtyRef.current = false
-    setLocal(readPartSource(parentId))
+    const next = readPartSource(parentId)
+    setLocal(next)
+    localRef.current = next
   }
 
   return (
@@ -109,6 +131,7 @@ export default function RichContentEditor({
       <MarkdownEditor
         source={local}
         onChange={handleChange}
+        onCommit={handleCommit}
         onUndo={handleUndo}
         onRedo={handleRedo}
       />

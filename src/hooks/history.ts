@@ -18,6 +18,27 @@ import { useResumeStore } from "@/stores/resume"
 type RoutedTree = "profile" | "resume"
 
 /**
+ * @description 各输入框 / 编辑器注册的"未提交内容"刷新函数
+ * 撤销 / 重做 / 手动保存前先 flush, 保证历史栈拿到最新文本
+ */
+const flushers = new Set<() => void>()
+
+/**
+ * @description 注册一个 flush, 返回注销函数
+ */
+export function registerFlush(fn: () => void): () => void {
+  flushers.add(fn)
+  return () => {
+    flushers.delete(fn)
+  }
+}
+
+function flushAll(): void {
+  for (const fn of [...flushers])
+    fn()
+}
+
+/**
  * @description 把 patch 路由到正确的树
  */
 function routePatch(profile: Tree, resume: Tree, p: Patch): { which: RoutedTree, tree: Tree } {
@@ -60,6 +81,9 @@ function takeSnapshot(): Resume | null {
  * @description 统一保存流程: 取快照 -> 调传输 -> 自动保存成功则截断历史
  */
 async function save(reason: SaveReason): Promise<void> {
+  if (reason === "manual")
+    flushAll()
+
   const { isSaving, saveFn } = useHistoryStore.getState()
   if (!saveFn)
     return
@@ -104,6 +128,7 @@ function commit(p: Patch): void {
  * @description 撤销最近一条: 应用 inverse 到树 + 移到 future
  */
 function undo(): void {
+  flushAll()
   const result = undoFn(useHistoryStore.getState().history)
   if (!result)
     return
@@ -121,6 +146,7 @@ function undo(): void {
  * @description 重做最近一条: 应用 forward 到树 + 推回 past
  */
 function redo(): void {
+  flushAll()
   const result = redoFn(useHistoryStore.getState().history)
   if (!result)
     return

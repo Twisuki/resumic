@@ -52,6 +52,8 @@ export default function Item({
               value={draft}
               onChange={e => setDraft(e.target.value)}
               onKeyDown={(e) => {
+                if (e.nativeEvent.isComposing)
+                  return
                 if (e.key === "Enter") {
                   confirmEdit()
                 }

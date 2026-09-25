@@ -3,11 +3,14 @@
 import type { ClipboardEvent, FormEvent } from "react"
 import { useEffect, useLayoutEffect, useRef } from "react"
 import { renderEditable } from "@/components/markdown/editable"
+import { isLineBreak, isWordBoundary } from "@/lib/text"
 import { cn } from "@/lib/utils"
 
 interface MarkdownEditorProps {
   source: string
   onChange: (next: string) => void
+  /** 词边界 / 合成结束 / 失焦时触发, 作为落库时机 */
+  onCommit?: (next: string) => void
   onUndo?: () => void
   onRedo?: () => void
   className?: string
@@ -80,6 +83,7 @@ function applyActiveState(el: HTMLElement, caret: number | null): void {
 export default function MarkdownEditor({
   source,
   onChange,
+  onCommit,
   onUndo,
   onRedo,
   className,
@@ -124,14 +128,20 @@ export default function MarkdownEditor({
     }
   }, [])
 
-  function handleInput() {
+  function handleInput(e?: FormEvent<HTMLDivElement>) {
     if (composingRef.current)
       return
     const el = ref.current
     if (!el)
       return
+    const next = el.textContent ?? ""
     caretRef.current = caretOffset(el)
-    onChange(el.textContent ?? "")
+    onChange(next)
+
+    // 词边界 / 换行时立即落库, 与输入框的 usePatchInput 规则一致
+    const input = e?.nativeEvent as InputEvent | undefined
+    if (isWordBoundary(input?.data ?? null) || isLineBreak(input?.inputType))
+      onCommit?.(next)
   }
 
   function handleBeforeInput(e: FormEvent<HTMLDivElement>) {
@@ -162,6 +172,7 @@ export default function MarkdownEditor({
     selection.removeAllRanges()
     selection.addRange(range)
     handleInput()
+    onCommit?.(el.textContent ?? "")
   }
 
   return (
@@ -186,15 +197,23 @@ export default function MarkdownEditor({
       }}
       onBlur={() => {
         const el = ref.current
-        if (el)
-          applyActiveState(el, null)
+        if (!el)
+          return
+        applyActiveState(el, null)
+        onCommit?.(el.textContent ?? "")
       }}
       onCompositionStart={() => {
         composingRef.current = true
       }}
       onCompositionEnd={() => {
         composingRef.current = false
-        handleInput()
+        const el = ref.current
+        if (!el)
+          return
+        const next = el.textContent ?? ""
+        caretRef.current = caretOffset(el)
+        onChange(next)
+        onCommit?.(next)
       }}
     />
   )

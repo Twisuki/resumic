@@ -64,18 +64,9 @@ export default function DetailRow({
       </Button>
 
       <Input
-        value={input.value}
         placeholder="例如: 个人网站 / 博客"
         className="h-7 text-xs"
-        onChange={e => input.onChange(e.target.value)}
-        onFocus={input.onFocus}
-        onBlur={input.onBlur}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault()
-            e.currentTarget.blur()
-          }
-        }}
+        {...input}
       />
 
       <Button

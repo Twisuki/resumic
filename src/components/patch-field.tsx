@@ -6,7 +6,7 @@ import { useNode } from "@/hooks/node"
 import { usePatchInput } from "@/hooks/patch-input"
 
 /**
- * @description 绑定节点的文本输入框, 失焦 / 回车时通过 patch 提交
+ * @description 绑定节点的文本输入框, 按"词"提交 patch (IME 以合成词为粒度)
  */
 export default function PatchField({
   id,
@@ -33,18 +33,9 @@ export default function PatchField({
       <FieldLabel htmlFor={inputId}>{label}</FieldLabel>
       <Input
         id={inputId}
-        value={input.value}
         placeholder={placeholder}
         className={inputClassName}
-        onChange={e => input.onChange(e.target.value)}
-        onFocus={input.onFocus}
-        onBlur={input.onBlur}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault()
-            e.currentTarget.blur()
-          }
-        }}
+        {...input}
       />
     </Field>
   )
