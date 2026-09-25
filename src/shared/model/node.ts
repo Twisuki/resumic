@@ -63,6 +63,14 @@ export type LineNode = BaseNode<{ content: string }>
 export type Node = RootNode | ProfileNode | DetailNode | PageNode | SectionNode | PartNode | LineNode
 
 /**
+ * @description 自包含子树快照: root 及其全部后代节点的深克隆, 供 ADD/REMOVE 注册与恢复
+ */
+export interface Subtree {
+  root: Node
+  nodes: Node[]
+}
+
+/**
  * @description 单棵节点树
  */
 export interface Tree {

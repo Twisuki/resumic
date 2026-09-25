@@ -1,7 +1,7 @@
 "use client"
 
+import type { SaveFn } from "@/stores/history"
 import { useEffect, useRef } from "react"
-import { toast } from "sonner"
 import { SidebarsProvider } from "@/app/(main)/contexts/sidebar"
 import Left from "@/app/(main)/sections/left"
 import Main from "@/app/(main)/sections/main"
@@ -12,31 +12,26 @@ import { useResumeUpdate } from "@/hooks/query/resume"
 import { useResume } from "@/hooks/resume"
 
 export default function Page() {
-  // 自动保存: history store 提交阈值达 50 时调 saveFn 全量 PUT
+  // 只注册保存传输: 何时保存 / 保存完怎么处理由 history hook 决定
   const update = useResumeUpdate()
-  const { registerSave, finishSave } = useHistory()
+  const { registerSave } = useHistory()
   const currentId = useResume().id
 
   // ref 保持最新值, 避免 registerSave 闭包过期 (currentId / mutation 切换简历时可能变)
-  const ctxRef = useRef({ currentId, update, finishSave })
-  ctxRef.current = { currentId, update, finishSave }
+  const ctxRef = useRef({ currentId, update })
+  ctxRef.current = { currentId, update }
 
   useEffect(() => {
-    registerSave((snapshot) => {
+    const transport: SaveFn = async (snapshot, reason) => {
       const ctx = ctxRef.current
       if (!ctx.currentId)
-        return
-      ctx.update.mutate(
-        { id: ctx.currentId, data: { ...snapshot, autosave: true } },
-        {
-          onSettled: (_data, error) => {
-            ctx.finishSave(!error)
-            if (error)
-              toast.error(`自动保存失败: ${error.message}`)
-          },
-        },
-      )
-    })
+        throw new Error("没有可保存的简历")
+      await ctx.update.mutateAsync({
+        id: ctx.currentId,
+        data: { ...snapshot, autosave: reason === "auto" },
+      })
+    }
+    registerSave(transport)
   }, [registerSave])
 
   return (

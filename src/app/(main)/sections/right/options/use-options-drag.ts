@@ -1,7 +1,6 @@
 "use client"
 
 import type { CollisionDetection, DragEndEvent, DragOverEvent, DragStartEvent, UniqueIdentifier } from "@dnd-kit/core"
-import type { SectionNode } from "@shared/model/node"
 import {
   closestCorners,
 
@@ -16,7 +15,7 @@ import {
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable"
 import { useState } from "react"
 import { useHistory } from "@/hooks/history"
-import { deepCloneNode, mustGet } from "@/lib/tree"
+import { mustGet } from "@/lib/tree"
 import { useResumeStore } from "@/stores/resume"
 
 export type DragType = "page" | "section"
@@ -171,9 +170,9 @@ export function useOptionsDrag() {
       patch.reorder(sourcePageId, newOrders)
     }
     else {
-      const sectionNode = mustGet(resume, activeSectionId) as SectionNode
-      patch.remove(sourcePageId, activeSectionId)
-      patch.add(targetPageId, deepCloneNode(sectionNode))
+      const subtree = patch.remove(sourcePageId, activeSectionId)
+      if (subtree)
+        patch.add(targetPageId, subtree)
     }
   }
 

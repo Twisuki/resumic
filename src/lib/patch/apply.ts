@@ -1,7 +1,7 @@
 import type { Tree } from "@shared/model/node"
 import type { Patch } from "@shared/model/patch"
 import { enableMapSet, produce } from "immer"
-import { registerSubtree, unregisterSubtree } from "@/lib/tree"
+import { cloneNode, unregisterSubtree } from "@/lib/tree"
 
 enableMapSet()
 
@@ -20,7 +20,8 @@ export function applyPatch(tree: Tree, patch: Patch): Tree {
 
     case "ADD":
       return produce(tree, (draft) => {
-        registerSubtree(draft.nodes, patch.payload)
+        for (const node of patch.payload.nodes)
+          draft.nodes.set(node.id, cloneNode(node))
         const parent = draft.nodes.get(patch.id)
         if (!parent)
           return
@@ -29,7 +30,7 @@ export function applyPatch(tree: Tree, patch: Patch): Tree {
 
     case "REMOVE":
       return produce(tree, (draft) => {
-        unregisterSubtree(draft.nodes, patch.payload)
+        unregisterSubtree(draft.nodes, patch.payload.root)
         const parent = draft.nodes.get(patch.id)
         if (!parent)
           return

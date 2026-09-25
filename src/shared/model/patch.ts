@@ -1,4 +1,4 @@
-import type { Node } from "@shared/model/node"
+import type { Subtree } from "@shared/model/node"
 
 /**
  * @description Patch 行为
@@ -22,14 +22,14 @@ export interface BasePatch<A extends PatchAction, P, T> {
 export type UpdatePatch = BasePatch<"UPDATE", string, unknown>
 
 /**
- * @description 新增节点 Patch
+ * @description 新增节点 Patch: payload 为自包含子树快照
  */
-export type AddPatch = BasePatch<"ADD", Node, string[]>
+export type AddPatch = BasePatch<"ADD", Subtree, string[]>
 
 /**
- * @description 删除节点 Patch
+ * @description 删除节点 Patch: payload 为自包含子树快照, 供撤销时完整恢复
  */
-export type RemovePatch = BasePatch<"REMOVE", Node, string[]>
+export type RemovePatch = BasePatch<"REMOVE", Subtree, string[]>
 
 /**
  * @description 顺序调整 Patch

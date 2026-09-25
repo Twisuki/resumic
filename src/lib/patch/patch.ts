@@ -1,4 +1,4 @@
-import type { Node, Tree } from "@shared/model/node"
+import type { Subtree, Tree } from "@shared/model/node"
 import type {
   AddPatch,
   Patch,
@@ -7,7 +7,7 @@ import type {
   UpdatePatch,
 } from "@shared/model/patch"
 import { enableMapSet, produce } from "immer"
-import { deepCloneNode, registerSubtree, unregisterSubtree } from "@/lib/tree"
+import { cloneNode, snapshotSubtree, unregisterSubtree } from "@/lib/tree"
 
 enableMapSet()
 
@@ -60,15 +60,16 @@ export const patch = {
   add(
     tree: Tree,
     parentId: string,
-    payload: Node,
+    payload: Subtree,
   ): PatchResult<AddPatch> {
     const parent = tree.nodes.get(parentId)
     if (!parent)
       throw new Error(`patch.add: parent ${parentId} not found`)
     const before = [...parent.children]
-    const after = [...before, payload.id]
+    const after = [...before, payload.root.id]
     const newTree = produce(tree, (draft) => {
-      registerSubtree(draft.nodes, payload)
+      for (const node of payload.nodes)
+        draft.nodes.set(node.id, cloneNode(node))
       const draftParent = draft.nodes.get(parentId)
       if (!draftParent)
         return
@@ -89,6 +90,7 @@ export const patch = {
     const child = tree.nodes.get(childId)
     if (!parent || !child)
       throw new Error(`patch.remove: parent or child not found`)
+    const payload = snapshotSubtree(tree, child)
     const before = [...parent.children]
     const after = before.filter(id => id !== childId)
     const newTree = produce(tree, (draft) => {
@@ -100,7 +102,7 @@ export const patch = {
     }) as Tree
     return {
       tree: newTree,
-      patch: { type: "REMOVE", id: parentId, payload: deepCloneNode(child), before, after },
+      patch: { type: "REMOVE", id: parentId, payload, before, after },
     }
   },
 

@@ -8,6 +8,7 @@ import type {
   ResumeTree,
   RootNode,
   SectionNode,
+  Subtree,
   Tree,
 } from "@shared/model/node"
 import type { Detail, Part, Profile, Resume, Section } from "@shared/model/resume"
@@ -33,18 +34,6 @@ export function mustGet(tree: Tree, id: string): Node {
 }
 
 /**
- * @description 递归注册节点及其整子树到 Map
- */
-export function registerSubtree(map: Map<string, Node>, node: Node): void {
-  map.set(node.id, node)
-  for (const childId of node.children) {
-    const child = map.get(childId)
-    if (child)
-      registerSubtree(map, child)
-  }
-}
-
-/**
  * @description 递归从 Map 移除节点及其整子树
  */
 export function unregisterSubtree(map: Map<string, Node>, node: Node): void {
@@ -57,14 +46,46 @@ export function unregisterSubtree(map: Map<string, Node>, node: Node): void {
 }
 
 /**
- * @description 深克隆节点, 用于 patch payload 冻结
+ * @description 浅克隆单个节点, 用于 patch payload 冻结
  */
-export function deepCloneNode(node: Node): Node {
+export function cloneNode(node: Node): Node {
   return {
     id: node.id,
     self: { ...(node.self as Record<string, unknown>) } as never,
     children: [...node.children],
   } as Node
+}
+
+/**
+ * @description 从树中深克隆一棵子树为自包含快照 (保留原 id)
+ */
+export function snapshotSubtree(tree: Tree, node: Node): Subtree {
+  const nodes: Node[] = []
+  const collect = (current: Node): void => {
+    nodes.push(cloneNode(current))
+    for (const childId of current.children) {
+      const child = tree.nodes.get(childId)
+      if (child)
+        collect(child)
+    }
+  }
+  collect(node)
+  return { root: nodes[0], nodes }
+}
+
+/**
+ * @description 由单个节点构造子树快照 (新增空节点用)
+ */
+export function leafSubtree(node: Node): Subtree {
+  const clone = cloneNode(node)
+  return { root: clone, nodes: [clone] }
+}
+
+/**
+ * @description 区分 Node 与 Subtree
+ */
+export function isSubtree(value: Node | Subtree): value is Subtree {
+  return "root" in value
 }
 
 /**
