@@ -3,9 +3,11 @@
 import type { SectionNode } from "@shared/model/node"
 import { SECTION_ICON_PLACEHOLDER } from "@/app/(main)/sections/right/options/section-edit-dialog/constants"
 import Icon from "@/components/icon"
+import IconPicker from "@/components/icon-picker"
 import { Button } from "@/components/ui/button"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { useHistory } from "@/hooks/history"
 import { useNode } from "@/hooks/node"
 import { usePatchInput } from "@/hooks/patch-input"
 
@@ -16,6 +18,7 @@ export default function BaseInfo({ id }: Readonly<{ id: string }>) {
   const node = useNode(id) as SectionNode | undefined
   const icon = node?.self.icon || SECTION_ICON_PLACEHOLDER
   const title = usePatchInput(id, "title", node?.self.title ?? "")
+  const { patch } = useHistory()
   const inputId = `section-title-${id}`
 
   return (
@@ -23,17 +26,20 @@ export default function BaseInfo({ id }: Readonly<{ id: string }>) {
       <FieldLabel htmlFor={inputId}>标题</FieldLabel>
 
       <div className="flex items-center gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          disabled
-          title="图标选择待实现"
-          aria-label="选择图标"
-          className="shrink-0"
+        <IconPicker
+          value={icon}
+          onSelect={name => patch.update(id, "icon", name)}
         >
-          <Icon name={icon} className="size-4" />
-        </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            aria-label="选择图标"
+            className="shrink-0"
+          >
+            <Icon name={icon} className="size-4" />
+          </Button>
+        </IconPicker>
 
         <Input
           id={inputId}

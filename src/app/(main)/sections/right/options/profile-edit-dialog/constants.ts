@@ -1,4 +1,4 @@
 /**
- * @description detail 图标占位 (图标选择组件待实现)
+ * @description 自定义信息默认图标 (新建 / 无值时回退)
  */
 export const DETAIL_ICON_PLACEHOLDER = "star"

@@ -6,6 +6,7 @@ import { CSS } from "@dnd-kit/utilities"
 import { IconGripVertical, IconTrash } from "@tabler/icons-react"
 import { DETAIL_ICON_PLACEHOLDER } from "@/app/(main)/sections/right/options/profile-edit-dialog/constants"
 import Icon from "@/components/icon"
+import IconPicker from "@/components/icon-picker"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useHistory } from "@/hooks/history"
@@ -14,7 +15,7 @@ import { usePatchInput } from "@/hooks/patch-input"
 import { cn } from "@/lib/utils"
 
 /**
- * @description 单条自定义信息: 拖拽手柄 + 图标占位 + 输入框 + 删除
+ * @description 单条自定义信息: 拖拽手柄 + 图标选择 + 输入框 + 删除
  */
 export default function DetailRow({
   id,
@@ -52,16 +53,19 @@ export default function DetailRow({
         <IconGripVertical className="size-3.5" />
       </button>
 
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-xs"
-        disabled
-        title="图标选择待实现"
-        aria-label="选择图标"
+      <IconPicker
+        value={node.self.icon || DETAIL_ICON_PLACEHOLDER}
+        onSelect={name => patch.update(id, "icon", name)}
       >
-        <Icon name={DETAIL_ICON_PLACEHOLDER} className="size-3.5" />
-      </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xs"
+          aria-label="选择图标"
+        >
+          <Icon name={node.self.icon || DETAIL_ICON_PLACEHOLDER} className="size-3.5" />
+        </Button>
+      </IconPicker>
 
       <Input
         placeholder="例如: 个人网站 / 博客"
