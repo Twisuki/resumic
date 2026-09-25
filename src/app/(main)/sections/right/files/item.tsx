@@ -92,11 +92,11 @@ export default function Item({
 
         {!loading && !editing && (
           <div className="flex items-center gap-0.5">
-            <IconAction aria-label="编辑" onClick={startEdit}><IconPencil /></IconAction>
-
             <DeleteDialog id={item.id} title={item.title}>
               <IconAction variant="destructive" aria-label="删除"><IconTrash /></IconAction>
             </DeleteDialog>
+
+            <IconAction aria-label="编辑" onClick={startEdit}><IconPencil /></IconAction>
           </div>
         )}
       </div>

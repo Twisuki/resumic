@@ -3,8 +3,9 @@
 import type { SectionNode } from "@shared/model/node"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { IconGripVertical, IconPencil } from "@tabler/icons-react"
+import { IconGripVertical, IconPencil, IconTrash } from "@tabler/icons-react"
 import { useState } from "react"
+import SectionDeleteDialog from "@/app/(main)/sections/right/options/section-delete-dialog"
 import SectionEditDialog from "@/app/(main)/sections/right/options/section-edit-dialog"
 import Icon from "@/components/icon"
 import { Button } from "@/components/ui/button"
@@ -64,15 +65,30 @@ export default function SectionRow({
           {title || <span className="text-muted-foreground italic">未命名章节</span>}
         </span>
 
-        <Button
-          variant="ghost"
-          size="icon-xs"
-          aria-label="编辑章节"
-          onClick={() => setEditOpen(true)}
-          className="shrink-0"
-        >
-          <IconPencil className="size-3" />
-        </Button>
+        <div className="flex shrink-0 items-center gap-0.5">
+          <SectionDeleteDialog
+            pageId={pageId}
+            sectionId={id}
+            title={title}
+          >
+            <Button
+              variant="destructive"
+              size="icon-xs"
+              aria-label="删除章节"
+            >
+              <IconTrash className="size-3.5" />
+            </Button>
+          </SectionDeleteDialog>
+
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            aria-label="编辑章节"
+            onClick={() => setEditOpen(true)}
+          >
+            <IconPencil className="size-3.5" />
+          </Button>
+        </div>
       </div>
 
       <SectionEditDialog
