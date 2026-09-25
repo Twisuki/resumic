@@ -39,8 +39,7 @@ export default function Page() {
       <div className="w-screen h-screen flex flex-col">
         <Navbar />
         <div
-          className="w-full flex-1 grid min-h-0"
-          style={{ gridTemplateColumns: "minmax(16rem, 1fr) minmax(0, 794px) minmax(16rem, 1fr)" }}
+          className="w-full flex-1 grid min-h-0 grid-rows-1 overflow-hidden grid-cols-1 lg:grid-cols-[minmax(16rem,1fr)_minmax(0,794px)_minmax(16rem,1fr)]"
         >
           <Left />
           <Main />

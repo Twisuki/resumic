@@ -24,7 +24,7 @@ export default function SectionEditDialog({
 }>) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg lg:max-w-2xl">
         <DialogHeader>
           <DialogTitle>编辑章节</DialogTitle>
         </DialogHeader>

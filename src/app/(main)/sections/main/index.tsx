@@ -7,7 +7,7 @@ export default function Main() {
   return (
     <main
       ref={ref}
-      className="min-w-0 w-full max-w-[794px] h-full flex overflow-y-auto overflow-x-hidden no-scrollbar"
+      className="min-w-0 min-h-0 w-full h-full flex justify-center overflow-y-auto overflow-x-hidden no-scrollbar"
     >
       <Resume scale={scale} />
     </main>

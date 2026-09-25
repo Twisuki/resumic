@@ -24,7 +24,7 @@ export default function Page({
     <Paper>
       <div
         className="flex flex-col gap-6 w-full"
-        style={{ transform: `scale(${zoom})`, transformOrigin: "top left" }}
+        style={{ transform: `scale(${zoom})`, transformOrigin: "top center" }}
       >
         {hasProfile && <Profile />}
         {sectionIds.map(id => (
