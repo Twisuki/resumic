@@ -93,3 +93,16 @@
     @apply font-sans;
   }
 }
+
+@layer components {
+  /* 可编辑富文本: 完整 token 的分隔符默认折叠为零宽, 光标进入时展开为可读语法 */
+  .md-syntax {
+    font-size: 0;
+    letter-spacing: 0;
+  }
+  [data-md-active] .md-syntax {
+    font-size: inherit;
+    letter-spacing: inherit;
+    color: var(--muted-foreground);
+  }
+}

@@ -1,4 +1,4 @@
-import Markdown from "@/components/markdown/display"
+import { Markdown } from "@/components/markdown"
 import { useRichContent } from "@/hooks/rich-content"
 
 export default function RichContent({

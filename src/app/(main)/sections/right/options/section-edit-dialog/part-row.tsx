@@ -5,13 +5,14 @@ import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { IconGripVertical, IconTrash } from "@tabler/icons-react"
 import PatchField from "@/components/patch-field"
+import { RichContentEditor } from "@/components/rich-content"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/hooks/history"
 import { useNode } from "@/hooks/node"
 import { cn } from "@/lib/utils"
 
 /**
- * @description 单条经历: 拖拽手柄 + 字段编辑 + 内容占位 + 删除
+ * @description 单条经历: 拖拽手柄 + 字段编辑 + 富文本内容 + 删除
  */
 export default function PartRow({
   id,
@@ -94,9 +95,7 @@ export default function PartRow({
         placeholder="例如: https://example.com"
       />
 
-      <div className="rounded-md border border-dashed border-border bg-muted/40 px-2 py-3 text-center text-xs text-muted-foreground">
-        内容编辑待实现
-      </div>
+      <RichContentEditor ids={node.children} parentId={id} />
     </div>
   )
 }
