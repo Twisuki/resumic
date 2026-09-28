@@ -3,6 +3,7 @@
 import type { SaveFn } from "@/stores/history"
 import { useEffect, useRef } from "react"
 import { SidebarsProvider } from "@/app/(main)/contexts/sidebar"
+import { useLoginError } from "@/app/(main)/hooks/login"
 import Left from "@/app/(main)/sections/left"
 import Main from "@/app/(main)/sections/main"
 import Navbar from "@/app/(main)/sections/navbar"
@@ -13,6 +14,7 @@ import { useResume } from "@/hooks/resume"
 import { useShortcuts } from "@/hooks/shortcuts"
 
 export default function Page() {
+  useLoginError()
   useShortcuts()
 
   // 只注册保存传输: 何时保存 / 保存完怎么处理由 history hook 决定
