@@ -16,15 +16,19 @@ export const ErrorCode = {
   Resume: {
     NotFound: 30001,
   },
+  Ai: {
+    ConfigNotFound: 40001,
+    ConfigLabelConflict: 40002,
+  },
+  Validation: {
+    InvalidParams: 40004,
+  },
   Avatar: {
     NotFound: 50001,
     TooLarge: 50002,
     TooMany: 50003,
     UnsupportedType: 50004,
     Forbidden: 50005,
-  },
-  Validation: {
-    InvalidParams: 40004,
   },
   System: {
     Internal: 90001,

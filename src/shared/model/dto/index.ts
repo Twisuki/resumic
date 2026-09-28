@@ -1,3 +1,4 @@
+export * from "@shared/model/dto/ai"
 export * from "@shared/model/dto/auth"
 export * from "@shared/model/dto/avatar"
 export * from "@shared/model/dto/health"
