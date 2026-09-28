@@ -1,3 +1,4 @@
+import { IconLoader2 } from "@tabler/icons-react"
 import Avatar from "@/app/(main)/sections/navbar/avatar"
 import {
   DropdownMenu,
@@ -8,14 +9,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useLoginTrigger } from "@/hooks/login"
 import { useSession } from "@/hooks/session"
-import { logout, redirectToGithubLogin } from "@/lib/auth-action"
+import { logout } from "@/lib/auth-action"
 
 /**
  * @description 账号下拉菜单, 触发头是头像, 内容跟随登录态
  */
 export default function UserMenu() {
   const { user, status, refresh } = useSession()
+  const { pending: loginPending, trigger: triggerLogin } = useLoginTrigger()
 
   // 首屏还没恢复完, 不能显示"未登录", 否则已登录用户会看到闪烁
   if (status === "pending") {
@@ -61,8 +64,22 @@ export default function UserMenu() {
         )}
 
         {status === "anonymous" && (
-          <DropdownMenuItem onSelect={redirectToGithubLogin}>
-            登录
+          <DropdownMenuItem
+            disabled={loginPending}
+            onSelect={(event) => {
+              // 阻止下拉自动关闭, 让 spinner 在原位可见
+              event.preventDefault()
+              triggerLogin()
+            }}
+          >
+            {loginPending
+              ? (
+                  <>
+                    <IconLoader2 className="size-3.5 animate-spin" />
+                    登录中...
+                  </>
+                )
+              : "登录"}
           </DropdownMenuItem>
         )}
 
