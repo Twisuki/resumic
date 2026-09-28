@@ -117,23 +117,20 @@ function readLine(tree: Tree, id: string): string {
 }
 
 /**
- * @description 注册一个 part 节点, content 按换行拆 line 子节点
+ * @description 注册一个 part 节点, content 按换行拆 line 子节点, 每个 line 自带内容无 \n
  */
 function buildPartNode(map: Map<string, Node>, part: Part): string {
   const { content, ...self } = part
-  const segments = content.split("\n")
-  const children = segments
-    .map((c, i) => (i < segments.length - 1 ? `${c}\n` : c))
-    .map(c => buildLineNode(map, c))
+  const children = content.split("\n").map(c => buildLineNode(map, c))
   return buildNode(map, self, children)
 }
 
 /**
- * @description 读取一个 part 节点, line 子节点直接拼回 content
+ * @description 读取一个 part 节点, line 子节点用 \n 拼回 content
  */
 function readPart(tree: Tree, id: string): Part {
   const node = mustGet(tree, id) as PartNode
-  const content = node.children.map(cid => readLine(tree, cid)).join("")
+  const content = node.children.map(cid => readLine(tree, cid)).join("\n")
   return { ...node.self, content }
 }
 

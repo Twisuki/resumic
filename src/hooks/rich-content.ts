@@ -13,5 +13,5 @@ export function useRichContent(ids: string[]) {
       const node = profileTree?.nodes.get(id) ?? resumeTree?.nodes.get(id)
       return (node as LineNode | undefined)?.self.content ?? ""
     })
-    .join("")
+    .join("\n")
 }
