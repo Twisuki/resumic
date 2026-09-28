@@ -7,18 +7,34 @@ model User {
   status      String   @default("active")       // active / disabled(暂用 String, prisma-next enum 待验证)
   createdAt   TimestamptzString @default(now())
 
-  // AI 配额(每日)
-  aiCount     Int      @default(0)
-  aiDate      DateString?                        // 上次扣量日期 (YYYY-MM-DD), 跨日重置
+  // ai 配置
+  activeConfigId  String?
+  activeConfig    AiConfig?   @relation("ActiveConfig", fields: [activeConfigId], references: [id])
 
-  // AI 自配(可选)
-  aiKey       String?
-  aiModel     String?
+  configs     AiConfig[] @relation("UserConfigs")
 
-  // 头像槽位(用户级, 文件存 Vercel Blob)
+  // 头像槽位
   avatars     Avatar[]
 
+  // 简历数组
   resumes     Resume[]
+}
+
+model AiConfig {
+  id            String   @id
+  userId        Int
+  label         String                  // 用户命名, 同 user 内唯一
+  apiStyle      String                  // "openai" | "anthropic"
+  baseUrl       String                  // 用户填的上游 LLM base URL
+  model         String                  // 模型名
+  encryptedKey  String                  // ai api key
+  createdAt     TimestamptzString       @default(now())
+  updatedAt     temporal.updatedAtString()
+
+  user          User     @relation("UserConfigs", fields: [userId], references: [id])
+
+  @@unique([userId, label])
+  @@index([userId])
 }
 
 model Avatar {

@@ -23,10 +23,6 @@ export const ErrorCode = {
     UnsupportedType: 50004,
     Forbidden: 50005,
   },
-  AI: {
-    QuotaExhausted: 40001,
-    UpstreamError: 40002,
-  },
   Validation: {
     InvalidParams: 40004,
   },

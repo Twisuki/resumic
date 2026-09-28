@@ -1,13 +1,6 @@
 import process from "node:process"
 import { z } from "zod"
 
-/**
- * @description CSV 字符串转 string[], 过滤空段
- */
-function csvList(s: string) {
-  return s.split(",").map(t => t.trim()).filter(Boolean)
-}
-
 const schema = z.object({
   /**
    * @description 当前运行环境, dev 拼裸 cookie 名, prod 拼 __Host- 前缀
@@ -28,6 +21,11 @@ const schema = z.object({
    * @description Vercel Blob 读写 token, 头像上传用
    */
   BLOB_READ_WRITE_TOKEN: z.string().min(1),
+
+  /**
+   * @description 头像上传单文件大小上限 (字节)
+   */
+  AVATAR_QUOTA_BYTES: z.coerce.number().int().positive().default(52428800),
 
   GH_CLIENT: z.object({
     /**
@@ -65,31 +63,6 @@ const schema = z.object({
      * @description 用户自配 key 的 AES-256-GCM 加密密钥
      */
     KEY_ENCRYPTION_SECRET: z.string().min(1),
-
-    /**
-     * @description 每日免费 AI 调用上限
-     */
-    DAILY_LIMIT: z.coerce.number().int().positive().default(20),
-
-    /**
-     * @description 允许用户自配的模型白名单 (CSV), 空表示禁用自配
-     */
-    MODEL_ALLOWLIST: z.string().default("").transform(csvList),
-
-    /**
-     * @description 默认 OpenAI key, 走项目免费额度
-     */
-    DEFAULT_KEY: z.string().min(1),
-
-    /**
-     * @description 默认模型, provider:model 格式 (如 openai:gpt-4o-mini)
-     */
-    DEFAULT_MODEL: z.string().min(1),
-
-    /**
-     * @description OpenAI 兼容服务 base URL, 空走官方
-     */
-    OPENAI_BASE_URL: z.string().default(""),
   }),
 })
 
@@ -102,6 +75,7 @@ function nest(raw: NodeJS.ProcessEnv) {
     DATABASE_URL: raw.DATABASE_URL,
     APP_URL: raw.APP_URL,
     BLOB_READ_WRITE_TOKEN: raw.BLOB_READ_WRITE_TOKEN,
+    AVATAR_QUOTA_BYTES: raw.AVATAR_QUOTA_BYTES,
     GH_CLIENT: {
       ID: raw.GH_CLIENT_ID,
       SECRET: raw.GH_CLIENT_SECRET,
@@ -115,11 +89,6 @@ function nest(raw: NodeJS.ProcessEnv) {
     },
     AI: {
       KEY_ENCRYPTION_SECRET: raw.AI_KEY_ENCRYPTION_SECRET,
-      DAILY_LIMIT: raw.AI_DAILY_LIMIT,
-      DEFAULT_KEY: raw.AI_DEFAULT_KEY,
-      DEFAULT_MODEL: raw.AI_DEFAULT_MODEL,
-      MODEL_ALLOWLIST: raw.AI_MODEL_ALLOWLIST,
-      OPENAI_BASE_URL: raw.AI_OPENAI_BASE_URL,
     },
   }
 }

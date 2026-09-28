@@ -4,6 +4,10 @@
   "target": "postgres",
   "profileHash": "3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2",
   "roots": {
+    "aiConfig": {
+      "model": "AiConfig",
+      "namespace": "public"
+    },
     "avatar": {
       "model": "Avatar",
       "namespace": "public"
@@ -21,6 +25,123 @@
     "namespaces": {
       "public": {
         "models": {
+          "AiConfig": {
+            "fields": {
+              "apiStyle": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "baseUrl": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "encryptedKey": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "label": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "model": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "user": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "userId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "apiStyle": {
+                  "column": "apiStyle"
+                },
+                "baseUrl": {
+                  "column": "baseUrl"
+                },
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "encryptedKey": {
+                  "column": "encryptedKey"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "label": {
+                  "column": "label"
+                },
+                "model": {
+                  "column": "model"
+                },
+                "updatedAt": {
+                  "column": "updatedAt"
+                },
+                "userId": {
+                  "column": "userId"
+                }
+              },
+              "namespaceId": "public",
+              "table": "aiConfig"
+            }
+          },
           "Avatar": {
             "fields": {
               "id": {
@@ -157,28 +278,7 @@
           },
           "User": {
             "fields": {
-              "aiCount": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/int4@1",
-                  "kind": "scalar"
-                }
-              },
-              "aiDate": {
-                "nullable": true,
-                "type": {
-                  "codecId": "pg/date-string@1",
-                  "kind": "scalar"
-                }
-              },
-              "aiKey": {
-                "nullable": true,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "aiModel": {
+              "activeConfigId": {
                 "nullable": true,
                 "type": {
                   "codecId": "pg/text@1",
@@ -222,6 +322,21 @@
               }
             },
             "relations": {
+              "activeConfig": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "activeConfigId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "AiConfig",
+                  "namespace": "public"
+                }
+              },
               "avatars": {
                 "cardinality": "1:N",
                 "on": {
@@ -234,6 +349,21 @@
                 },
                 "to": {
                   "model": "Avatar",
+                  "namespace": "public"
+                }
+              },
+              "configs": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "userId"
+                  ]
+                },
+                "to": {
+                  "model": "AiConfig",
                   "namespace": "public"
                 }
               },
@@ -255,17 +385,8 @@
             },
             "storage": {
               "fields": {
-                "aiCount": {
-                  "column": "aiCount"
-                },
-                "aiDate": {
-                  "column": "aiDate"
-                },
-                "aiKey": {
-                  "column": "aiKey"
-                },
-                "aiModel": {
-                  "column": "aiModel"
+                "activeConfigId": {
+                  "column": "activeConfigId"
                 },
                 "createdAt": {
                   "column": "createdAt"
@@ -296,6 +417,100 @@
       "public": {
         "entries": {
           "table": {
+            "aiConfig": {
+              "columns": {
+                "apiStyle": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "baseUrl": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "encryptedKey": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "label": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "model": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "updatedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "userId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "source": {
+                    "columns": [
+                      "userId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "aiConfig"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "user"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "userId"
+                  ],
+                  "name": "aiConfig_userId_idx_a489d58a",
+                  "prefix": "aiConfig_userId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "userId",
+                    "label"
+                  ]
+                }
+              ]
+            },
             "avatar": {
               "columns": {
                 "id": {
@@ -432,26 +647,7 @@
             },
             "user": {
               "columns": {
-                "aiCount": {
-                  "codecId": "pg/int4@1",
-                  "default": {
-                    "kind": "literal",
-                    "value": 0
-                  },
-                  "nativeType": "int4",
-                  "nullable": false
-                },
-                "aiDate": {
-                  "codecId": "pg/date-string@1",
-                  "nativeType": "date",
-                  "nullable": true
-                },
-                "aiKey": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": true
-                },
-                "aiModel": {
+                "activeConfigId": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": true
@@ -494,8 +690,34 @@
                   "nullable": false
                 }
               },
-              "foreignKeys": [],
-              "indexes": [],
+              "foreignKeys": [
+                {
+                  "source": {
+                    "columns": [
+                      "activeConfigId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "user"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "aiConfig"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "activeConfigId"
+                  ],
+                  "name": "user_activeConfigId_idx_87465cb0",
+                  "prefix": "user_activeConfigId_idx",
+                  "unique": false
+                }
+              ],
               "primaryKey": {
                 "columns": [
                   "id"
@@ -515,12 +737,27 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "9f7b009c047f212dc6fdee29936b72ecdfe5284d4ada6f86984e8b05b95ab9ec"
+    "storageHash": "21db37c15447b00c28df23ecee4b9dd22ead980df5db55ed0da595dee4c1f221"
   },
   "execution": {
-    "executionHash": "5840b31f308379226ef4bc0729c6c48a7c2b85da32f6a5040812eb2bd63c881d",
+    "executionHash": "df815b9fe38ae798ec6c04bca097c3743d1bb1cd919ac303041295156f6e04fe",
     "mutations": {
       "defaults": [
+        {
+          "onCreate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "onUpdate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "ref": {
+            "column": "updatedAt",
+            "namespace": "public",
+            "table": "aiConfig"
+          }
+        },
         {
           "onCreate": {
             "id": "timestampNow",
