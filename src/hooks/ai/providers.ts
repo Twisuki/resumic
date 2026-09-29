@@ -1,5 +1,6 @@
 import type { AiConfigDto } from "@shared/model"
 import type { LanguageModel } from "ai"
+import { createAnthropic } from "@ai-sdk/anthropic"
 import { createOpenAI } from "@ai-sdk/openai"
 
 /**
@@ -12,6 +13,10 @@ export function getModel(active: AiConfigDto | null): LanguageModel | null {
   if (active.apiStyle === "openai") {
     const openai = createOpenAI({ baseURL: "/api/ai", apiKey: "placeholder" })
     return openai(active.model)
+  }
+  if (active.apiStyle === "anthropic") {
+    const anthropic = createAnthropic({ baseURL: "/api/ai", apiKey: "placeholder" })
+    return anthropic(active.model)
   }
   return null
 }
