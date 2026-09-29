@@ -1,6 +1,7 @@
 import type { UIMessage } from "ai"
 import { convertToModelMessages, readUIMessageStream, stepCountIs, streamText, toUIMessageStream } from "ai"
 import { useCallback, useMemo, useRef } from "react"
+import { MAX_STEPS, SYSTEM_PROMPT } from "@/config/ai"
 import {
   useActivateConfig,
   useActiveConfig,
@@ -13,11 +14,6 @@ import { getModel } from "@/hooks/ai/providers"
 import { tools } from "@/hooks/ai/tools"
 import { genId } from "@/lib/id"
 import { useAiStore } from "@/stores/ai"
-
-/**
- * @description agent 多步循环上限, 模型达到该步数仍想继续调工具就强制收尾
- */
-const MAX_STEPS = 10
 
 export { useAiMessages } from "@/hooks/ai/messages"
 export { useAiStatus } from "@/hooks/ai/status"
@@ -86,6 +82,7 @@ export function useAi(): UseAi {
     try {
       const result = streamText({
         model,
+        system: SYSTEM_PROMPT,
         messages: await convertToModelMessages([...useAiStore.getState().messages.slice(0, -1)]),
         tools,
         stopWhen: stepCountIs(MAX_STEPS),
