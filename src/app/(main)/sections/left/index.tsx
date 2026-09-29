@@ -2,6 +2,7 @@
 
 import { Sidebar } from "@/app/(main)/components/sidebar"
 import { useSidebars } from "@/app/(main)/hooks/sidebar"
+import AgentPanel from "@/app/(main)/sections/left/agent"
 
 export default function Left() {
   const { isLeftOpen, onLeftOpenChange } = useSidebars()
@@ -11,9 +12,7 @@ export default function Left() {
       openMobile={isLeftOpen}
       onOpenMobileChange={onLeftOpenChange}
     >
-      <div className="flex h-full flex-col">
-        left
-      </div>
+      <AgentPanel />
     </Sidebar>
   )
 }

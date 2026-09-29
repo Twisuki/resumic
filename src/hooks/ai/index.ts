@@ -16,8 +16,8 @@ import { genId } from "@/lib/id"
 import { useAiStore } from "@/stores/ai"
 
 export { useAiMessages } from "@/hooks/ai/messages"
+export { useAiPermission } from "@/hooks/ai/permission"
 export { useAiStatus } from "@/hooks/ai/status"
-export type { AiStatusSnapshot } from "@/hooks/ai/status"
 
 export {
   useActivateConfig,
@@ -27,6 +27,8 @@ export {
   useDeleteConfig,
   useUpdateConfig,
 }
+
+export type { AiStatusSnapshot } from "@/hooks/ai/status"
 
 export { getModel }
 
@@ -45,6 +47,10 @@ export interface UseAi {
    * @description 发起一次对话; 无 active 配置或 input 为空时直接返回 noop
    */
   send: (input: string) => Promise<void>
+  /**
+   * @description 清空 messages + error + 回 idle, 不影响 abort controller
+   */
+  clear: () => void
 }
 
 /**
@@ -113,7 +119,11 @@ export function useAi(): UseAi {
     }
   }, [model])
 
+  const clear = useCallback(() => {
+    useAiStore.setState({ messages: [], status: "idle", error: null })
+  }, [])
+
   const ready = model !== null && status === "idle"
 
-  return { ready, stop, send }
+  return { ready, stop, send, clear }
 }
