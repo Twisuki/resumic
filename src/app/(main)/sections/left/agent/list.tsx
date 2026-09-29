@@ -31,6 +31,13 @@ export default function List() {
     return () => el.removeEventListener("scroll", update)
   }, [])
 
+  // 初始挂载滚到底: mobile Sheet 重开 (list 重新挂载) 时, 重置到末尾; desktop 首次加载同理
+  useEffect(() => {
+    const el = scrollRef.current
+    if (el)
+      el.scrollTop = el.scrollHeight
+  }, [])
+
   // 内容变化时, 若贴底则滚到底
   useEffect(() => {
     const el = scrollRef.current
@@ -40,7 +47,7 @@ export default function List() {
   }, [messages])
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-y-auto p-2 flex flex-col gap-3">
+    <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar p-2 flex flex-col gap-3">
       {messages.length === 0 && (
         <div className="py-8 text-center text-xs text-muted-foreground">
           开始与 AI 对话吧
