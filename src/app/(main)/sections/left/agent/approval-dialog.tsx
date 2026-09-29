@@ -15,21 +15,21 @@ import { useAiPermission } from "@/hooks/ai"
  * @description 权限弹窗: 写工具 ask 模式触发, 三选一 (拒绝 / 仅本次 / 始终允许); 关闭视为拒绝
  */
 export default function ApprovalDialog() {
-  const { pending, setMode, clearPending } = useAiPermission()
+  const { pending, setMode, resolvePending } = useAiPermission()
   const open = pending !== null
 
   function handleDeny() {
-    clearPending()
+    resolvePending(false)
   }
 
   function handleAllowOnce() {
-    clearPending()
+    resolvePending(true)
   }
 
   function handleAllowAlways() {
     if (pending)
       setMode(pending.toolName, "always")
-    clearPending()
+    resolvePending(true)
   }
 
   function handleOpenChange(next: boolean) {

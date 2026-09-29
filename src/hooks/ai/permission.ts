@@ -11,9 +11,9 @@ export interface UseAiPermission {
    */
   setMode: (name: ToolName, mode: Permission) => void
   /**
-   * @description 关闭弹窗, 同时 resolve(false) 给等待中的 execute
+   * @description 决议 pending: 传 true 放行, false 拒绝. 同时清空 pending 弹窗
    */
-  clearPending: () => void
+  resolvePending: (decision: boolean) => void
 }
 
 /**
@@ -22,10 +22,10 @@ export interface UseAiPermission {
 export function useAiPermission(): UseAiPermission {
   const pending = useAiPermissionStore(s => s.pending)
   const setMode = useAiPermissionStore(s => s.setMode)
-  const clearPending = useAiPermissionStore(s => s.clearPending)
+  const resolvePending = useAiPermissionStore(s => s.resolvePending)
   return {
     pending: pending ? { toolName: pending.toolName, args: pending.args } : null,
     setMode,
-    clearPending,
+    resolvePending,
   }
 }

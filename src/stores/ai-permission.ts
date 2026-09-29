@@ -19,7 +19,10 @@ export interface AiPermissionStore {
 
   setMode: (name: ToolName, mode: Permission) => void
   request: (name: ToolName, args: unknown) => Promise<boolean>
-  clearPending: () => void
+  /**
+   * @description 决议 + 清空 pending, decision 传给等待中的 resolve
+   */
+  resolvePending: (decision: boolean) => void
 }
 
 export const useAiPermissionStore = create<AiPermissionStore>()(set => ({
@@ -36,8 +39,8 @@ export const useAiPermissionStore = create<AiPermissionStore>()(set => ({
     set({ pending: { toolName: name, args, resolve } })
   }),
 
-  clearPending: () => set((state) => {
-    state.pending?.resolve(false)
+  resolvePending: decision => set((state) => {
+    state.pending?.resolve(decision)
     return { pending: null }
   }),
 }))
