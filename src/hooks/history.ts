@@ -182,9 +182,9 @@ function saveManual(): void {
 }
 
 /**
- * @description 简历编辑命令: 写树 + 提交 history
+ * @description 简历编辑命令: 写树 + 提交 history; 也作为顶层 export, 供非 React 上下文 (AI 工具) 调用
  */
-const patch = {
+export const patch = {
   update(id: string, key: string, after: unknown): void {
     const { profile, resume } = useResumeStore.getState()
     if (!profile || !resume)
