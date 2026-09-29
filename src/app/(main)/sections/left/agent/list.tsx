@@ -1,20 +1,46 @@
 "use client"
 
 import { isReasoningUIPart, isTextUIPart, isToolUIPart } from "ai"
-import { Fragment } from "react"
+import { Fragment, useEffect, useRef } from "react"
 import BubbleAi from "@/app/(main)/sections/left/agent/bubble-ai"
 import BubbleUser from "@/app/(main)/sections/left/agent/bubble-user"
 import ToolCard from "@/app/(main)/sections/left/agent/tool-card"
 import { useAiMessages } from "@/hooks/ai"
 
 /**
- * @description list 滚动容器: 流式堆叠 user 气泡 / ai 气泡 / tool 卡片, tool 部分提到气泡外独立居中行
+ * @description list 滚动容器: 流式堆叠 user 气泡 / ai 气泡 / tool 卡片, tool 部分提到气泡外独立居中行; 新内容到达时若用户原本贴底则自动跟随, 滚上看历史时不强制拉回
  */
+const BOTTOM_SLOP = 32
+
 export default function List() {
   const messages = useAiMessages()
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const isAtBottomRef = useRef(true)
+
+  // 监听滚动: 距底 < BOTTOM_SLOP 算贴底, 用 ref 避免触发 re-render
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el)
+      return
+    function update() {
+      const distance = el!.scrollHeight - el!.scrollTop - el!.clientHeight
+      isAtBottomRef.current = distance < BOTTOM_SLOP
+    }
+    el.addEventListener("scroll", update, { passive: true })
+    update()
+    return () => el.removeEventListener("scroll", update)
+  }, [])
+
+  // 内容变化时, 若贴底则滚到底
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el || !isAtBottomRef.current)
+      return
+    el.scrollTop = el.scrollHeight
+  }, [messages])
 
   return (
-    <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-3">
+    <div ref={scrollRef} className="flex-1 overflow-y-auto p-2 flex flex-col gap-3">
       {messages.length === 0 && (
         <div className="py-8 text-center text-xs text-muted-foreground">
           开始与 AI 对话吧
