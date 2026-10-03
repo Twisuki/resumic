@@ -1,23 +1,15 @@
 "use client"
 
-import { IconUser } from "@tabler/icons-react"
+import AvatarSection from "@/app/(main)/sections/right/options/profile-edit-dialog/avatar-section"
 import PatchField from "@/components/patch-field"
 
 /**
- * @description 个人信息基础字段 + 头像占位
+ * @description 个人信息基础字段 + 头像区块
  */
 export default function BaseInfo({ id }: Readonly<{ id: string }>) {
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-3">
-        <div className="flex w-14 h-16 shrink-0 items-center justify-center rounded-md border border-dashed border-border bg-muted">
-          <IconUser className="size-5 text-muted-foreground" />
-        </div>
-        <div className="flex flex-col gap-0.5">
-          <span className="text-sm font-medium">头像</span>
-          <span className="text-xs text-muted-foreground">头像编辑待实现</span>
-        </div>
-      </div>
+      <AvatarSection id={id} />
 
       <div className="grid grid-cols-2 gap-3">
         <PatchField
