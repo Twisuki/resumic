@@ -39,7 +39,7 @@ export default function ApprovalDialog() {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent>
+      <DialogContent onPointerDownOutside={e => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>
             允许工具

@@ -62,25 +62,28 @@ export default function List() {
           return <BubbleUser key={message.id} text={text} />
         }
 
-        // 按最后一个 tool 切两段: 中间段(折叠, 是“中间过程”) vs 最终段(展开, 是给用户的最终输出)
-        const lastToolIdx = message.parts.reduce(
-          (acc, p, i) => (isToolUIPart(p) ? i : acc),
-          -1,
-        )
-        const intermediateParts = lastToolIdx >= 0 ? message.parts.slice(0, lastToolIdx) : []
-        const finalParts = lastToolIdx >= 0 ? message.parts.slice(lastToolIdx + 1) : message.parts
+        // 按首个 text part 切两段: 中间段(所有 reasoning + 工具之间的自言自语) vs 最终段(首个 text 起的输出)
+        // 用首个 text 切分保证所有 reasoning 都进中间段, 不被“最后一个 tool”切掉
+        const firstTextIdx = message.parts.findIndex(p => isTextUIPart(p))
+        const splitIdx = firstTextIdx >= 0 ? firstTextIdx : message.parts.length
+        const intermediateParts = message.parts.slice(0, splitIdx)
+        const finalParts = message.parts.slice(splitIdx)
 
         const joinText = (ps: typeof message.parts) =>
           ps.filter(isTextUIPart).map(p => p.text).join("")
         const joinReasoning = (ps: typeof message.parts) =>
           ps.filter(isReasoningUIPart).map(p => p.text).join("\n")
+        const hasStreamingReasoning = (ps: typeof message.parts) =>
+          ps.some(p => isReasoningUIPart(p) && p.state === "streaming")
 
         const intermediateText = joinText(intermediateParts)
         const intermediateReasoning = joinReasoning(intermediateParts)
+        const intermediateReasoningStreaming = hasStreamingReasoning(intermediateParts)
         const finalText = joinText(finalParts)
         const finalReasoning = joinReasoning(finalParts)
+        const finalReasoningStreaming = hasStreamingReasoning(finalParts)
 
-        const showIntermediate = lastToolIdx >= 0 && (intermediateText || intermediateReasoning)
+        const showIntermediate = !!(intermediateText || intermediateReasoning)
         const showFinal = !!(finalText || finalReasoning)
 
         // 新一轮工具到来时挤掉老的 output-available (仅作为“模型思考中”提示, 已被并行 active 工具取代)
@@ -96,6 +99,7 @@ export default function List() {
                 text={intermediateText}
                 reasoning={intermediateReasoning || undefined}
                 collapsible
+                reasoningStreaming={intermediateReasoningStreaming}
               />
             )}
             {visibleToolParts.map((part, idx) => (
@@ -105,7 +109,11 @@ export default function List() {
               />
             ))}
             {showFinal && (
-              <BubbleAi text={finalText} reasoning={finalReasoning || undefined} />
+              <BubbleAi
+                text={finalText}
+                reasoning={finalReasoning || undefined}
+                reasoningStreaming={finalReasoningStreaming}
+              />
             )}
           </Fragment>
         )
