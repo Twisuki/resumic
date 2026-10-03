@@ -2,23 +2,24 @@
 
 import type { Icon as TablerIcon } from "@tabler/icons-react"
 import type { DynamicToolUIPart, UIDataTypes, UIMessagePart, UITools } from "ai"
-import { IconLoader2, IconX } from "@tabler/icons-react"
+import { IconCheck, IconLoader2, IconX } from "@tabler/icons-react"
 import { isToolUIPart } from "ai"
 import { cn } from "@/lib/utils"
 
 type ToolPart = Extract<UIMessagePart<UIDataTypes, UITools>, { type: `tool-${string}` }> | DynamicToolUIPart
 
 /**
- * @description 工具卡片: list 内左右居中, 比气泡宽, 6 态 (input-streaming / input-available / approval-* / output-available / output-error / output-denied)
+ * @description 工具卡片: list 内左右居中, 比气泡宽; output-denied 不展示, output-available 保留为"完成"提示模型思考中
  */
 export default function ToolCard({ part }: Readonly<{ part: ToolPart }>) {
   if (!isToolUIPart(part))
     return null
   const state = part.state
 
-  // output-available / output-denied 不再展示: 成功 AI 会用 text 总结, 拒绝状态已明确; 老卡片继续留只会堆视口, 新一轮工具自然替换
-  // output-error 仍展示, 错误信息用户需看到
-  if (state === "output-available" || state === "output-denied")
+  // output-denied: 用户主动拒绝, 状态已明确, 无需再占位
+  // output-available: 保留为绿色"完成"卡片, 覆盖"模型拿到结果 → 流式返回"这段思考空白期; 下一轮工具到来时由 list 过滤掉
+  // output-error:    仍展示, 错误信息用户需看到
+  if (state === "output-denied")
     return null
 
   const meta: { Icon: TablerIcon, label: string, tone: string, spin: boolean } = (() => {
@@ -29,6 +30,8 @@ export default function ToolCard({ part }: Readonly<{ part: ToolPart }>) {
       case "approval-requested":
       case "approval-responded":
         return { Icon: IconLoader2, label: "等待审批", tone: "border-amber-500/40 bg-amber-500/5 text-amber-700 dark:text-amber-300", spin: false }
+      case "output-available":
+        return { Icon: IconCheck, label: "完成", tone: "border-emerald-500/40 bg-emerald-500/5 text-emerald-700 dark:text-emerald-300", spin: false }
       case "output-error":
         return { Icon: IconX, label: "失败", tone: "border-destructive/40 bg-destructive/5 text-destructive", spin: false }
     }

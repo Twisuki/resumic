@@ -66,10 +66,16 @@ export default function List() {
         const text = textParts.map(p => p.text).join("")
         const reasoning = reasoningParts.map(p => p.text).join("\n")
 
+        // 新一轮工具到来时挤掉老的 output-available (仅作为"模型思考中"提示, 已被并行 active 工具取代)
+        const hasActive = toolParts.some(p => p.state === "input-streaming" || p.state === "input-available")
+        const visibleToolParts = hasActive
+          ? toolParts.filter(p => p.state !== "output-available")
+          : toolParts
+
         return (
           <Fragment key={message.id}>
             <BubbleAi text={text} reasoning={reasoning || undefined} />
-            {toolParts.map((part, idx) => (
+            {visibleToolParts.map((part, idx) => (
               <ToolCard
                 key={`${message.id}-tool-${idx}-${"toolCallId" in part ? part.toolCallId : idx}`}
                 part={part}
