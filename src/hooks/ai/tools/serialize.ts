@@ -40,8 +40,8 @@ function getKind(node: Node): NodeKind {
 /**
  * @description 递归把子树转成可发给模型的 JSON 形状
  *
- * structure 模式 (read_structure): line 省略, part 只露 title, detail 只露 icon
- * profile  模式 (read_profile):   全字段, line 也保留 (只是没有 self 字段, 仅留 id)
+ * structure 模式 (read_structure): line 只露 id (无 content, 编辑器独占), part 只露 title, detail 只露 icon
+ * profile  模式 (read_profile):   全字段 (profile 树本无 line, 走不到 line case)
  */
 function walk(node: Node, tree: Tree, mode: WalkMode): unknown {
   const kind = getKind(node)
@@ -54,7 +54,7 @@ function walk(node: Node, tree: Tree, mode: WalkMode): unknown {
 
   switch (kind) {
     case "line":
-      return mode === "structure" ? null : { id: (node as LineNode).id, kind: "line" }
+      return { id: (node as LineNode).id, kind: "line" }
     case "page":
       return { id: (node as PageNode).id, kind: "page", children }
     case "root": {
