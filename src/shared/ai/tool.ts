@@ -7,7 +7,7 @@ export const PERMISSIONS = ["always", "ask", "deny"] as const
 export type Permission = typeof PERMISSIONS[number]
 
 /**
- * @description 7 个工具的字面量联合, 给 SDK + permission gate 用
+ * @description 工具字面量联合, 给 SDK + permission gate 用
  */
 export const TOOL_NAMES = [
   "read_structure",
@@ -17,6 +17,7 @@ export const TOOL_NAMES = [
   "insert_node",
   "remove_node",
   "reorder_nodes",
+  "move_node",
 ] as const
 export type ToolName = typeof TOOL_NAMES[number]
 
@@ -74,4 +75,14 @@ export const removeNodeInput = z.object({
 export const reorderNodesInput = z.object({
   parentId: z.string(),
   order: z.array(z.string()),
+})
+
+/**
+ * @description move_node: 把 child 从 parent 移到 newParentId 下, newParentId 必须与 parent 同 kind (同级), 整棵子树跟随, 无数据丢失
+ */
+export const moveNodeInput = z.object({
+  parentId: z.string(),
+  childId: z.string(),
+  newParentId: z.string(),
+  insertIndex: z.number().int().nonnegative().optional(),
 })
