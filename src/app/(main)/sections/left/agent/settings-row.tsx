@@ -1,7 +1,7 @@
 "use client"
 
 import type { AiApiStyle, AiConfigDto } from "@shared/model"
-import { IconCircle, IconCircleDot, IconTrash } from "@tabler/icons-react"
+import { IconCircle, IconCircleFilled, IconTrash } from "@tabler/icons-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -112,7 +112,7 @@ export default function SettingsRow({
           className="shrink-0 text-muted-foreground hover:text-foreground disabled:cursor-default"
         >
           {isActive
-            ? <IconCircleDot className="size-4 text-primary" />
+            ? <IconCircleFilled className="size-4 text-primary" />
             : <IconCircle className="size-4" />}
         </button>
         <Input

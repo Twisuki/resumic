@@ -27,7 +27,7 @@ export default function ErrorState({
             ? (
                 <>
                   <IconLoader2 className="animate-spin" />
-                  跳转中...
+                  登录中...
                 </>
               )
             : "GitHub 登录"}
