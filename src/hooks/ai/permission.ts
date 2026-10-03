@@ -20,11 +20,12 @@ export interface UseAiPermission {
  * @description 权限 store 的 UI 切片, 给弹窗组件用; 不暴露 request 等内部方法
  */
 export function useAiPermission(): UseAiPermission {
-  const pending = useAiPermissionStore(s => s.pending)
+  const queue = useAiPermissionStore(s => s.pending)
   const setMode = useAiPermissionStore(s => s.setMode)
   const resolvePending = useAiPermissionStore(s => s.resolvePending)
+  const head = queue[0]
   return {
-    pending: pending ? { toolName: pending.toolName, args: pending.args } : null,
+    pending: head ? { toolName: head.toolName, args: head.args } : null,
     setMode,
     resolvePending,
   }

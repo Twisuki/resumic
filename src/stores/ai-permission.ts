@@ -11,23 +11,23 @@ export interface PendingRequest {
 }
 
 /**
- * @description AI 工具权限 store: session-level grants 缓存 + pending 弹窗队列 (任意时刻最多 1 条)
+ * @description AI 工具权限 store: session-level grants 缓存 + pending 队列
  */
 export interface AiPermissionStore {
   grants: Map<ToolName, Permission>
-  pending: PendingRequest | null
+  pending: PendingRequest[]
 
   setMode: (name: ToolName, mode: Permission) => void
   request: (name: ToolName, args: unknown) => Promise<boolean>
   /**
-   * @description 决议 + 清空 pending, decision 传给等待中的 resolve
+   * @description 决议队首 + 出队; 队列非空时 dialog 保留, 自然切到下一个
    */
   resolvePending: (decision: boolean) => void
 }
 
 export const useAiPermissionStore = create<AiPermissionStore>()(set => ({
   grants: new Map(),
-  pending: null,
+  pending: [],
 
   setMode: (name, mode) => set((state) => {
     const next = new Map(state.grants)
@@ -36,11 +36,13 @@ export const useAiPermissionStore = create<AiPermissionStore>()(set => ({
   }),
 
   request: (name, args) => new Promise<boolean>((resolve) => {
-    set({ pending: { toolName: name, args, resolve } })
+    set(state => ({ pending: [...state.pending, { toolName: name, args, resolve }] }))
   }),
 
   resolvePending: decision => set((state) => {
-    state.pending?.resolve(decision)
-    return { pending: null }
+    const [first, ...rest] = state.pending
+    if (first)
+      first.resolve(decision)
+    return { pending: rest }
   }),
 }))
