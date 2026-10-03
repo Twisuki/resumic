@@ -1,8 +1,9 @@
 import { ai } from "@/api/ai"
 import { auth } from "@/api/auth"
+import { avatar } from "@/api/avatar"
 import { resume } from "@/api/resume"
 
 /**
  * @description 前端 API 汇总, 按 app/api 的 route 分类
  */
-export const api = { ai, auth, resume }
+export const api = { ai, auth, avatar, resume }
