@@ -7,6 +7,7 @@ import { IconCheck, IconPencil, IconPlus, IconTrash, IconUpload, IconUser } from
 import Image from "next/image"
 import { useRef, useState } from "react"
 import { toast } from "sonner"
+import ImageEditor from "@/components/image-editor"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -65,7 +66,8 @@ export default function AvatarPickerDialog({
   const remove = useAvatarRemove()
 
   const fileRef = useRef<HTMLInputElement>(null)
-  const [busyId, setBusyId] = useState<number | null>(null)
+  const [editorFile, setEditorFile] = useState<File | null>(null)
+  const [editorTargetId, setEditorTargetId] = useState<number | null>(null)
 
   const slotsSafe = slots ?? []
   const atCapacity = slotsSafe.length >= 10
@@ -74,21 +76,36 @@ export default function AvatarPickerDialog({
     fileRef.current?.click()
   }
 
-  async function handleFile(file: File, targetId?: number) {
+  function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ""
+    if (!file)
+      return
     const msg = checkFile(file)
     if (msg) {
       toast.error(msg)
       return
     }
+    setEditorFile(file)
+    setEditorTargetId(null)
+  }
+
+  function handleReplaceClick(e: MouseEvent, id: number) {
+    e.stopPropagation()
+    setEditorTargetId(id)
+    fileRef.current?.click()
+  }
+
+  async function handleEditorConfirm(processed: File) {
     const formData = new FormData()
-    formData.append("file", file)
+    formData.append("file", processed)
     try {
-      if (targetId === undefined) {
+      if (editorTargetId === null) {
         await create.mutateAsync(formData)
         toast.success("上传成功")
       }
       else {
-        await replace.mutateAsync({ id: targetId, formData })
+        await replace.mutateAsync({ id: editorTargetId, formData })
         toast.success("覆盖成功")
       }
     }
@@ -100,48 +117,31 @@ export default function AvatarPickerDialog({
         toast.error(e instanceof Error ? e.message : String(e))
       }
     }
+    setEditorFile(null)
+    setEditorTargetId(null)
   }
 
-  function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    e.target.value = ""
-    if (file)
-      void handleFile(file)
-  }
-
-  function handleReplaceClick(e: MouseEvent, id: number) {
+  function handleRemove(e: MouseEvent, id: number) {
     e.stopPropagation()
-    setBusyId(id)
-    fileRef.current?.click()
-  }
-
-  async function handleRemove(e: MouseEvent, id: number) {
-    e.stopPropagation()
-    try {
-      await remove.mutateAsync(id)
-      toast.success("已删除")
-    }
-    catch (e) {
-      if (e instanceof ApiClientError) {
-        toast.error(describeError(e.code))
+    void (async () => {
+      try {
+        await remove.mutateAsync(id)
+        toast.success("已删除")
       }
-      else {
-        toast.error(e instanceof Error ? e.message : String(e))
+      catch (e) {
+        if (e instanceof ApiClientError) {
+          toast.error(describeError(e.code))
+        }
+        else {
+          toast.error(e instanceof Error ? e.message : String(e))
+        }
       }
-    }
+    })()
   }
 
   function handlePickSlot(url: string) {
     onPick(url)
     onOpenChange(false)
-  }
-
-  function handleReplaceFileChange(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    e.target.value = ""
-    setBusyId(null)
-    if (file && busyId !== null)
-      void handleFile(file, busyId)
   }
 
   return (
@@ -159,7 +159,7 @@ export default function AvatarPickerDialog({
           type="file"
           accept={ACCEPTED_TYPES.join(",")}
           className="hidden"
-          onChange={busyId === null ? handleFileChange : handleReplaceFileChange}
+          onChange={handleFileChange}
         />
 
         <div className="grid grid-cols-3 gap-2">
@@ -206,6 +206,18 @@ export default function AvatarPickerDialog({
                 </>
               )}
         </Button>
+
+        <ImageEditor
+          open={editorFile !== null}
+          onOpenChange={(o) => {
+            if (!o) {
+              setEditorFile(null)
+              setEditorTargetId(null)
+            }
+          }}
+          file={editorFile}
+          onConfirm={handleEditorConfirm}
+        />
       </DialogContent>
     </Dialog>
   )
