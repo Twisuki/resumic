@@ -30,6 +30,7 @@ export default function Part({ id }: Readonly<{ id: string }>) {
       <RichContent
         ids={node.children}
         className="space-y-2"
+        hideIfEmpty
       />
     </section>
   )
