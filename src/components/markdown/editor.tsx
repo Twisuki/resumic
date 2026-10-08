@@ -1,6 +1,6 @@
 "use client"
 
-import type { ClipboardEvent, FormEvent, KeyboardEvent as ReactKeyboardEvent, Ref } from "react"
+import type { ClipboardEvent, FormEvent, Ref } from "react"
 import {
   useEffect,
   useImperativeHandle,
@@ -12,14 +12,15 @@ import { isWordBoundary } from "@/lib/text"
 import { cn } from "@/lib/utils"
 
 /**
- * @description 父组件命令式 API: 跨行操作之后由父组件调用 focus 投递光标
+ * @description 父组件命令式 API
+ * - focus: 聚焦并把光标放到指定字符偏移
  */
 export interface MarkdownEditorHandle {
   focus: (caret: number) => void
 }
 
 interface MarkdownEditorProps {
-  /** 父组件命令式句柄: 跨行操作之后由父组件调用 focus 投递光标 */
+  /** 父组件命令式句柄 */
   ref?: Ref<MarkdownEditorHandle>
   source: string
   onChange: (next: string) => void
@@ -27,16 +28,6 @@ interface MarkdownEditorProps {
   onCommit?: (next: string) => void
   onUndo?: () => void
   onRedo?: () => void
-  /** Enter: 在 caret 处把行拆成两段, head 留在当前, tail 交给父组件落到新行 */
-  onSplit?: (caret: number) => void
-  /** Backspace 在行首: 与上一行合并 (无上一行时由父组件决定 no-op) */
-  onMergePrev?: () => void
-  /** Delete / End-Forward 在行尾: 与下一行合并 (无下一行时由父组件决定 no-op) */
-  onMergeNext?: () => void
-  /** ArrowUp 在行首: 把光标送到上一行末 */
-  onMovePrev?: () => void
-  /** ArrowDown 在行尾: 把光标送到下一行首 */
-  onMoveNext?: () => void
   className?: string
 }
 
@@ -101,8 +92,15 @@ function applyActiveState(el: HTMLElement, caret: number | null): void {
 }
 
 /**
- * @description markdown 单行编辑组件, 完全受控于外部 source
- * 跨行操作 (Enter / Backspace-at-start / Delete-at-end / Arrow 行边界) 通过回调交给父组件编排
+ * @description markdown 多行编辑组件, 完全受控于外部 source
+ *
+ * 用 `contenteditable="plaintext-only"` 让浏览器原生把 Enter / Backspace / Delete 处理为纯文本 \n 操作,
+ * 文本始终直接进 textContent, 没有 `<br>` / `<div>` 结构差异. 这样:
+ * - DOM 与 source 始终同步, 没有"patch 已发但 DOM 未更新"的 race window
+ * - 用户连续快速敲键不会丢字
+ * - 跨行合并/拆分通过 `onInput` 拿到的 textContent 在父组件 commit 时统一 diff 成 LineNode 级 patch
+ *
+ * `whitespace-pre-wrap` 把 \n 渲染为可见换行, 与 `renderEditable` 不 escape \n 配合.
  */
 export default function MarkdownEditor({
   ref,
@@ -111,11 +109,6 @@ export default function MarkdownEditor({
   onCommit,
   onUndo,
   onRedo,
-  onSplit,
-  onMergePrev,
-  onMergeNext,
-  onMovePrev,
-  onMoveNext,
   className,
 }: Readonly<MarkdownEditorProps>) {
   const elRef = useRef<HTMLDivElement>(null)
@@ -178,16 +171,13 @@ export default function MarkdownEditor({
     caretRef.current = caretOffset(el)
     onChange(next)
 
-    // 词边界立即落库; Enter 在 beforeinput 阶段拦截, 不进入 input 路径
+    // 词边界立即落库; 跨行操作由浏览器原生完成, 走 onInput 路径
     const input = e?.nativeEvent as InputEvent | undefined
     if (isWordBoundary(input?.data ?? null))
       onCommit?.(next)
   }
 
   function handleBeforeInput(e: FormEvent<HTMLDivElement>) {
-    const el = elRef.current
-    if (!el)
-      return
     const inputType = (e.nativeEvent as InputEvent).inputType
 
     if (inputType === "historyUndo") {
@@ -198,54 +188,10 @@ export default function MarkdownEditor({
     if (inputType === "historyRedo") {
       e.preventDefault()
       onRedo?.()
-      return
     }
 
-    // Enter / Shift+Enter: 阻止浏览器默认块分裂, caret 经 onSplit 交由父组件拆行
-    if (inputType === "insertParagraph" || inputType === "insertLineBreak") {
-      const caret = caretOffset(el)
-      caretRef.current = caret
-      e.preventDefault()
-      onSplit?.(caret)
-      return
-    }
-
-    // Backspace 在行首: 与上一行合并
-    if (inputType === "deleteContentBackward" && onMergePrev) {
-      if (caretOffset(el) === 0) {
-        e.preventDefault()
-        onMergePrev()
-        return
-      }
-    }
-
-    // 行尾 forward-delete (Delete 键 / Mac Cmd+Delete 等): 与下一行合并
-    if (
-      inputType === "deleteContentForward"
-      || inputType === "deleteHardLineBackward"
-      || inputType === "deleteHardLineForward"
-    ) {
-      if (onMergeNext && caretOffset(el) === source.length) {
-        e.preventDefault()
-        onMergeNext()
-      }
-    }
-  }
-
-  function handleKeyDown(e: ReactKeyboardEvent<HTMLDivElement>) {
-    const el = elRef.current
-    if (!el)
-      return
-    // ArrowUp 在行首 / ArrowDown 在行尾: 跨行 nav
-    if (e.key === "ArrowUp" && caretOffset(el) === 0) {
-      e.preventDefault()
-      onMovePrev?.()
-      return
-    }
-    if (e.key === "ArrowDown" && caretOffset(el) === source.length) {
-      e.preventDefault()
-      onMoveNext?.()
-    }
+    // 其它 (insertParagraph / deleteContentBackward / deleteContentForward 等) 全部交给浏览器原生处理,
+    // DOM 文本会自然更新, onInput 触发后由父组件 commitLines diff 出 LineNode 级 patch
   }
 
   function handlePaste(e: ClipboardEvent<HTMLDivElement>) {
@@ -257,7 +203,9 @@ export default function MarkdownEditor({
 
     const range = selection.getRangeAt(0)
     range.deleteContents()
-    const node = document.createTextNode(e.clipboardData.getData("text/plain"))
+    // 规范化换行: Windows 剪贴板常带 \r\n, Mac 老格式 \r, 统一为 \n
+    const text = e.clipboardData.getData("text/plain").replace(/\r\n?/g, "\n")
+    const node = document.createTextNode(text)
     range.insertNode(node)
     range.setStartAfter(node)
     range.collapse(true)
@@ -270,7 +218,7 @@ export default function MarkdownEditor({
   return (
     <div
       ref={elRef}
-      contentEditable
+      contentEditable="plaintext-only"
       suppressContentEditableWarning
       role="textbox"
       aria-multiline="true"
@@ -281,7 +229,6 @@ export default function MarkdownEditor({
       )}
       onInput={handleInput}
       onBeforeInput={handleBeforeInput}
-      onKeyDown={handleKeyDown}
       onPaste={handlePaste}
       onFocus={() => {
         const el = elRef.current

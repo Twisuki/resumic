@@ -15,12 +15,15 @@ const PLUGINS: Plugin[] = [colorRule, sizeRule]
 
 /**
  * @description 装配 markdown-it, 接入自定义解析能力
+ *
+ * breaks: true 让单个 \n 渲染为行内换行, 与编辑器 `whitespace-pre-wrap` 行为一致;
+ * 富内容编辑器现在支持多行 source, 显示端必须把 \n 渲染为换行而不是被浏览器当成空格
  */
 function createParser(): MarkdownItInstance {
   const md = new MarkdownIt({
     html: false,
     linkify: true,
-    breaks: false,
+    breaks: true,
     typographer: false,
   })
 
