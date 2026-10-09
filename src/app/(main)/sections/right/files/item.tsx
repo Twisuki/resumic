@@ -1,8 +1,9 @@
 import type { ListResumesItem, Resume } from "@shared/model"
-import { IconArrowBarRight, IconCopy, IconDotsVertical, IconLoader2, IconPencil, IconTrash } from "@tabler/icons-react"
+import { IconArrowBarRight, IconCopy, IconDotsVertical, IconDownload, IconLoader2, IconPencil, IconTrash } from "@tabler/icons-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { api } from "@/api"
+import { usePrint } from "@/app/(main)/hooks/print"
 import DeleteDialog from "@/app/(main)/sections/right/files/delete-dialog"
 import IconAction from "@/app/(main)/sections/right/files/icon-action"
 import RenameDialog from "@/app/(main)/sections/right/files/rename-dialog"
@@ -32,10 +33,12 @@ export default function Item({
 }>) {
   const duplicate = useResumeDuplicate()
   const { saveAndSnapshot } = useResumeSnapshot()
+  const { trigger: triggerPrint } = usePrint()
   const [renameOpen, setRenameOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [copying, setCopying] = useState(false)
+  const [printing, setPrinting] = useState(false)
 
   /**
    * @description 导出当前行指向的简历: 当前打开的先保存再取快照, 否则直接从后端拉
@@ -72,7 +75,7 @@ export default function Item({
    * @description 备份当前行指向的简历: 当前打开的先保存再备份, 否则直接从后端拉后备份
    */
   async function handleBackup() {
-    if (exporting || copying)
+    if (exporting || copying || printing)
       return
     setCopying(true)
     try {
@@ -99,6 +102,26 @@ export default function Item({
     }
     finally {
       setCopying(false)
+    }
+  }
+
+  /**
+   * @description 导出当前行指向的简历为 PDF: 当前打开的先保存, 然后加载 /print/${id} 到 iframe,
+   * 真正的 window.print() 由 /print 页面在自己内部调
+   */
+  async function handlePrint() {
+    if (exporting || copying || printing)
+      return
+    setPrinting(true)
+    try {
+      if (active) {
+        // 错误已经 toast, 不阻塞打印 (后端可能有上一个有效状态)
+        await saveAndSnapshot()
+      }
+      triggerPrint(item.id)
+    }
+    finally {
+      setPrinting(false)
     }
   }
 
@@ -146,11 +169,15 @@ export default function Item({
                   <IconPencil />
                   重命名
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => void handleExport()} disabled={exporting || copying}>
+                <DropdownMenuItem onSelect={() => void handleExport()} disabled={exporting || copying || printing}>
                   <IconArrowBarRight />
-                  {exporting ? "导出中..." : "导出"}
+                  {exporting ? "导出 JSON 中..." : "导出 JSON"}
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => void handleBackup()} disabled={exporting || copying}>
+                <DropdownMenuItem onSelect={() => void handlePrint()} disabled={exporting || copying || printing}>
+                  <IconDownload />
+                  {printing ? "打印中..." : "导出 PDF"}
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => void handleBackup()} disabled={exporting || copying || printing}>
                   <IconCopy />
                   {copying ? "备份中..." : "备份"}
                 </DropdownMenuItem>
