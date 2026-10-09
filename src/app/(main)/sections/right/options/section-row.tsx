@@ -3,12 +3,18 @@
 import type { SectionNode } from "@shared/model/node"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { IconGripVertical, IconPencil, IconTrash } from "@tabler/icons-react"
+import { IconDotsVertical, IconGripVertical, IconPencil, IconTrash } from "@tabler/icons-react"
 import { useState } from "react"
 import SectionDeleteDialog from "@/app/(main)/sections/right/options/section-delete-dialog"
 import SectionEditDialog from "@/app/(main)/sections/right/options/section-edit-dialog"
 import Icon from "@/components/icon"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { useNode } from "@/hooks/node"
 import { cn } from "@/lib/utils"
 
@@ -21,6 +27,7 @@ export default function SectionRow({
 }>) {
   const node = useNode(id) as SectionNode | undefined
   const [editOpen, setEditOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
 
   const sortable = useSortable({
     id: `section:${id}`,
@@ -65,36 +72,43 @@ export default function SectionRow({
           {title || <span className="text-muted-foreground italic">未命名章节</span>}
         </span>
 
-        <div className="flex shrink-0 items-center gap-0.5">
-          <SectionDeleteDialog
-            pageId={pageId}
-            sectionId={id}
-            title={title}
-          >
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
             <Button
-              variant="destructive"
+              variant="ghost"
               size="icon-xs"
-              aria-label="删除章节"
+              aria-label="更多操作"
             >
-              <IconTrash className="size-3.5" />
+              <IconDotsVertical className="size-3.5" />
             </Button>
-          </SectionDeleteDialog>
-
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            aria-label="编辑章节"
-            onClick={() => setEditOpen(true)}
-          >
-            <IconPencil className="size-3.5" />
-          </Button>
-        </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onSelect={() => setEditOpen(true)}>
+              <IconPencil />
+              编辑
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              variant="destructive"
+              onSelect={() => setDeleteOpen(true)}
+            >
+              <IconTrash />
+              删除
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <SectionEditDialog
         open={editOpen}
         onOpenChange={setEditOpen}
         sectionId={id}
+      />
+      <SectionDeleteDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        pageId={pageId}
+        sectionId={id}
+        title={title}
       />
     </>
   )

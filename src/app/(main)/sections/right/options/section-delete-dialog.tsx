@@ -1,7 +1,5 @@
 "use client"
 
-import type { ReactNode } from "react"
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -10,31 +8,34 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import { useHistory } from "@/hooks/history"
 
 /**
- * @description 删除章节确认弹窗
+ * @description 受控的删除章节确认框, 由父组件传入 open/onOpenChange 控制显隐
  */
 export default function SectionDeleteDialog({
+  open,
+  onOpenChange,
   pageId,
   sectionId,
   title,
-  children,
 }: Readonly<{
+  open: boolean
+  onOpenChange: (open: boolean) => void
   pageId: string
   sectionId: string
   title: string
-  children: ReactNode
 }>) {
   const { patch } = useHistory()
-  const [open, setOpen] = useState(false)
+
+  function confirm() {
+    patch.remove(pageId, sectionId)
+    onOpenChange(false)
+  }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
-
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>删除章节</DialogTitle>
@@ -46,21 +47,8 @@ export default function SectionDeleteDialog({
         </DialogHeader>
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => setOpen(false)}
-          >
-            取消
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={() => {
-              patch.remove(pageId, sectionId)
-              setOpen(false)
-            }}
-          >
-            删除
-          </Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>取消</Button>
+          <Button variant="destructive" onClick={confirm}>删除</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
