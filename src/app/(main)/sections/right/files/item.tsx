@@ -130,35 +130,40 @@ export default function Item({
 
         {!loading && (
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <IconAction aria-label="更多操作" title="更多操作" disabled={exporting || copying}>
-                {(exporting || copying)
-                  ? <IconLoader2 className="animate-spin" />
-                  : <IconDotsVertical />}
-              </IconAction>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={() => setRenameOpen(true)}>
-                <IconPencil />
-                重命名
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => void handleExport()} disabled={exporting || copying}>
-                <IconArrowBarRight />
-                {exporting ? "导出中..." : "导出"}
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => void handleBackup()} disabled={exporting || copying}>
-                <IconCopy />
-                {copying ? "备份中..." : "备份"}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                variant="destructive"
-                onSelect={() => setDeleteOpen(true)}
-                disabled={exporting || copying}
-              >
-                <IconTrash />
-                删除
-              </DropdownMenuItem>
-            </DropdownMenuContent>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <IconAction aria-label="更多操作" disabled={exporting || copying}>
+                    {(exporting || copying)
+                      ? <IconLoader2 className="animate-spin" />
+                      : <IconDotsVertical />}
+                  </IconAction>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent>更多操作</TooltipContent>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onSelect={() => setRenameOpen(true)}>
+                  <IconPencil />
+                  重命名
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => void handleExport()} disabled={exporting || copying}>
+                  <IconArrowBarRight />
+                  {exporting ? "导出中..." : "导出"}
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => void handleBackup()} disabled={exporting || copying}>
+                  <IconCopy />
+                  {copying ? "备份中..." : "备份"}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  variant="destructive"
+                  onSelect={() => setDeleteOpen(true)}
+                  disabled={exporting || copying}
+                >
+                  <IconTrash />
+                  删除
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </Tooltip>
           </DropdownMenu>
         )}
       </div>

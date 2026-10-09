@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import SectionRow from "@/app/(main)/sections/right/options/section-row"
 import { Button } from "@/components/ui/button"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useHistory } from "@/hooks/history"
 import { useNode } from "@/hooks/node"
 import { useResume } from "@/hooks/resume"
@@ -119,15 +120,20 @@ export default function PageCard({
           </span>
 
           <div className="ml-auto flex items-center">
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              aria-label={collapsed ? "展开" : "折叠"}
-              onClick={() => setCollapsed(c => !c)}
-              className={cn("transition-transform", collapsed && "-rotate-90")}
-            >
-              <IconChevronDown className="size-3.5" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  aria-label={collapsed ? "展开" : "收起"}
+                  onClick={() => setCollapsed(c => !c)}
+                  className={cn("transition-transform", collapsed && "-rotate-90")}
+                >
+                  <IconChevronDown className="size-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{collapsed ? "展开" : "收起"}</TooltipContent>
+            </Tooltip>
           </div>
         </div>
 
