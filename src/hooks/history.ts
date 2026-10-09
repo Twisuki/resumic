@@ -175,10 +175,10 @@ function registerSave(saveFn: SaveFn): void {
 }
 
 /**
- * @description 手动保存
+ * @description 手动保存, 返回 Promise 让调用方能等到保存完成 (错误已 toast, 不会 reject)
  */
-function saveManual(): void {
-  void save("manual")
+function saveManual(): Promise<void> {
+  return save("manual")
 }
 
 /**

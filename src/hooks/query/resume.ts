@@ -42,6 +42,19 @@ export function useResumeCreate() {
 }
 
 /**
+ * @description 复制简历, 复用现有 create 接口, 但不自动 open 新简历 (避免打断用户上下文)
+ */
+export function useResumeDuplicate() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (data: Resume) => api.resume.create(data),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: keys.resume.lists() })
+    },
+  })
+}
+
+/**
  * @description 删除简历, 若删的是当前打开项则清空 store, 并刷新列表
  */
 export function useResumeDelete() {
