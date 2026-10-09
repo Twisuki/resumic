@@ -4,6 +4,7 @@ import type { SyntheticEvent } from "react"
 import { IconChevronDown, IconLoader2 } from "@tabler/icons-react"
 import { useState } from "react"
 import ReasoningBlock from "@/app/(main)/sections/left/agent/reasoning-block"
+import { Markdown } from "@/components/markdown"
 import { cn } from "@/lib/utils"
 
 /**
@@ -26,7 +27,12 @@ export default function BubbleAi({
         <div className="text-xs italic text-muted-foreground">思考中...</div>
       )}
       {!showPlaceholder && reasoning && <ReasoningBlock text={reasoning} />}
-      {text && <div className="whitespace-pre-wrap break-words">{text}</div>}
+      {text && (
+        <Markdown
+          source={text}
+          className="space-y-2 break-words"
+        />
+      )}
     </>
   )
   if (!collapsible) {
