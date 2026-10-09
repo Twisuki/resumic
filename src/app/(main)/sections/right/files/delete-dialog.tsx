@@ -1,5 +1,3 @@
-import type { ReactNode } from "react"
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -8,26 +6,31 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import { useResumeDelete } from "@/hooks/query/resume"
 
+/**
+ * @description 受控的删除简历确认框, 由父组件传入 open/onOpenChange 控制显隐
+ */
 export default function DeleteDialog({
   id,
   title,
-  children,
+  open,
+  onOpenChange,
 }: Readonly<{
   id: number
   title: string
-  children: ReactNode
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }>) {
   const remove = useResumeDelete()
-  const [open, setOpen] = useState(false)
+
+  function confirm() {
+    remove.mutate(id, { onSuccess: () => onOpenChange(false) })
+  }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
-
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>删除简历</DialogTitle>
@@ -39,16 +42,11 @@ export default function DeleteDialog({
         </DialogHeader>
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => setOpen(false)}
-          >
-            取消
-          </Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>取消</Button>
           <Button
             variant="destructive"
             disabled={remove.isPending}
-            onClick={() => remove.mutate(id, { onSuccess: () => setOpen(false) })}
+            onClick={confirm}
           >
             删除
           </Button>
