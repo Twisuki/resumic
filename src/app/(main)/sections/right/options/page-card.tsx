@@ -120,15 +120,6 @@ export default function PageCard({
 
           <div className="ml-auto flex items-center">
             <Button
-              variant="destructive"
-              size="icon-xs"
-              aria-label="删除分页"
-              onClick={handleDeletePage}
-            >
-              <IconTrash className="size-3.5" />
-            </Button>
-
-            <Button
               variant="ghost"
               size="icon-xs"
               aria-label={collapsed ? "展开" : "折叠"}
@@ -168,6 +159,18 @@ export default function PageCard({
             >
               <IconPlus className="size-3.5" />
               <span className="text-xs">新增章节</span>
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start gap-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
+              onClick={handleDeletePage}
+              disabled={sectionIds.length > 0}
+              title={sectionIds.length > 0 ? "请先删除或移走章节" : "删除分页"}
+            >
+              <IconTrash className="size-3.5" />
+              <span className="text-xs">删除分页</span>
             </Button>
           </div>
         )}
