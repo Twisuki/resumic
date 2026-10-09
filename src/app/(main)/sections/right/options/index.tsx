@@ -110,7 +110,7 @@ export default function Options() {
           </div>
         </header>
 
-        <div className="shrink-0 p-3 flex flex-col gap-4">
+        <div className="shrink-0 px-3 pb-3 pt-2 flex flex-col gap-3">
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium">缩放</span>
@@ -131,6 +131,7 @@ export default function Options() {
           <div className="flex gap-2">
             <Button
               variant="outline"
+              size="sm"
               className="flex-1 justify-start gap-2"
               onClick={() => setProfileOpen(true)}
               disabled={!currentId}
@@ -140,6 +141,7 @@ export default function Options() {
             </Button>
 
             <Button
+              size="sm"
               className="flex-1 justify-start gap-2"
               onClick={handleSave}
               disabled={!currentId || isSaving}

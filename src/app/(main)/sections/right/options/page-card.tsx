@@ -164,10 +164,10 @@ export default function PageCard({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start gap-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
+              className="w-full justify-start gap-1.5 text-muted-foreground border border-transparent hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:bg-transparent disabled:hover:text-muted-foreground disabled:hover:border-border"
               onClick={handleDeletePage}
               disabled={sectionIds.length > 0}
-              title={sectionIds.length > 0 ? "请先删除或移走章节" : "删除分页"}
+              title={sectionIds.length > 0 ? "请先清空内容" : "删除分页"}
             >
               <IconTrash className="size-3.5" />
               <span className="text-xs">删除分页</span>
