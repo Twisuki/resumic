@@ -15,7 +15,7 @@ export default function Paper({
   return (
     <div
       className={cn(
-        "bg-white shadow-lg shrink-0 flex items-start justify-center overflow-hidden p-16",
+        "bg-white shadow-lg shrink-0 flex items-start justify-center overflow-hidden p-8",
         className,
       )}
       style={{ width: PAPER.WIDTH, height: PAPER.HEIGHT }}

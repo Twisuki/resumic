@@ -7,10 +7,10 @@ export const PAPER = {
 }
 
 /**
- * @description Paper 内边距 (4rem = 64px, 与 Paper 组件 className="p-16" 保持同步)
+ * @description Paper 内边距 (2rem = 32px, 与 Paper 组件 className="p-8" 保持同步)
  * 修改 Paper 的 padding 时务必同步这里
  */
-const PAPER_PADDING = 64
+const PAPER_PADDING = 32
 
 /**
  * @description Paper 内容区 (扣除 padding)
