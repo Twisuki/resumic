@@ -50,7 +50,7 @@ export default function List() {
     <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar p-2 flex flex-col gap-3">
       {messages.length === 0 && (
         <div className="py-8 text-center text-xs text-muted-foreground">
-          开始与 AI 对话吧
+          也许我可以帮忙呢 ~
         </div>
       )}
       {messages.map((message) => {
