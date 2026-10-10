@@ -27,6 +27,20 @@ export function useResumeOpen() {
 }
 
 /**
+ * @description 拉取单份简历 (查询式, 不写 store)
+ *
+ * 主要给打印页等"用完即弃"的场景: 调用方自己根据 data 决定写不写 store.
+ * disabled 选项让非法 id 直接停在 pending, 不打接口.
+ */
+export function useResumeDetail(id: number, options?: { enabled?: boolean }) {
+  return useQuery<Resume, ApiClientError>({
+    queryKey: keys.resume.detail(id),
+    queryFn: ({ signal }) => api.resume.get(id, { signal }),
+    enabled: (options?.enabled ?? true) && Number.isInteger(id) && id > 0,
+  })
+}
+
+/**
  * @description 新建简历, 成功后打开并刷新列表
  */
 export function useResumeCreate() {

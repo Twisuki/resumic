@@ -1,7 +1,9 @@
 "use client"
 
 import { useEffect, useRef } from "react"
+import { toast } from "sonner"
 import { usePrint } from "@/app/(main)/hooks/print"
+import { isPrintMessage } from "@/lib/print-protocol"
 
 /**
  * @description 隐藏的 iframe, 用于打印简历
@@ -16,6 +18,21 @@ export default function PrintFrame() {
         iframeRef.current.src = `/print/${id}`
     })
   }, [register])
+
+  useEffect(() => {
+    function onMessage(event: MessageEvent<unknown>) {
+      if (event.source !== iframeRef.current?.contentWindow)
+        return
+      if (!isPrintMessage(event.data))
+        return
+      // 只发失败原因; success 不需要回执
+      toast.error(event.data.msg)
+    }
+    window.addEventListener("message", onMessage)
+    return () => {
+      window.removeEventListener("message", onMessage)
+    }
+  }, [])
 
   return (
     <iframe

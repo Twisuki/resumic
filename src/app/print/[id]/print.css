@@ -1,0 +1,18 @@
+/**
+ * @description 打印页专用样式
+ *
+ * - @page 控制纸张大小与页边距, 由浏览器打印引擎使用
+ * - @media print 关掉屏幕上的灰底, 只输出 Paper 本身
+ */
+
+@page {
+  size: A4;
+  margin: 0;
+}
+
+@media print {
+  html,
+  body {
+    background: white !important;
+  }
+}
