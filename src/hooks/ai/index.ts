@@ -92,6 +92,7 @@ export function useAi(): UseAi {
         messages: await convertToModelMessages([...useAiStore.getState().messages.slice(0, -1)]),
         tools,
         stopWhen: stepCountIs(MAX_STEPS),
+        maxOutputTokens: 16384,
         abortSignal: controller.signal,
       })
       const uiStream = toUIMessageStream({ stream: result.stream })
