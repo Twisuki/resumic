@@ -2,7 +2,6 @@ import type { Node, Subtree, Tree } from "@shared/model/node"
 import type { Patch } from "@shared/model/patch"
 import type { Resume } from "@shared/model/resume"
 import type { SaveFn, SaveReason } from "@/stores/history"
-import { toast } from "sonner"
 import { SAVE_THRESHOLD } from "@/config/history"
 import {
   commit as commitFn,
@@ -11,6 +10,7 @@ import {
   undo as undoFn,
 } from "@/lib/history"
 import { applyPatch, inversePatch, patch as libPatch } from "@/lib/patch"
+import { t } from "@/lib/toast"
 import { deserialize, isSubtree, leafSubtree } from "@/lib/tree"
 import { useHistoryStore } from "@/stores/history"
 import { useResumeStore } from "@/stores/resume"
@@ -89,7 +89,7 @@ async function save(reason: SaveReason): Promise<void> {
     return
   if (isSaving) {
     if (reason === "manual")
-      toast.error("正在保存中, 请稍候")
+      t.error("正在保存中, 请稍候")
     return
   }
 
@@ -106,7 +106,7 @@ async function save(reason: SaveReason): Promise<void> {
   }
   catch (error) {
     const label = reason === "auto" ? "自动保存" : "保存"
-    toast.error(`${label}失败: ${(error as Error).message}`)
+    t.error(`${label}失败: ${(error as Error).message}`)
   }
   finally {
     useHistoryStore.getState().setSaving(false)

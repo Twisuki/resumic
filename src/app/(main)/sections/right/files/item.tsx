@@ -1,7 +1,6 @@
 import type { ListResumesItem, Resume } from "@shared/model"
 import { IconArrowBarRight, IconCopy, IconDotsVertical, IconDownload, IconLoader2, IconPencil, IconTrash } from "@tabler/icons-react"
 import { useState } from "react"
-import { toast } from "sonner"
 import { api } from "@/api"
 import { usePrint } from "@/app/(main)/hooks/print"
 import DeleteDialog from "@/app/(main)/sections/right/files/delete-dialog"
@@ -18,6 +17,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useResumeDuplicate } from "@/hooks/query/resume"
 import { useResumeSnapshot } from "@/hooks/resume-snapshot"
 import { downloadResumeJson, sanitizeFilename, withCopySuffix } from "@/lib/resume-export"
+import { t } from "@/lib/toast"
 import { cn } from "@/lib/utils"
 
 export default function Item({
@@ -44,27 +44,33 @@ export default function Item({
    * @description 导出当前行指向的简历: 当前打开的先保存再取快照, 否则直接从后端拉
    */
   async function handleExport() {
-    if (exporting || copying)
+    if (exporting || copying || printing)
       return
     setExporting(true)
     try {
-      let snapshot: Resume
-      if (active) {
-        const saved = await saveAndSnapshot()
-        if (!saved) {
-          toast.error("没有可导出的简历")
-          return
-        }
-        snapshot = saved
-      }
-      else {
-        snapshot = await api.resume.get(item.id)
-      }
-      downloadResumeJson(snapshot, `${sanitizeFilename(item.title)}.json`)
-      toast.success("已导出")
+      await t.promise(
+        (async (): Promise<void> => {
+          let snapshot: Resume
+          if (active) {
+            const saved = await saveAndSnapshot()
+            if (!saved)
+              throw new Error("没有可导出的简历")
+            snapshot = saved
+          }
+          else {
+            snapshot = await api.resume.get(item.id)
+          }
+          downloadResumeJson(snapshot, `${sanitizeFilename(item.title)}.json`)
+        })(),
+        {
+          loading: "导出 JSON 中...",
+          success: "已导出",
+          error: e => `导出失败: ${e instanceof Error ? e.message : String(e)}`,
+        },
+      )
     }
-    catch (error) {
-      toast.error(`导出失败: ${(error as Error).message}`)
+    catch {
+      // toast 已经展示
     }
     finally {
       setExporting(false)
@@ -79,26 +85,32 @@ export default function Item({
       return
     setCopying(true)
     try {
-      let snapshot: Resume
-      if (active) {
-        const saved = await saveAndSnapshot()
-        if (!saved) {
-          toast.error("没有可备份的简历")
-          return
-        }
-        snapshot = saved
-      }
-      else {
-        snapshot = await api.resume.get(item.id)
-      }
-      await duplicate.mutateAsync({
-        ...snapshot,
-        title: withCopySuffix(snapshot.title),
-      })
-      toast.success("已备份")
+      await t.promise(
+        (async (): Promise<void> => {
+          let snapshot: Resume
+          if (active) {
+            const saved = await saveAndSnapshot()
+            if (!saved)
+              throw new Error("没有可备份的简历")
+            snapshot = saved
+          }
+          else {
+            snapshot = await api.resume.get(item.id)
+          }
+          await duplicate.mutateAsync({
+            ...snapshot,
+            title: withCopySuffix(snapshot.title),
+          })
+        })(),
+        {
+          loading: "备份中...",
+          success: "已备份",
+          error: e => `备份失败: ${e instanceof Error ? e.message : String(e)}`,
+        },
+      )
     }
-    catch (error) {
-      toast.error(`备份失败: ${(error as Error).message}`)
+    catch {
+      // toast 已经展示
     }
     finally {
       setCopying(false)
@@ -108,6 +120,9 @@ export default function Item({
   /**
    * @description 导出当前行指向的简历为 PDF: 当前打开的先保存, 然后加载 /print/${id} 到 iframe,
    * 真正的 window.print() 由 /print 页面在自己内部调
+   *
+   * 不走 t.promise: triggerPrint 是同步设 src, 立刻 resolve 后 toast 会瞬间跳到 success,
+   * 而 iframe 还在加载中, 体感不连贯; 改用 t.success 派发后反馈
    */
   async function handlePrint() {
     if (exporting || copying || printing)
@@ -115,10 +130,17 @@ export default function Item({
     setPrinting(true)
     try {
       if (active) {
-        // 错误已经 toast, 不阻塞打印 (后端可能有上一个有效状态)
-        await saveAndSnapshot()
+        const saved = await saveAndSnapshot()
+        if (!saved) {
+          t.error("没有可打印的简历")
+          return
+        }
       }
       triggerPrint(item.id)
+      t.success("已发送到打印对话框")
+    }
+    catch (error) {
+      t.error(`导出失败: ${(error as Error).message}`)
     }
     finally {
       setPrinting(false)

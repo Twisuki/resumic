@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { useResumeCreate } from "@/hooks/query/resume"
+import { t } from "@/lib/toast"
 
 export default function ImportDialog({
   open,
@@ -59,11 +60,24 @@ export default function ImportDialog({
     onOpenChange(next)
   }
 
-  function confirm() {
+  async function confirm() {
     if (!data) {
       return
     }
-    create.mutate(data, { onSuccess: () => handleOpenChange(false) })
+    try {
+      await t.promise(
+        create.mutateAsync(data),
+        {
+          loading: "导入中...",
+          success: "已导入",
+          error: e => `导入失败: ${e instanceof Error ? e.message : String(e)}`,
+        },
+      )
+      handleOpenChange(false)
+    }
+    catch {
+      // toast 已经展示, 弹窗保留
+    }
   }
 
   return (

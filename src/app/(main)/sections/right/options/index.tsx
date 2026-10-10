@@ -5,7 +5,6 @@ import { DndContext, DragOverlay } from "@dnd-kit/core"
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import { IconArrowBackUp, IconArrowForwardUp, IconDeviceFloppy, IconPencil } from "@tabler/icons-react"
 import { useEffect, useRef, useState } from "react"
-import { toast } from "sonner"
 import OptionsDragOverlay from "@/app/(main)/sections/right/options/options-drag-overlay"
 import PagesList from "@/app/(main)/sections/right/options/pages-list"
 import ProfileEditDialog from "@/app/(main)/sections/right/options/profile-edit-dialog"
@@ -16,6 +15,7 @@ import { Slider } from "@/components/ui/slider"
 import { useHistory } from "@/hooks/history"
 import { useNode } from "@/hooks/node"
 import { useResume } from "@/hooks/resume"
+import { t } from "@/lib/toast"
 
 export default function Options() {
   const { resumeRootId } = useResume()
@@ -29,7 +29,7 @@ export default function Options() {
 
   function handleSave() {
     if (!currentId) {
-      toast.error("没有可保存的简历")
+      t.error("没有可保存的简历")
       return
     }
     save()

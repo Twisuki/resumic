@@ -7,7 +7,6 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-
 import { CSS } from "@dnd-kit/utilities"
 import { IconChevronDown, IconGripVertical, IconPlus, IconTrash } from "@tabler/icons-react"
 import { useEffect, useRef, useState } from "react"
-import { toast } from "sonner"
 import SectionRow from "@/app/(main)/sections/right/options/section-row"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
@@ -15,6 +14,7 @@ import { useHistory } from "@/hooks/history"
 import { useNode } from "@/hooks/node"
 import { useResume } from "@/hooks/resume"
 import { genId } from "@/lib/id"
+import { t } from "@/lib/toast"
 import { cn } from "@/lib/utils"
 
 export default function PageCard({
@@ -76,7 +76,7 @@ export default function PageCard({
 
   function handleDeletePage() {
     if (sectionIds.length > 0) {
-      toast.warning("分页内还有章节, 请先删除或移走章节")
+      t.warning("分页内还有章节, 请先删除或移走章节")
       return
     }
     if (!resumeRootId)

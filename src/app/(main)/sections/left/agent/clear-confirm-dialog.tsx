@@ -1,5 +1,3 @@
-"use client"
-
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -9,10 +7,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { t } from "@/lib/toast"
 
-/**
- * @description 清空对话确认弹窗: 破坏性操作走强制 dialog 确认, 不用 toast
- */
+/** @description 清空对话确认弹窗, 破坏性操作走强制 dialog 确认 */
 export default function ClearConfirmDialog({
   open,
   onOpenChange,
@@ -40,6 +37,7 @@ export default function ClearConfirmDialog({
             variant="destructive"
             onClick={() => {
               onConfirm()
+              t.success("已清空对话")
               onOpenChange(false)
             }}
           >

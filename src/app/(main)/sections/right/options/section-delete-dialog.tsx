@@ -1,5 +1,3 @@
-"use client"
-
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -10,10 +8,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { useHistory } from "@/hooks/history"
+import { t } from "@/lib/toast"
 
-/**
- * @description 受控的删除章节确认框, 由父组件传入 open/onOpenChange 控制显隐
- */
+/** @description 受控的删除章节确认框 */
 export default function SectionDeleteDialog({
   open,
   onOpenChange,
@@ -31,6 +28,7 @@ export default function SectionDeleteDialog({
 
   function confirm() {
     patch.remove(pageId, sectionId)
+    t.success("已删除章节")
     onOpenChange(false)
   }
 

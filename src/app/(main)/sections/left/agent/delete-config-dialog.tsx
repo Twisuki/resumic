@@ -1,7 +1,4 @@
-"use client"
-
 import type { AiConfigDto } from "@shared/model"
-import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -12,10 +9,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { useDeleteConfig } from "@/hooks/ai"
+import { t } from "@/lib/toast"
 
-/**
- * @description 删除 AI 配置确认弹窗; 取消/esc 不删, 确认才删
- */
+/** @description 删除 AI 配置确认弹窗, 取消 / esc 不删, 确认才删 */
 export default function DeleteConfigDialog({
   config,
   open,
@@ -30,16 +26,15 @@ export default function DeleteConfigDialog({
   async function handleConfirm() {
     if (!config)
       return
-    try {
-      await deleteConfig.mutateAsync(config.id)
-      toast.success("已删除")
-    }
-    catch (e) {
-      toast.error(`删除失败: ${e instanceof Error ? e.message : String(e)}`)
-    }
-    finally {
-      onOpenChange(false)
-    }
+    await t.promise(
+      deleteConfig.mutateAsync(config.id),
+      {
+        loading: "删除中...",
+        success: "已删除",
+        error: e => `删除失败: ${e instanceof Error ? e.message : String(e)}`,
+      },
+    ).catch(() => {})
+    onOpenChange(false)
   }
 
   return (

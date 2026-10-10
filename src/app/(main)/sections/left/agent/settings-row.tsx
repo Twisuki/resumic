@@ -3,7 +3,6 @@
 import type { AiApiStyle, AiConfigDto } from "@shared/model"
 import { IconCircle, IconCircleFilled, IconTrash } from "@tabler/icons-react"
 import { useState } from "react"
-import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -11,12 +10,11 @@ import {
   useCreateConfig,
   useUpdateConfig,
 } from "@/hooks/ai"
+import { t } from "@/lib/toast"
 
 const API_STYLES: readonly AiApiStyle[] = ["openai", "anthropic"]
 
-/**
- * @description 单行 AI 配置: 字段受控编辑 + 保存; 新建模式 (config=undefined) 时字段空; 同 id 由父级 key 触发重挂避免 effect 同步
- */
+/** @description 单行 AI 配置: 字段受控编辑 + 保存; 新建模式时字段空; 同 id 由父级 key 触发重挂避免 effect 同步 */
 export default function SettingsRow({
   config,
   onRequestDelete,
@@ -43,30 +41,37 @@ export default function SettingsRow({
 
   async function handleSave() {
     if (!label.trim()) {
-      toast.error("label 不能为空")
+      t.error("label 不能为空")
       return
     }
     if (!baseUrl.trim()) {
-      toast.error("baseUrl 不能为空")
+      t.error("baseUrl 不能为空")
       return
     }
     if (!model.trim()) {
-      toast.error("model 不能为空")
+      t.error("model 不能为空")
       return
     }
     try {
       if (isNew) {
         if (!key.trim()) {
-          toast.error("新建时 key 必填")
+          t.error("新建时 key 必填")
           return
         }
-        await createConfig.mutateAsync({
-          label: label.trim(),
-          apiStyle,
-          baseUrl: baseUrl.trim(),
-          model: model.trim(),
-          key: key.trim(),
-        })
+        await t.promise(
+          createConfig.mutateAsync({
+            label: label.trim(),
+            apiStyle,
+            baseUrl: baseUrl.trim(),
+            model: model.trim(),
+            key: key.trim(),
+          }),
+          {
+            loading: "保存中...",
+            success: "已保存",
+            error: e => `保存失败: ${e instanceof Error ? e.message : String(e)}`,
+          },
+        ).catch(() => {})
       }
       else {
         const payload: Parameters<typeof updateConfig.mutateAsync>[0] = {
@@ -80,25 +85,34 @@ export default function SettingsRow({
         }
         if (key.trim())
           payload.data.key = key.trim()
-        await updateConfig.mutateAsync(payload)
+        await t.promise(
+          updateConfig.mutateAsync(payload),
+          {
+            loading: "保存中...",
+            success: "已保存",
+            error: e => `保存失败: ${e instanceof Error ? e.message : String(e)}`,
+          },
+        ).catch(() => {})
       }
       setKey("")
       onSaved?.()
     }
-    catch (e) {
-      toast.error(`保存失败: ${e instanceof Error ? e.message : String(e)}`)
+    catch {
+      // toast 已经展示
     }
   }
 
   async function handleActivate() {
     if (!config || isActive)
       return
-    try {
-      await activateConfig.mutateAsync(config.id)
-    }
-    catch (e) {
-      toast.error(`切换失败: ${e instanceof Error ? e.message : String(e)}`)
-    }
+    await t.promise(
+      activateConfig.mutateAsync(config.id),
+      {
+        loading: "切换中...",
+        success: "已切换",
+        error: e => `切换失败: ${e instanceof Error ? e.message : String(e)}`,
+      },
+    ).catch(() => {})
   }
 
   return (

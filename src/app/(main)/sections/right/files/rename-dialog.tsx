@@ -10,11 +10,9 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { useResumeRename } from "@/hooks/query/resume"
+import { t } from "@/lib/toast"
 
-/**
- * @description 受控的重命名简历对话框, 由父组件传入 open/onOpenChange 控制显隐
- * 打开时自动把 draft 同步为最新 title, Enter 提交, Esc 取消
- */
+/** @description 受控的重命名简历对话框, 打开时把 draft 同步为最新 title, Enter 提交, Esc 取消 */
 export default function RenameDialog({
   id,
   title,
@@ -36,13 +34,26 @@ export default function RenameDialog({
       setDraft(title)
   }, [open, title])
 
-  function confirm() {
+  async function confirm() {
     const next = draft.trim()
     if (!next || next === title) {
       onOpenChange(false)
       return
     }
-    rename.mutate({ id, title: next }, { onSuccess: () => onOpenChange(false) })
+    try {
+      await t.promise(
+        rename.mutateAsync({ id, title: next }),
+        {
+          loading: "重命名中...",
+          success: "已重命名",
+          error: e => `重命名失败: ${e instanceof Error ? e.message : String(e)}`,
+        },
+      )
+      onOpenChange(false)
+    }
+    catch {
+      // toast 已经展示, 弹窗保留
+    }
   }
 
   const trimmed = draft.trim()

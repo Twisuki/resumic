@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
-import { toast } from "sonner"
+import { t } from "@/lib/toast"
 
 /**
  * @description 消费 /api/auth/github/callback 302 跳回时携带的 ?login=failed 参数,
@@ -21,6 +21,6 @@ export function useLoginError(): void {
     url.searchParams.delete("msg")
     window.history.replaceState(null, "", url.pathname + url.search + url.hash)
 
-    toast.error(msg)
+    t.error(msg)
   }, [])
 }

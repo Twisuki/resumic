@@ -4,11 +4,20 @@ import Item from "@/app/(main)/sections/right/files/item"
 import ListSkeleton from "@/app/(main)/sections/right/files/skeleton"
 import { useResumeList, useResumeOpen } from "@/hooks/query/resume"
 import { useResume } from "@/hooks/resume"
+import { t } from "@/lib/toast"
 
 export default function Files() {
   const list = useResumeList()
   const open = useResumeOpen()
   const currentId = useResume().id
+
+  function handleOpen(id: number) {
+    open.mutate(id, {
+      onError: (e) => {
+        t.error(`打开失败: ${e instanceof Error ? e.message : String(e)}`)
+      },
+    })
+  }
 
   return (
     <div className="w-full h-72 shrink-0 flex flex-col border-b border-sidebar-border">
@@ -31,7 +40,7 @@ export default function Files() {
                 item={item}
                 active={item.id === currentId}
                 loading={open.isPending && open.variables === item.id}
-                onOpen={open.mutate}
+                onOpen={handleOpen}
               />
             ))}
 

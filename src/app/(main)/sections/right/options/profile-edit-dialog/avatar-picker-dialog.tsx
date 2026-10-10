@@ -6,7 +6,6 @@ import { ErrorCode } from "@shared/error-code"
 import { IconCheck, IconPencil, IconPlus, IconTrash, IconUpload, IconUser } from "@tabler/icons-react"
 import Image from "next/image"
 import { useRef, useState } from "react"
-import { toast } from "sonner"
 import ImageEditor from "@/components/image-editor"
 import { Button } from "@/components/ui/button"
 import {
@@ -18,6 +17,7 @@ import {
 } from "@/components/ui/dialog"
 import { useAvatarCreate, useAvatarList, useAvatarRemove, useAvatarReplace } from "@/hooks/query/avatar"
 import { ApiClientError } from "@/lib/request"
+import { t } from "@/lib/toast"
 import { cn } from "@/lib/utils"
 
 /**
@@ -46,9 +46,13 @@ function describeError(code: number): string {
   return "操作失败"
 }
 
-/**
- * @description 头像槽位 picker 弹窗: 槽位 grid + 上传 + 覆盖 / 删除 / 选用; 选用走 onPick, 不调 patch
- */
+function describeApiError(e: unknown): string {
+  if (e instanceof ApiClientError)
+    return describeError(e.code)
+  return e instanceof Error ? e.message : String(e)
+}
+
+/** @description 头像槽位 picker 弹窗: 槽位 grid + 上传 + 覆盖 / 删除 / 选用; 选用走 onPick, 不调 patch */
 export default function AvatarPickerDialog({
   open,
   onOpenChange,
@@ -83,7 +87,7 @@ export default function AvatarPickerDialog({
       return
     const msg = checkFile(file)
     if (msg) {
-      toast.error(msg)
+      t.error(msg)
       return
     }
     setEditorFile(file)
@@ -99,44 +103,35 @@ export default function AvatarPickerDialog({
   async function handleEditorConfirm(processed: File) {
     const formData = new FormData()
     formData.append("file", processed)
+    const isCreate = editorTargetId === null
     try {
-      if (editorTargetId === null) {
-        await create.mutateAsync(formData)
-        toast.success("上传成功")
-      }
-      else {
-        await replace.mutateAsync({ id: editorTargetId, formData })
-        toast.success("覆盖成功")
-      }
+      await t.promise(
+        isCreate
+          ? create.mutateAsync(formData)
+          : replace.mutateAsync({ id: editorTargetId, formData }),
+        {
+          loading: "上传中...",
+          success: isCreate ? "上传成功" : "覆盖成功",
+          error: e => describeApiError(e),
+        },
+      ).catch(() => {})
     }
-    catch (e) {
-      if (e instanceof ApiClientError) {
-        toast.error(describeError(e.code))
-      }
-      else {
-        toast.error(e instanceof Error ? e.message : String(e))
-      }
+    finally {
+      setEditorFile(null)
+      setEditorTargetId(null)
     }
-    setEditorFile(null)
-    setEditorTargetId(null)
   }
 
   function handleRemove(e: MouseEvent, id: number) {
     e.stopPropagation()
-    void (async () => {
-      try {
-        await remove.mutateAsync(id)
-        toast.success("已删除")
-      }
-      catch (e) {
-        if (e instanceof ApiClientError) {
-          toast.error(describeError(e.code))
-        }
-        else {
-          toast.error(e instanceof Error ? e.message : String(e))
-        }
-      }
-    })()
+    void t.promise(
+      remove.mutateAsync(id),
+      {
+        loading: "删除中...",
+        success: "已删除",
+        error: e => describeApiError(e),
+      },
+    )
   }
 
   function handlePickSlot(url: string) {
