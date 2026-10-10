@@ -22,7 +22,7 @@ export function useLoginTrigger(): UseLoginTrigger {
       return
     const timer = window.setTimeout(() => {
       setLoginPending(false)
-      t.error("跳转超时, 请重试")
+      t.error("登录超时, 请重试")
     }, LOGIN_TIMEOUT)
     redirectToGithubLogin()
     return () => window.clearTimeout(timer)

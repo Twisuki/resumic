@@ -14,7 +14,7 @@ export function useLoading(): LoadingState {
   const list = useResumeList()
 
   if (loginPending)
-    return { visible: true, message: "正在跳转..." }
+    return { visible: true, message: "正在登录..." }
   if (session.status === "pending")
     return { visible: true, message: "正在加载..." }
   if (session.status === "authenticated" && list.isPending)
