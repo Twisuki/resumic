@@ -18,12 +18,12 @@ export default function Profile() {
   const baseInfo = [gender, age].filter(Boolean).join(" | ")
 
   return (
-    <section className="flex items-center gap-6">
-      <div className="min-w-0 flex-1 flex flex-col items-center">
+    <section className="flex items-stretch gap-6">
+      <div className="min-w-0 flex-1 flex flex-col items-center justify-between">
         <h1 className="text-3xl font-bold">{name}</h1>
         {headline && <p>{headline}</p>}
 
-        <div className="mt-2 flex flex-col items-center gap-y-1">
+        <div className="flex flex-col items-center gap-y-1">
           <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
             {baseInfo && (
               <div className="flex items-center gap-1">
