@@ -1,11 +1,11 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect } from "react"
+import { useLoadingContext } from "@/app/(main)/contexts/loading"
 import { redirectToGithubLogin } from "@/lib/auth-action"
+import { t } from "@/lib/toast"
 
-/**
- * @description 跳转失败 (拦截, 服务器异常等) 后兜底回退的等待窗口
- */
+/** @description 跳转失败 (拦截, 服务器异常等) 后兜底回退的等待窗口 */
 const LOGIN_TIMEOUT = 5000
 
 interface UseLoginTrigger {
@@ -13,23 +13,24 @@ interface UseLoginTrigger {
   trigger: () => void
 }
 
-/**
- * @description 用户点击登录后, 把 pending 置 true, useEffect 真正触发跳转
- */
+/** @description 用户点击登录后置 pending, useEffect 真正触发跳转; 超时回退并 toast */
 export function useLoginTrigger(): UseLoginTrigger {
-  const [pending, setPending] = useState(false)
+  const { loginPending, setLoginPending } = useLoadingContext()
 
   useEffect(() => {
-    if (!pending)
+    if (!loginPending)
       return
-    const timer = window.setTimeout(setPending, LOGIN_TIMEOUT, false)
+    const timer = window.setTimeout(() => {
+      setLoginPending(false)
+      t.error("跳转超时, 请重试")
+    }, LOGIN_TIMEOUT)
     redirectToGithubLogin()
     return () => window.clearTimeout(timer)
-  }, [pending])
+  }, [loginPending, setLoginPending])
 
   const trigger = useCallback(() => {
-    setPending(true)
-  }, [])
+    setLoginPending(true)
+  }, [setLoginPending])
 
-  return { pending, trigger }
+  return { pending: loginPending, trigger }
 }
