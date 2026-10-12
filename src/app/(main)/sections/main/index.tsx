@@ -7,13 +7,16 @@ import { Resume } from "@/components/resume"
 import { useResume } from "@/hooks/resume"
 import { useSession } from "@/hooks/session"
 
-/** @description 主区域: 未登录显示介绍 + 登录引导, 已登录但未加载简历显示占位, 否则渲染 Resume */
+import { useTrialMode } from "@/lib/trial-mode"
+
+/** @description 主区域允许已登录或本地试用编辑, 无简历时显示占位 */
 export default function Main() {
   const { scale, ref } = useScale<HTMLDivElement>()
   const { id } = useResume()
   const { status } = useSession()
+  const { enabled } = useTrialMode()
 
-  if (status === "anonymous" || status === "error") {
+  if (!enabled && (status === "anonymous" || status === "error")) {
     return (
       <main
         ref={ref}

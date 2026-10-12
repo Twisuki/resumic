@@ -1,5 +1,7 @@
 import { IconLoader2 } from "@tabler/icons-react"
+import { useState } from "react"
 import Avatar from "@/app/(main)/sections/navbar/avatar"
+import ClearTrialDialog from "@/app/(main)/sections/navbar/clear-trial-dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +13,9 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { useLoginTrigger } from "@/hooks/login"
 import { useSession } from "@/hooks/session"
+import { useTrialActions } from "@/hooks/trial"
 import { logout } from "@/lib/auth-action"
+import { useTrialMode } from "@/lib/trial-mode"
 
 /**
  * @description 账号下拉菜单, 触发头是头像, 内容跟随登录态
@@ -19,6 +23,9 @@ import { logout } from "@/lib/auth-action"
 export default function UserMenu() {
   const { user, status, refresh } = useSession()
   const { pending: loginPending, trigger: triggerLogin } = useLoginTrigger()
+  const { enabled } = useTrialMode()
+  const { enter, close } = useTrialActions()
+  const [clearOpen, setClearOpen] = useState(false)
 
   // 首屏还没恢复完, 不能显示"未登录", 否则已登录用户会看到闪烁
   if (status === "pending") {
@@ -29,66 +36,82 @@ export default function UserMenu() {
   const avatarUrl = user ? `https://github.com/${user.github}.png` : null
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        aria-label="账号菜单"
-        className="flex size-8 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-      >
-        <Avatar name={user?.name} url={avatarUrl} />
-      </DropdownMenuTrigger>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          aria-label="账号菜单"
+          className="flex h-8 min-w-8 gap-2 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        >
+          <Avatar name={user?.name} url={avatarUrl} />
+          {enabled && <span className="text-xs text-muted-foreground pr-2">本地试用</span>}
+        </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="min-w-56">
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex items-center gap-2 py-0.5">
-            <Avatar name={user?.name} url={avatarUrl} />
-            <div className="flex min-w-0 flex-col">
-              <span className="truncate text-sm text-foreground">
-                {user?.name ?? (status === "anonymous" ? "未登录" : "加载失败")}
-              </span>
-              {user && (
-                <span className="truncate text-xs text-muted-foreground">
-                  @
-                  {user.github}
+        <DropdownMenuContent align="end" className="min-w-56">
+          <DropdownMenuLabel className="font-normal">
+            <div className="flex items-center gap-2 py-0.5">
+              <Avatar name={user?.name} url={avatarUrl} />
+              <div className="flex min-w-0 flex-col">
+                <span className="truncate text-sm text-foreground">
+                  {enabled ? "本地试用" : user?.name ?? (status === "anonymous" ? "未登录" : "加载失败")}
                 </span>
-              )}
+                {enabled && <span className="text-xs text-muted-foreground">简历保存在此浏览器</span>}
+                {user && (
+                  <span className="truncate text-xs text-muted-foreground">
+                    @
+                    {user.github}
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
-        </DropdownMenuLabel>
+          </DropdownMenuLabel>
 
-        <DropdownMenuSeparator />
+          <DropdownMenuSeparator />
 
-        {status === "authenticated" && (
-          <DropdownMenuItem variant="destructive" onSelect={() => void logout()}>
-            退出登录
-          </DropdownMenuItem>
-        )}
+          {status === "authenticated" && (
+            <DropdownMenuItem variant="destructive" onSelect={() => void logout()}>
+              退出登录
+            </DropdownMenuItem>
+          )}
 
-        {status === "anonymous" && (
-          <DropdownMenuItem
-            disabled={loginPending}
-            onSelect={(event) => {
-              // 阻止下拉自动关闭, 让 spinner 在原位可见
-              event.preventDefault()
-              triggerLogin()
-            }}
-          >
-            {loginPending
-              ? (
-                  <>
-                    <IconLoader2 className="size-3.5 animate-spin" />
-                    登录中...
-                  </>
-                )
-              : "登录"}
-          </DropdownMenuItem>
-        )}
+          {status === "anonymous" && (
+            <DropdownMenuItem
+              disabled={loginPending}
+              onSelect={(event) => {
+                // 阻止下拉自动关闭, 让 spinner 在原位可见
+                event.preventDefault()
+                triggerLogin()
+              }}
+            >
+              {loginPending
+                ? (
+                    <>
+                      <IconLoader2 className="size-3.5 animate-spin" />
+                      登录中...
+                    </>
+                  )
+                : enabled ? "GitHub 登录" : "登录"}
+            </DropdownMenuItem>
+          )}
 
-        {status === "error" && (
-          <DropdownMenuItem onSelect={refresh}>
-            加载失败, 点击重试
-          </DropdownMenuItem>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+          {enabled && (
+            <>
+              <DropdownMenuItem disabled={loginPending} onSelect={() => void close()}>关闭本地试用</DropdownMenuItem>
+              <DropdownMenuItem variant="destructive" disabled={loginPending} onSelect={() => setClearOpen(true)}>清空本地数据</DropdownMenuItem>
+            </>
+          )}
+
+          {!enabled && status === "anonymous" && (
+            <DropdownMenuItem disabled={loginPending} onSelect={() => void enter()}>本地试用</DropdownMenuItem>
+          )}
+
+          {status === "error" && (
+            <DropdownMenuItem onSelect={refresh}>
+              加载失败, 点击重试
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <ClearTrialDialog open={clearOpen} onOpenChange={setClearOpen} />
+    </>
   )
 }

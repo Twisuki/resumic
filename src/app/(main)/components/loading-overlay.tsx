@@ -1,11 +1,31 @@
 "use client"
 
 import { Loader2 } from "lucide-react"
+import { useEffect } from "react"
 import { useLoading } from "@/app/(main)/hooks/loading"
+import { useTrialMode } from "@/lib/trial-mode"
 
 /** @description 统一的页面级加载遮罩, 状态由 useLoading 计算, 本组件只负责渲染 */
 export default function LoadingOverlay() {
   const { visible, message } = useLoading()
+  const { locked } = useTrialMode()
+
+  useEffect(() => {
+    if (!locked)
+      return
+    const block = (event: Event) => {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+    const events = ["keydown", "beforeinput", "paste", "drop"]
+    for (const event of events)
+      document.addEventListener(event, block, true)
+    return () => {
+      for (const event of events)
+        document.removeEventListener(event, block, true)
+    }
+  }, [locked])
+
   if (!visible || !message)
     return null
 

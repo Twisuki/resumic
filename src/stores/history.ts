@@ -7,10 +7,13 @@ import { create } from "zustand"
  */
 export type SaveReason = "auto" | "manual"
 
-/**
- * @description 保存传输函数: 只负责把快照按 reason 落库, 具体策略由 history hook 决定
- */
-export type SaveFn = (snapshot: Resume, reason: SaveReason) => Promise<void>
+export interface SavedResume {
+  id: number
+  data: Resume
+}
+
+/** @description 保存传输使用捕获的简历 ID 和快照, 不重读当前编辑器 */
+export type SaveFn = (snapshot: SavedResume, reason: SaveReason) => Promise<void>
 
 /**
  * @description 简历历史 store (纯状态容器, 编排逻辑见 hooks/history.ts)

@@ -6,6 +6,7 @@ import { commitLines } from "@/components/rich-content/commit"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { registerFlush, useHistory } from "@/hooks/history"
 import { useRichContent } from "@/hooks/rich-content"
+import { isEditorReady } from "@/lib/trial-mode"
 
 /**
  * @description 没有词边界 / 合成结束时, 长停顿兜底提交的延迟
@@ -54,6 +55,8 @@ export default function RichContentEditor({
    * @description 把 localRef.current (joined source) 落库
    */
   const applyCommit = useCallback(() => {
+    if (!isEditorReady())
+      return
     clearTimer()
     if (!dirtyRef.current)
       return
@@ -71,6 +74,8 @@ export default function RichContentEditor({
   }, [applyCommit])
 
   function handleChange(next: string) {
+    if (!isEditorReady())
+      return
     setLocal(next)
     localRef.current = next
     dirtyRef.current = true
@@ -79,6 +84,8 @@ export default function RichContentEditor({
   }
 
   function handleCommit(next: string) {
+    if (!isEditorReady())
+      return
     setLocal(next)
     localRef.current = next
     dirtyRef.current = true

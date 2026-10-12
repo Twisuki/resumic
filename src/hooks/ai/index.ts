@@ -16,7 +16,7 @@ import { toolsForRun } from "@/hooks/ai/tools"
 import { createAiRun } from "@/lib/ai-runtime"
 import { genId } from "@/lib/id"
 import { ApiClientError } from "@/lib/request"
-import { isModeReady, isTrialMode } from "@/lib/trial-mode"
+import { isEditorReady, isTrialMode } from "@/lib/trial-mode"
 import { useAiStore } from "@/stores/ai"
 import { useAiPermissionStore } from "@/stores/ai-permission"
 
@@ -82,7 +82,7 @@ export function useAi(): UseAi {
 
   const send = useCallback(async (input: string) => {
     const text = input.trim()
-    if (!text || !model || !isModeReady() || useAiStore.getState().status === "streaming")
+    if (!text || !model || !isEditorReady() || useAiStore.getState().status === "streaming")
       return
 
     const userMsg: UIMessage = { id: genId(), role: "user", parts: [{ type: "text", text }] }

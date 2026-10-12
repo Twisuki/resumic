@@ -4,6 +4,7 @@ import type { ChangeEvent, KeyboardEvent, CompositionEvent as ReactCompositionEv
 import { useEffect, useRef, useState } from "react"
 import { registerFlush, useHistory } from "@/hooks/history"
 import { isWordBoundary } from "@/lib/text"
+import { isEditorReady } from "@/lib/trial-mode"
 
 /**
  * @description 非合成输入没有词边界可依时的兜底提交延迟
@@ -40,6 +41,8 @@ export function usePatchInput(id: string, key: string, value: string) {
   }
 
   function commit() {
+    if (!isEditorReady())
+      return
     clearTimer()
     const next = pendingRef.current
     pendingRef.current = null
@@ -48,6 +51,8 @@ export function usePatchInput(id: string, key: string, value: string) {
   }
 
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
+    if (!isEditorReady())
+      return
     const next = e.target.value
     setLocal(next)
     pendingRef.current = next
@@ -63,12 +68,16 @@ export function usePatchInput(id: string, key: string, value: string) {
   }
 
   function handleCompositionStart() {
+    if (!isEditorReady())
+      return
     composingRef.current = true
     clearTimer()
   }
 
   function handleCompositionEnd(e: ReactCompositionEvent<HTMLInputElement>) {
     composingRef.current = false
+    if (!isEditorReady())
+      return
     const next = e.currentTarget.value
     setLocal(next)
     pendingRef.current = next

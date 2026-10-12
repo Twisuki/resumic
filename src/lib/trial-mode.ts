@@ -12,12 +12,14 @@ export interface TrialSnapshot {
   generation: number
   error: Error | null
   user: MeResponse | null
+  locked: boolean
 }
 
-const serverSnapshot: TrialSnapshot = { status: "boot", generation: 0, error: null, user: null }
+const serverSnapshot: TrialSnapshot = { status: "boot", generation: 0, error: null, user: null, locked: false }
 let snapshot = serverSnapshot
 const listeners = new Set<() => void>()
 const operations = new Set<Promise<unknown>>()
+const resumeWrites = new Set<Promise<unknown>>()
 let transition: ((action: TrialAction) => Promise<void>) | undefined
 
 function subscribe(listener: () => void): () => void {
@@ -39,9 +41,24 @@ export function isTrialMode(): boolean {
   return snapshot.status === "trial"
 }
 
+export function isEditorReady(): boolean {
+  return isModeReady() && !snapshot.locked
+}
+
+/** @description 保存边界保持当前模式和代次, 只冻结新的编辑及 API 操作 */
+export function setEditorLocked(locked: boolean): void {
+  snapshot = { ...snapshot, locked }
+  for (const listener of listeners)
+    listener()
+}
+
+export function hasResumeWrites(): boolean {
+  return resumeWrites.size > 0
+}
+
 /** @description 发布模式快照并使上一代异步操作失效 */
 export function setTrialStatus(status: TrialStatus, error: Error | null = null, user: MeResponse | null = null): void {
-  snapshot = { status, generation: snapshot.generation + 1, error, user }
+  snapshot = { status, generation: snapshot.generation + 1, error, user, locked: snapshot.locked }
   for (const listener of listeners)
     listener()
 }
@@ -75,9 +92,9 @@ export function writeTrialEnabled(enabled: boolean): void {
 }
 
 /** @description 固定调用所属模式, 切换后拒绝迟到结果 */
-export async function runInMode<T>(operation: (mode: "trial" | "remote") => Promise<T>): Promise<T> {
-  if (!isModeReady())
-    throw new ApiClientError(ErrorCode.System.Internal, "模式尚未就绪，请等待初始化或切换完成")
+export async function runInMode<T>(operation: (mode: "trial" | "remote") => Promise<T>, kind?: "resume-write"): Promise<T> {
+  if (!isEditorReady())
+    throw new ApiClientError(ErrorCode.System.Internal, "正在保存或切换模式，请稍候")
   const { generation } = snapshot
   const pending = operation(isTrialMode() ? "trial" : "remote").then((result) => {
     if (!isModeReady() || snapshot.generation !== generation)
@@ -85,7 +102,13 @@ export async function runInMode<T>(operation: (mode: "trial" | "remote") => Prom
     return result
   })
   operations.add(pending)
-  void pending.then(() => operations.delete(pending), () => operations.delete(pending))
+  if (kind === "resume-write")
+    resumeWrites.add(pending)
+  const finish = () => {
+    operations.delete(pending)
+    resumeWrites.delete(pending)
+  }
+  void pending.then(finish, finish)
   return pending
 }
 

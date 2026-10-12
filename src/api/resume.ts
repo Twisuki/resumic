@@ -34,7 +34,7 @@ export const resume = {
   create: (data: CreateResumeRequest, options?: RequestOptions) =>
     runInMode(mode => mode === "trial"
       ? localServer.resume.create(data, options)
-      : request<CreateResumeResponse>("/resume", { ...options, method: "POST", body: data })),
+      : request<CreateResumeResponse>("/resume", { ...options, method: "POST", body: data }), "resume-write"),
 
   /**
    * @description 全量更新简历
@@ -42,7 +42,7 @@ export const resume = {
   update: (id: number, data: UpdateResumeRequest, options?: RequestOptions) =>
     runInMode(mode => mode === "trial"
       ? localServer.resume.update(id, data, options)
-      : request<UpdateResumeResponse>(`/resume/${id}`, { ...options, method: "PUT", body: data })),
+      : request<UpdateResumeResponse>(`/resume/${id}`, { ...options, method: "PUT", body: data }), "resume-write"),
 
   /**
    * @description 重命名简历
@@ -50,12 +50,12 @@ export const resume = {
   rename: (id: number, data: RenameResumeRequest, options?: RequestOptions) =>
     runInMode(mode => mode === "trial"
       ? localServer.resume.rename(id, data, options)
-      : request<RenameResumeResponse>(`/resume/${id}`, { ...options, method: "PATCH", body: data })),
+      : request<RenameResumeResponse>(`/resume/${id}`, { ...options, method: "PATCH", body: data }), "resume-write"),
 
   /**
    * @description 删除简历
    */
   remove: (id: number, options?: RequestOptions) => runInMode(mode => mode === "trial"
     ? localServer.resume.remove(id, options)
-    : request<null>(`/resume/${id}`, { ...options, method: "DELETE" })),
+    : request<null>(`/resume/${id}`, { ...options, method: "DELETE" }), "resume-write"),
 }

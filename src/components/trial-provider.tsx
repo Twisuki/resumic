@@ -17,6 +17,7 @@ import {
   isModeReady,
   readTrialEnabled,
   registerTrialTransition,
+  setEditorLocked,
   setTrialStatus,
   TRIAL_MODE_KEY,
   useTrialMode,
@@ -42,6 +43,7 @@ function waitForSave(): Promise<void> {
 }
 
 function resetSession(): void {
+  setEditorLocked(false)
   useResumeStore.getState().close()
   useHistoryStore.getState().setSaveFn(null)
   useAiStore.setState({ messages: [], status: "idle", error: null })
@@ -75,7 +77,10 @@ export default function TrialProvider({
               if (disposed || controller.signal.aborted)
                 return
               writeTrialEnabled(false)
-              writeUpgradeIntent({ ...intent, phase: "ready", userId: user.id })
+              if (intent.sourceResumeId === null)
+                clearUpgradeIntent()
+              else
+                writeUpgradeIntent({ ...intent, phase: "ready", userId: user.id })
               consumeUpgradeReturn(intent.nonce)
               queryClient.setQueryData(keys.auth.me, user)
               localServer.storage.resumeWrites()

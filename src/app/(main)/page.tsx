@@ -1,7 +1,8 @@
 "use client"
 
 import type { SaveFn } from "@/stores/history"
-import { useEffect, useRef } from "react"
+import { useEffect } from "react"
+import { api } from "@/api"
 import LoadingOverlay from "@/app/(main)/components/loading-overlay"
 import PrintFrame from "@/app/(main)/components/print-frame"
 import { LoadingProvider } from "@/app/(main)/contexts/loading"
@@ -13,35 +14,33 @@ import Main from "@/app/(main)/sections/main"
 import Navbar from "@/app/(main)/sections/navbar"
 import Right from "@/app/(main)/sections/right"
 import { useHistory } from "@/hooks/history"
-import { useResumeUpdate } from "@/hooks/query/resume"
-import { useResume } from "@/hooks/resume"
 import { useShortcuts } from "@/hooks/shortcuts"
+import { useTrialRestore } from "@/hooks/trial"
 
 export default function Page() {
   useLoginError()
   useShortcuts()
 
-  // 只注册保存传输: 何时保存 / 保存完怎么处理由 history hook 决定
-  const update = useResumeUpdate()
   const { registerSave } = useHistory()
-  const currentId = useResume().id
-
-  // ref 保持最新值, 避免 registerSave 闭包过期 (currentId / mutation 切换简历时可能变)
-  const ctxRef = useRef({ currentId, update })
-  ctxRef.current = { currentId, update }
+  const restored = useTrialRestore()
 
   useEffect(() => {
-    const transport: SaveFn = async (snapshot, reason) => {
-      const ctx = ctxRef.current
-      if (!ctx.currentId)
-        throw new Error("没有可保存的简历")
-      await ctx.update.mutateAsync({
-        id: ctx.currentId,
-        data: { ...snapshot, autosave: reason === "auto" },
-      })
+    const transport: SaveFn = async ({ id, data }, reason) => {
+      await api.resume.update(id, { ...data, autosave: reason === "auto" })
     }
     registerSave(transport)
   }, [registerSave])
+
+  if (!restored.ready) {
+    return (
+      <div role={restored.error ? "alert" : "status"} className="min-h-screen flex flex-col items-center justify-center gap-4 p-8 text-sm">
+        <p>{restored.error?.message ?? "正在打开本地简历..."}</p>
+        {restored.error && (
+          <button type="button" className="underline" onClick={() => window.location.reload()}>重新加载</button>
+        )}
+      </div>
+    )
+  }
 
   return (
     <LoadingProvider>

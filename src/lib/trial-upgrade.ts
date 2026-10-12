@@ -8,11 +8,11 @@ export const TRIAL_UPGRADE_PARAM = "trial-upgrade"
 const intentSchema = z.object({
   version: z.literal(1),
   nonce: z.string().min(1),
-  sourceResumeId: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
-  sourceUpdatedAt: z.iso.datetime({ offset: true }),
+  sourceResumeId: z.number().int().positive().max(Number.MAX_SAFE_INTEGER).nullable(),
+  sourceUpdatedAt: z.iso.datetime({ offset: true }).nullable(),
   phase: z.enum(["awaiting-login", "ready"]),
   userId: z.number().int().positive().nullable(),
-}).strict().refine(intent => intent.phase !== "ready" || intent.userId !== null)
+}).strict().refine(intent => intent.phase !== "ready" || intent.userId !== null).refine(intent => (intent.sourceResumeId === null) === (intent.sourceUpdatedAt === null))
 
 export type TrialUpgradeIntent = z.infer<typeof intentSchema>
 

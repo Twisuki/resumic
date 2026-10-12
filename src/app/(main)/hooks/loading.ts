@@ -2,6 +2,8 @@ import { useLoadingContext } from "@/app/(main)/contexts/loading"
 import { useResumeList } from "@/hooks/query/resume"
 import { useSession } from "@/hooks/session"
 
+import { useTrialMode } from "@/lib/trial-mode"
+
 export interface LoadingState {
   visible: boolean
   message: string | null
@@ -12,7 +14,10 @@ export function useLoading(): LoadingState {
   const { loginPending } = useLoadingContext()
   const session = useSession()
   const list = useResumeList()
+  const { locked } = useTrialMode()
 
+  if (locked)
+    return { visible: true, message: "正在保存并准备离开..." }
   if (loginPending)
     return { visible: true, message: "正在登录..." }
   if (session.status === "pending")

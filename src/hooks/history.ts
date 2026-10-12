@@ -1,8 +1,10 @@
 import type { Node, Subtree, Tree } from "@shared/model/node"
 import type { Patch } from "@shared/model/patch"
 import type { Resume } from "@shared/model/resume"
-import type { SaveFn, SaveReason } from "@/stores/history"
+import type { SavedResume, SaveFn, SaveReason } from "@/stores/history"
+import { localServer } from "@/api/local/server"
 import { SAVE_THRESHOLD } from "@/config/history"
+import { stopAiRuns } from "@/lib/ai-runtime"
 import {
   commit as commitFn,
   redo as redoFn,
@@ -12,7 +14,9 @@ import {
 import { applyPatch, inversePatch, patch as libPatch } from "@/lib/patch"
 import { t } from "@/lib/toast"
 import { deserialize, isSubtree, leafSubtree } from "@/lib/tree"
-import { isModeReady } from "@/lib/trial-mode"
+import { getTrialSnapshot, hasResumeWrites, isEditorReady, isModeReady, isTrialMode, setEditorLocked } from "@/lib/trial-mode"
+import { useAiStore } from "@/stores/ai"
+import { useAiPermissionStore } from "@/stores/ai-permission"
 import { useHistoryStore } from "@/stores/history"
 import { useResumeStore } from "@/stores/resume"
 
@@ -78,38 +82,95 @@ function takeSnapshot(): Resume | null {
   return deserialize({ profile, resume })
 }
 
-/**
- * @description 统一保存流程: 取快照 -> 调传输 -> 自动保存成功则截断历史
- */
-async function save(reason: SaveReason): Promise<void> {
-  if (!isModeReady())
-    return
-  if (reason === "manual")
-    flushAll()
+export type SaveResult
+  = { status: "success", snapshot: SavedResume }
+    | { status: "empty" | "busy" | "unavailable" }
+    | { status: "failure", error: Error }
 
-  const { isSaving, saveFn } = useHistoryStore.getState()
-  if (!saveFn)
-    return
-  if (isSaving) {
-    if (reason === "manual")
-      t.error("正在保存中, 请稍候")
-    return
+/** @description 释放严格保存边界, 切换已开始时不恢复本地写入 */
+export function releaseSaveBoundary(): void {
+  if (isModeReady())
+    localServer.storage.resumeWrites()
+  setEditorLocked(false)
+}
+
+function freezeEditor(): void {
+  setEditorLocked(true)
+  stopAiRuns()
+  useAiPermissionStore.getState().reset()
+  if (useAiStore.getState().status === "streaming")
+    useAiStore.setState({ status: "idle" })
+  if (isTrialMode())
+    void localServer.storage.pauseWrites()
+}
+
+/** @description 返回本次提交的结果, 严格成功后保持冻结供关闭或登录继续使用 */
+async function save(reason: SaveReason, strict = false): Promise<SaveResult> {
+  if (!isEditorReady()) {
+    if (strict)
+      t.error("正在保存或切换模式，请稍候")
+    return { status: "busy" }
+  }
+  if (strict && (useHistoryStore.getState().isSaving || hasResumeWrites())) {
+    t.error("正在保存或处理简历，请稍候再试")
+    return { status: "busy" }
+  }
+  if (reason === "manual") {
+    try {
+      flushAll()
+    }
+    catch (cause) {
+      const error = cause instanceof Error ? cause : new Error(String(cause))
+      t.error(`保存失败: ${error.message}`)
+      return { status: "failure", error }
+    }
   }
 
+  const { isSaving, saveFn } = useHistoryStore.getState()
+  if (isSaving || (strict && hasResumeWrites())) {
+    if (reason === "manual")
+      t.error("正在保存中, 请稍候")
+    return { status: "busy" }
+  }
+  const { id, profile } = useResumeStore.getState()
+  if (id === null) {
+    if (strict)
+      freezeEditor()
+    return { status: "empty" }
+  }
+  if (!saveFn) {
+    if (strict)
+      t.error("保存尚未就绪，请稍候再试")
+    return { status: "unavailable" }
+  }
+
+  const { generation } = getTrialSnapshot()
   useHistoryStore.getState().setSaving(true)
   try {
-    const snapshot = takeSnapshot()
-    if (!snapshot)
-      return
-    await saveFn(snapshot, reason)
-    if (reason === "auto") {
+    const data = takeSnapshot()
+    if (!data)
+      throw new Error("没有可保存的简历")
+    const snapshot = { id, data: structuredClone(data) }
+    // 传输同步接纳本次请求后冻结, 保证写队列仍能完成这次保存
+    const pending = saveFn(snapshot, reason)
+    if (strict)
+      freezeEditor()
+    await pending
+    if (!isModeReady() || generation !== getTrialSnapshot().generation)
+      throw new DOMException("模式已切换", "AbortError")
+    if (reason === "auto" && profile?.rootId === useResumeStore.getState().profile?.rootId) {
       const { history, setHistory } = useHistoryStore.getState()
       setHistory(truncateAfterSave(history))
     }
+    return { status: "success", snapshot }
   }
-  catch (error) {
+  catch (cause) {
+    const error = cause instanceof Error ? cause : new Error(String(cause))
     const label = reason === "auto" ? "自动保存" : "保存"
-    t.error(`${label}失败: ${(error as Error).message}`)
+    t.error(`${label}失败: ${error.message}`)
+    if (strict)
+      releaseSaveBoundary()
+    return { status: "failure", error }
   }
   finally {
     useHistoryStore.getState().setSaving(false)
@@ -120,7 +181,7 @@ async function save(reason: SaveReason): Promise<void> {
  * @description 推入 history, 达阈值触发自动保存
  */
 function commit(p: Patch): void {
-  if (!isModeReady())
+  if (!isEditorReady())
     return
   const { history, setHistory } = useHistoryStore.getState()
   setHistory(commitFn(history, p))
@@ -133,7 +194,7 @@ function commit(p: Patch): void {
  * @description 撤销最近一条: 应用 inverse 到树 + 移到 future
  */
 function undo(): void {
-  if (!isModeReady())
+  if (!isEditorReady())
     return
   flushAll()
   const result = undoFn(useHistoryStore.getState().history)
@@ -153,7 +214,7 @@ function undo(): void {
  * @description 重做最近一条: 应用 forward 到树 + 推回 past
  */
 function redo(): void {
-  if (!isModeReady())
+  if (!isEditorReady())
     return
   flushAll()
   const result = redoFn(useHistoryStore.getState().history)
@@ -187,8 +248,8 @@ function registerSave(saveFn: SaveFn): void {
 /**
  * @description 手动保存, 返回 Promise 让调用方能等到保存完成 (错误已 toast, 不会 reject)
  */
-function saveManual(): Promise<void> {
-  return save("manual")
+async function saveManual(): Promise<void> {
+  await save("manual")
 }
 
 /**
@@ -196,7 +257,7 @@ function saveManual(): Promise<void> {
  */
 export const patch = {
   update(id: string, key: string, after: unknown): void {
-    if (!isModeReady())
+    if (!isEditorReady())
       return
     const { profile, resume } = useResumeStore.getState()
     if (!profile || !resume)
@@ -210,7 +271,7 @@ export const patch = {
   },
 
   add(parentId: string, payload: Node | Subtree): void {
-    if (!isModeReady())
+    if (!isEditorReady())
       return
     const { profile, resume } = useResumeStore.getState()
     if (!profile || !resume)
@@ -223,7 +284,7 @@ export const patch = {
   },
 
   remove(parentId: string, childId: string): Subtree | null {
-    if (!isModeReady())
+    if (!isEditorReady())
       return null
     const { profile, resume } = useResumeStore.getState()
     if (!profile || !resume)
@@ -236,7 +297,7 @@ export const patch = {
   },
 
   reorder(parentId: string, afterOrders: string[]): void {
-    if (!isModeReady())
+    if (!isEditorReady())
       return
     const { profile, resume } = useResumeStore.getState()
     if (!profile || !resume)
@@ -267,6 +328,7 @@ export function useHistory() {
     canRedo,
     reset,
     save: saveManual,
+    saveStrict: () => save("manual", true),
     registerSave,
     isSaving,
   }

@@ -1,4 +1,4 @@
-import { getTrialSnapshot, isModeReady } from "@/lib/trial-mode"
+import { getTrialSnapshot, isEditorReady } from "@/lib/trial-mode"
 
 const controllers = new Set<AbortController>()
 
@@ -7,7 +7,7 @@ export function createAiRun() {
   const controller = new AbortController()
   const { generation } = getTrialSnapshot()
   controllers.add(controller)
-  const isActive = () => isModeReady() && generation === getTrialSnapshot().generation
+  const isActive = () => isEditorReady() && generation === getTrialSnapshot().generation
     && controllers.has(controller) && !controller.signal.aborted
   return {
     controller,

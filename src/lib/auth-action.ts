@@ -1,8 +1,8 @@
 import { t } from "@/lib/toast"
 
 /** @description 跳 GitHub 授权页, 成功后回当前页 */
-export function redirectToGithubLogin(): void {
-  const next = encodeURIComponent(window.location.pathname + window.location.search)
+export function redirectToGithubLogin(returnTo?: string): void {
+  const next = encodeURIComponent(returnTo ?? window.location.pathname + window.location.search)
   window.location.href = `/api/auth/github?next=${next}`
 }
 

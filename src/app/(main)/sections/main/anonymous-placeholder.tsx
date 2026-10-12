@@ -4,10 +4,12 @@ import { IconLayout, IconMarkdown, IconSparkles } from "@tabler/icons-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useLoginTrigger } from "@/hooks/login"
+import { useTrialActions } from "@/hooks/trial"
 
 /** @description 未登录态主区域占位, 简介 + GitHub 登录 / 查看仓库 */
 export default function AnonymousPlaceholder() {
   const { pending: loginPending, trigger: triggerLogin } = useLoginTrigger()
+  const { enter } = useTrialActions()
   return (
     <div className="flex flex-col items-center gap-6 text-center max-w-sm">
       <div className="flex flex-col items-center gap-1.5">
@@ -47,8 +49,15 @@ export default function AnonymousPlaceholder() {
 
       <div className="flex flex-col items-center gap-3">
         <p className="text-sm text-muted-foreground">来试试吧</p>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap justify-center gap-2">
           <Button
+            disabled={loginPending}
+            onClick={() => void enter()}
+          >
+            本地试用
+          </Button>
+          <Button
+            variant="outline"
             disabled={loginPending}
             onClick={triggerLogin}
           >
@@ -64,6 +73,7 @@ export default function AnonymousPlaceholder() {
             </Link>
           </Button>
         </div>
+        <p className="text-xs text-muted-foreground">本地试用无需登录，简历保存在此浏览器</p>
       </div>
     </div>
   )

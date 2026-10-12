@@ -1,7 +1,7 @@
 import type { Resume, Tree } from "@shared/model"
 import { create } from "zustand"
 import { serialize } from "@/lib/tree"
-import { isModeReady } from "@/lib/trial-mode"
+import { getTrialSnapshot, isEditorReady } from "@/lib/trial-mode"
 import { useHistoryStore } from "@/stores/history"
 
 /**
@@ -20,13 +20,15 @@ export const useResumeStore = create<ResumeStore>()(set => ({
   profile: null,
   resume: null,
   open: (id, resume) => {
-    if (!isModeReady())
+    if (!isEditorReady())
       return
     const trees = serialize(resume)
     useHistoryStore.getState().reset()
     set({ id, profile: trees.profile, resume: trees.resume })
   },
   close: () => {
+    if (getTrialSnapshot().locked)
+      return
     useHistoryStore.getState().reset()
     set({ id: null, profile: null, resume: null })
   },
