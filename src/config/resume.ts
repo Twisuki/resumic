@@ -77,7 +77,7 @@ export const DEFAULT_RESUME: Resume = {
               link: "https://resumic.twis.uk",
               date: "2026.9 - 至今",
               content:
-                "基于 **Next** 和 **Prisma** 的全栈简历编辑器, 使用 **Vercel AI SDK** 提供了 AI 能力, 本简历就是使用此编辑器编写的\n"
+                "基于 **Next** 和 **Prisma** 的全栈简历编辑器, 使用 **Vercel AI SDK** 提供了 AI 能力, 本简历就是使用此编辑器开发的\n"
                 + "- 使用 **markdown-it** 和 **html-react-parser** 实现了既开发友好又 **XSS** 安全的富文本编辑器\n"
                 + "- 专门设计了 **节点树与哈希表结构**, 实现高性能的 **增量 Patch** 与 **历史记录** 能力\n"
                 + "- 实现小型 **Agent**, 提供 **AI 驱动** 的简历编辑能力",
