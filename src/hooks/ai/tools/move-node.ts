@@ -36,8 +36,8 @@ function getKind(self: unknown): string | null {
 export const moveNodeTool = tool({
   description: "Move a child node to a new parent of the same kind (e.g. section between pages, part between sections, line between parts). The full subtree follows — no children lost. Composed from remove + add + optional reorder.",
   inputSchema: moveNodeInput,
-  execute: async ({ parentId, childId, newParentId, insertIndex }) => {
-    if (!(await checkAndAct("move_node", "ask", { parentId, childId, newParentId, insertIndex })))
+  execute: async ({ parentId, childId, newParentId, insertIndex }, { abortSignal }) => {
+    if (!(await checkAndAct("move_node", "ask", { parentId, childId, newParentId, insertIndex }, abortSignal)) || abortSignal?.aborted)
       return { error: "denied by user" }
     try {
       const from = findTreeForNode(parentId)

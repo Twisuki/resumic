@@ -9,8 +9,8 @@ import { patch } from "@/hooks/history"
 export const replaceFieldTool = tool({
   description: "Replace a single self field on a node. nodeId identifies the node, key is the field name in self, value is the new value. Reversible via history.",
   inputSchema: replaceFieldInput,
-  execute: async ({ nodeId, key, value }) => {
-    if (!(await checkAndAct("replace_field", "ask", { nodeId, key, value })))
+  execute: async ({ nodeId, key, value }, { abortSignal }) => {
+    if (!(await checkAndAct("replace_field", "ask", { nodeId, key, value }, abortSignal)) || abortSignal?.aborted)
       return { error: "denied by user" }
     try {
       patch.update(nodeId, key, value)

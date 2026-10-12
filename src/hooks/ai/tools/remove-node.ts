@@ -9,8 +9,8 @@ import { patch } from "@/hooks/history"
 export const removeNodeTool = tool({
   description: "Remove a child node from its parent. Subtree is snapshotted into the patch for undo. Reversible via history.",
   inputSchema: removeNodeInput,
-  execute: async ({ parentId, childId }) => {
-    if (!(await checkAndAct("remove_node", "ask", { parentId, childId })))
+  execute: async ({ parentId, childId }, { abortSignal }) => {
+    if (!(await checkAndAct("remove_node", "ask", { parentId, childId }, abortSignal)) || abortSignal?.aborted)
       return { error: "denied by user" }
     try {
       const subtree = patch.remove(parentId, childId)

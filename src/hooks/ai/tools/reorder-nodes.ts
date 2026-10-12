@@ -9,8 +9,8 @@ import { patch } from "@/hooks/history"
 export const reorderNodesTool = tool({
   description: "Reorder children under parentId. order must be the complete new ordering of all current child ids. Reversible via history.",
   inputSchema: reorderNodesInput,
-  execute: async ({ parentId, order }) => {
-    if (!(await checkAndAct("reorder_nodes", "ask", { parentId, order })))
+  execute: async ({ parentId, order }, { abortSignal }) => {
+    if (!(await checkAndAct("reorder_nodes", "ask", { parentId, order }, abortSignal)) || abortSignal?.aborted)
       return { error: "denied by user" }
     try {
       patch.reorder(parentId, order)

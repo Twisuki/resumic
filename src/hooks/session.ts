@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query"
 import { api } from "@/api"
 import { keys } from "@/hooks/query/key"
 import { isAuthError } from "@/lib/request"
+import { getTrialSnapshot, useTrialMode } from "@/lib/trial-mode"
 
 export type SessionStatus = "pending" | "authenticated" | "anonymous" | "error"
 
@@ -18,12 +19,24 @@ export interface SessionState {
  * @description 挂载时恢复登录态, 未登录归为 anonymous 而非错误
  */
 export function useSession(): SessionState {
+  const mode = useTrialMode()
   const { data, error, isPending, refetch } = useQuery<MeResponse, ApiClientError>({
     queryKey: keys.auth.me,
     queryFn: ({ signal }) => api.auth.me({ signal }),
+    enabled: mode.status === "remote",
     // 登录态只在全页导航后变, 不需要重新过期
     staleTime: Infinity,
   })
+
+  const refresh = () => {
+    if (getTrialSnapshot().status === "remote")
+      void refetch()
+  }
+
+  if (mode.enabled)
+    return { user: null, status: "anonymous", error: null, refresh }
+  if (!mode.ready)
+    return { user: null, status: "pending", error: null, refresh }
 
   const status: SessionStatus = isPending
     ? "pending"
@@ -37,6 +50,6 @@ export function useSession(): SessionState {
     user: data ?? null,
     status,
     error: status === "error" ? error : null,
-    refresh: refetch,
+    refresh,
   }
 }

@@ -23,6 +23,7 @@ export interface AiPermissionStore {
    * @description 决议队首 + 出队; 队列非空时 dialog 保留, 自然切到下一个
    */
   resolvePending: (decision: boolean) => void
+  reset: () => void
 }
 
 export const useAiPermissionStore = create<AiPermissionStore>()(set => ({
@@ -37,6 +38,12 @@ export const useAiPermissionStore = create<AiPermissionStore>()(set => ({
 
   request: (name, args) => new Promise<boolean>((resolve) => {
     set(state => ({ pending: [...state.pending, { toolName: name, args, resolve }] }))
+  }),
+
+  reset: () => set((state) => {
+    for (const request of state.pending)
+      request.resolve(false)
+    return { grants: new Map(), pending: [] }
   }),
 
   resolvePending: decision => set((state) => {

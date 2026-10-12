@@ -1,6 +1,7 @@
 import type { UIMessage } from "ai"
+import { ErrorCode } from "@shared/error-code"
 import { convertToModelMessages, readUIMessageStream, stepCountIs, streamText, toUIMessageStream } from "ai"
-import { useCallback, useMemo, useRef } from "react"
+import { useCallback, useEffect, useMemo, useRef } from "react"
 import { MAX_STEPS, SYSTEM_PROMPT } from "@/config/ai"
 import {
   useActivateConfig,
@@ -11,9 +12,13 @@ import {
   useUpdateConfig,
 } from "@/hooks/ai/configs"
 import { getModel } from "@/hooks/ai/providers"
-import { tools } from "@/hooks/ai/tools"
+import { toolsForRun } from "@/hooks/ai/tools"
+import { createAiRun } from "@/lib/ai-runtime"
 import { genId } from "@/lib/id"
+import { ApiClientError } from "@/lib/request"
+import { isModeReady, isTrialMode } from "@/lib/trial-mode"
 import { useAiStore } from "@/stores/ai"
+import { useAiPermissionStore } from "@/stores/ai-permission"
 
 export { useAiMessages } from "@/hooks/ai/messages"
 export { useAiPermission } from "@/hooks/ai/permission"
@@ -65,18 +70,25 @@ export function useAi(): UseAi {
   const abortRef = useRef<AbortController | null>(null)
 
   const stop = useCallback(() => {
-    abortRef.current?.abort()
+    if (!abortRef.current)
+      return
+    abortRef.current.abort()
     abortRef.current = null
+    useAiPermissionStore.getState().reset()
+    useAiStore.setState({ status: "idle" })
   }, [])
+
+  useEffect(() => stop, [stop])
 
   const send = useCallback(async (input: string) => {
     const text = input.trim()
-    if (!text || !model)
+    if (!text || !model || !isModeReady() || useAiStore.getState().status === "streaming")
       return
 
     const userMsg: UIMessage = { id: genId(), role: "user", parts: [{ type: "text", text }] }
     const assistantMsg: UIMessage = { id: genId(), role: "assistant", parts: [] }
-    const controller = new AbortController()
+    const run = createAiRun()
+    const { controller } = run
     abortRef.current = controller
 
     useAiStore.setState(prev => ({
@@ -86,11 +98,15 @@ export function useAi(): UseAi {
     }))
 
     try {
+      if (isTrialMode())
+        throw new ApiClientError(ErrorCode.System.Internal, "本地试用的 AI 对话暂不可用")
+      const messages = await convertToModelMessages([...useAiStore.getState().messages.slice(0, -1)])
+      run.assertActive()
       const result = streamText({
         model,
         system: SYSTEM_PROMPT,
-        messages: await convertToModelMessages([...useAiStore.getState().messages.slice(0, -1)]),
-        tools,
+        messages,
+        tools: toolsForRun(run),
         stopWhen: stepCountIs(MAX_STEPS),
         maxOutputTokens: 16384,
         abortSignal: controller.signal,
@@ -99,13 +115,17 @@ export function useAi(): UseAi {
       const assistantId = assistantMsg.id
 
       for await (const uiMessage of readUIMessageStream({ message: assistantMsg, stream: uiStream })) {
+        run.assertActive()
         useAiStore.setState(prev => ({
           messages: prev.messages.map(m => m.id === assistantId ? uiMessage : m),
         }))
       }
-      useAiStore.setState({ status: "idle" })
+      if (run.isActive())
+        useAiStore.setState({ status: "idle" })
     }
     catch (e) {
+      if (!run.isActive())
+        return
       if (e instanceof DOMException && e.name === "AbortError") {
         useAiStore.setState({ status: "idle" })
         return
@@ -116,7 +136,9 @@ export function useAi(): UseAi {
       })
     }
     finally {
-      abortRef.current = null
+      run.finish()
+      if (abortRef.current === controller)
+        abortRef.current = null
     }
   }, [model])
 

@@ -30,6 +30,9 @@ export const ErrorCode = {
     UnsupportedType: 50004,
     Forbidden: 50005,
   },
+  Local: {
+    ResumeLimitExceeded: 60001,
+  },
   System: {
     Internal: 90001,
   },

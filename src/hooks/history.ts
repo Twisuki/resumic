@@ -12,6 +12,7 @@ import {
 import { applyPatch, inversePatch, patch as libPatch } from "@/lib/patch"
 import { t } from "@/lib/toast"
 import { deserialize, isSubtree, leafSubtree } from "@/lib/tree"
+import { isModeReady } from "@/lib/trial-mode"
 import { useHistoryStore } from "@/stores/history"
 import { useResumeStore } from "@/stores/resume"
 
@@ -81,6 +82,8 @@ function takeSnapshot(): Resume | null {
  * @description 统一保存流程: 取快照 -> 调传输 -> 自动保存成功则截断历史
  */
 async function save(reason: SaveReason): Promise<void> {
+  if (!isModeReady())
+    return
   if (reason === "manual")
     flushAll()
 
@@ -117,6 +120,8 @@ async function save(reason: SaveReason): Promise<void> {
  * @description 推入 history, 达阈值触发自动保存
  */
 function commit(p: Patch): void {
+  if (!isModeReady())
+    return
   const { history, setHistory } = useHistoryStore.getState()
   setHistory(commitFn(history, p))
 
@@ -128,6 +133,8 @@ function commit(p: Patch): void {
  * @description 撤销最近一条: 应用 inverse 到树 + 移到 future
  */
 function undo(): void {
+  if (!isModeReady())
+    return
   flushAll()
   const result = undoFn(useHistoryStore.getState().history)
   if (!result)
@@ -146,6 +153,8 @@ function undo(): void {
  * @description 重做最近一条: 应用 forward 到树 + 推回 past
  */
 function redo(): void {
+  if (!isModeReady())
+    return
   flushAll()
   const result = redoFn(useHistoryStore.getState().history)
   if (!result)
@@ -171,7 +180,8 @@ function reset(): void {
  * @description 注册保存传输函数
  */
 function registerSave(saveFn: SaveFn): void {
-  useHistoryStore.getState().setSaveFn(saveFn)
+  if (isModeReady())
+    useHistoryStore.getState().setSaveFn(saveFn)
 }
 
 /**
@@ -186,6 +196,8 @@ function saveManual(): Promise<void> {
  */
 export const patch = {
   update(id: string, key: string, after: unknown): void {
+    if (!isModeReady())
+      return
     const { profile, resume } = useResumeStore.getState()
     if (!profile || !resume)
       return
@@ -198,6 +210,8 @@ export const patch = {
   },
 
   add(parentId: string, payload: Node | Subtree): void {
+    if (!isModeReady())
+      return
     const { profile, resume } = useResumeStore.getState()
     if (!profile || !resume)
       return
@@ -209,6 +223,8 @@ export const patch = {
   },
 
   remove(parentId: string, childId: string): Subtree | null {
+    if (!isModeReady())
+      return null
     const { profile, resume } = useResumeStore.getState()
     if (!profile || !resume)
       return null
@@ -220,6 +236,8 @@ export const patch = {
   },
 
   reorder(parentId: string, afterOrders: string[]): void {
+    if (!isModeReady())
+      return
     const { profile, resume } = useResumeStore.getState()
     if (!profile || !resume)
       return

@@ -11,8 +11,8 @@ import { genId } from "@/lib/id"
 export const insertNodeTool = tool({
   description: "Insert a new node under parentId. Specify kind (detail/page/section/part/line) and the matching self fields. id is generated client-side. Reversible via history.",
   inputSchema: insertNodeInput,
-  execute: async ({ parentId, node }) => {
-    if (!(await checkAndAct("insert_node", "ask", { parentId, kind: node.kind })))
+  execute: async ({ parentId, node }, { abortSignal }) => {
+    if (!(await checkAndAct("insert_node", "ask", { parentId, kind: node.kind }, abortSignal)) || abortSignal?.aborted)
       return { error: "denied by user" }
     try {
       const id = genId()
