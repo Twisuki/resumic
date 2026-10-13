@@ -116,6 +116,7 @@ export function useTrialActions() {
         sourceUpdatedAt: resume?.updatedAt ?? null,
         phase: "awaiting-login",
         userId: null,
+        uploadedAvatar: null,
       })
       const url = new URL(window.location.href)
       url.searchParams.set(TRIAL_UPGRADE_PARAM, nonce)

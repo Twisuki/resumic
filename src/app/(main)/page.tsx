@@ -5,6 +5,7 @@ import { useEffect } from "react"
 import { api } from "@/api"
 import LoadingOverlay from "@/app/(main)/components/loading-overlay"
 import PrintFrame from "@/app/(main)/components/print-frame"
+import TrialUpgradeDialog from "@/app/(main)/components/trial-upgrade-dialog"
 import { LoadingProvider } from "@/app/(main)/contexts/loading"
 import { PrintProvider } from "@/app/(main)/contexts/print"
 import { SidebarsProvider } from "@/app/(main)/contexts/sidebar"
@@ -47,6 +48,7 @@ export default function Page() {
       <PrintProvider>
         <SidebarsProvider>
           <PrintFrame />
+          <TrialUpgradeDialog />
           <LoadingOverlay />
           <div className="w-screen h-screen flex flex-col">
             <Navbar />

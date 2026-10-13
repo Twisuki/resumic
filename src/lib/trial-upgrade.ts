@@ -12,6 +12,7 @@ const intentSchema = z.object({
   sourceUpdatedAt: z.iso.datetime({ offset: true }).nullable(),
   phase: z.enum(["awaiting-login", "ready"]),
   userId: z.number().int().positive().nullable(),
+  uploadedAvatar: z.object({ id: z.number().int().positive(), url: z.string().min(1) }).nullable(),
 }).strict().refine(intent => intent.phase !== "ready" || intent.userId !== null).refine(intent => (intent.sourceResumeId === null) === (intent.sourceUpdatedAt === null))
 
 export type TrialUpgradeIntent = z.infer<typeof intentSchema>

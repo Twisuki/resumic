@@ -80,7 +80,7 @@ export default function TrialProvider({
               if (intent.sourceResumeId === null)
                 clearUpgradeIntent()
               else
-                writeUpgradeIntent({ ...intent, phase: "ready", userId: user.id })
+                writeUpgradeIntent({ ...intent, phase: "ready", userId: user.id, uploadedAvatar: null })
               consumeUpgradeReturn(intent.nonce)
               queryClient.setQueryData(keys.auth.me, user)
               localServer.storage.resumeWrites()
@@ -98,6 +98,7 @@ export default function TrialProvider({
           if (disposed || controller.signal.aborted)
             return
           consumeUpgradeReturn(intent.nonce)
+          clearUpgradeIntent()
           localServer.storage.resumeWrites()
           setTrialStatus("trial")
           return
