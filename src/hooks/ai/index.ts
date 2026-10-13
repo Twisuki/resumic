@@ -1,7 +1,9 @@
+import type { AiConfigDto } from "@shared/model"
 import type { UIMessage } from "ai"
-import { ErrorCode } from "@shared/error-code"
+import { useQueryClient } from "@tanstack/react-query"
 import { convertToModelMessages, readUIMessageStream, stepCountIs, streamText, toUIMessageStream } from "ai"
 import { useCallback, useEffect, useMemo, useRef } from "react"
+import { localServer } from "@/api/local/server"
 import { MAX_STEPS, SYSTEM_PROMPT } from "@/config/ai"
 import {
   useActivateConfig,
@@ -13,9 +15,9 @@ import {
 } from "@/hooks/ai/configs"
 import { getModel } from "@/hooks/ai/providers"
 import { toolsForRun } from "@/hooks/ai/tools"
+import { keys } from "@/hooks/query/key"
 import { createAiRun } from "@/lib/ai-runtime"
 import { genId } from "@/lib/id"
-import { ApiClientError } from "@/lib/request"
 import { isEditorReady, isTrialMode } from "@/lib/trial-mode"
 import { useAiStore } from "@/stores/ai"
 import { useAiPermissionStore } from "@/stores/ai-permission"
@@ -62,9 +64,20 @@ export interface UseAi {
  * @description 顶层 hook: 把 active config / SDK streamText / store 三者串起来; 不持 ID 之外的任何业务状态, 状态全在 useAiStore
  */
 export function useAi(): UseAi {
+  const queryClient = useQueryClient()
   const { data: configs } = useAiConfigs()
   const active = useMemo(() => configs?.find(c => c.isActive) ?? null, [configs])
-  const model = useMemo(() => getModel(active), [active])
+  const model = useMemo(() => {
+    if (!active)
+      return null
+    if (isTrialMode()) {
+      const key = localServer.ai.getKey(active.id) ?? null
+      if (!key)
+        return null
+      return getModel(active, { mode: "trial", key })
+    }
+    return getModel(active, { mode: "remote" })
+  }, [active])
   const status = useAiStore(s => s.status)
 
   const abortRef = useRef<AbortController | null>(null)
@@ -82,8 +95,29 @@ export function useAi(): UseAi {
 
   const send = useCallback(async (input: string) => {
     const text = input.trim()
-    if (!text || !model || !isEditorReady() || useAiStore.getState().status === "streaming")
+    if (!text || !isEditorReady() || useAiStore.getState().status === "streaming")
       return
+
+    const liveConfigs = queryClient.getQueryData<AiConfigDto[]>(keys.ai.configs.list())
+    const liveActive = liveConfigs?.find(c => c.isActive) ?? null
+    if (!liveActive) {
+      useAiStore.setState({ status: "error", error: "尚未激活 AI 配置，请在设置中选择" })
+      return
+    }
+    const trial = isTrialMode()
+    let liveKey: string | null = null
+    if (trial) {
+      liveKey = localServer.ai.getKey(liveActive.id) ?? null
+      if (!liveKey) {
+        useAiStore.setState({ status: "error", error: "本地试用缺少 API key，请在设置中填写" })
+        return
+      }
+    }
+    const liveModel = getModel(liveActive, { mode: trial ? "trial" : "remote", key: liveKey })
+    if (!liveModel) {
+      useAiStore.setState({ status: "error", error: `不支持的 apiStyle: ${liveActive.apiStyle}` })
+      return
+    }
 
     const userMsg: UIMessage = { id: genId(), role: "user", parts: [{ type: "text", text }] }
     const assistantMsg: UIMessage = { id: genId(), role: "assistant", parts: [] }
@@ -98,12 +132,10 @@ export function useAi(): UseAi {
     }))
 
     try {
-      if (isTrialMode())
-        throw new ApiClientError(ErrorCode.System.Internal, "本地试用的 AI 对话暂不可用")
       const messages = await convertToModelMessages([...useAiStore.getState().messages.slice(0, -1)])
       run.assertActive()
       const result = streamText({
-        model,
+        model: liveModel,
         system: SYSTEM_PROMPT,
         messages,
         tools: toolsForRun(run),
@@ -140,7 +172,7 @@ export function useAi(): UseAi {
       if (abortRef.current === controller)
         abortRef.current = null
     }
-  }, [model])
+  }, [queryClient])
 
   const clear = useCallback(() => {
     useAiStore.setState({ messages: [], status: "idle", error: null })

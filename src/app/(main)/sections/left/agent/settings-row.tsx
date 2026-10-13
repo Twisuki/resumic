@@ -3,6 +3,7 @@
 import type { AiApiStyle, AiConfigDto } from "@shared/model"
 import { IconCircle, IconCircleFilled, IconTrash } from "@tabler/icons-react"
 import { useState } from "react"
+import { localServer } from "@/api/local/server"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -11,6 +12,7 @@ import {
   useUpdateConfig,
 } from "@/hooks/ai"
 import { t } from "@/lib/toast"
+import { isTrialMode } from "@/lib/trial-mode"
 
 const API_STYLES: readonly AiApiStyle[] = ["openai", "anthropic"]
 
@@ -26,12 +28,24 @@ export default function SettingsRow({
 }>) {
   const isNew = config === undefined
   const isActive = config?.isActive ?? false
+  const trial = isTrialMode()
 
   const [label, setLabel] = useState(config?.label ?? "")
   const [apiStyle, setApiStyle] = useState<AiApiStyle>(config?.apiStyle ?? "openai")
   const [baseUrl, setBaseUrl] = useState(config?.baseUrl ?? "")
   const [model, setModel] = useState(config?.model ?? "")
   const [key, setKey] = useState("")
+  const [persistKey, setPersistKey] = useState(() => {
+    if (!trial || !config)
+      return false
+    try {
+      return localServer.ai.getPersistKey(config.id)
+    }
+    catch {
+      return false
+    }
+  })
+  const [persistKeyTouched, setPersistKeyTouched] = useState(false)
 
   const createConfig = useCreateConfig()
   const updateConfig = useUpdateConfig()
@@ -52,13 +66,14 @@ export default function SettingsRow({
       t.error("model 不能为空")
       return
     }
+    let targetId: string | null = null
     try {
       if (isNew) {
         if (!key.trim()) {
           t.error("新建时 key 必填")
           return
         }
-        await t.promise(
+        const result = await t.promise(
           createConfig.mutateAsync({
             label: label.trim(),
             apiStyle,
@@ -71,7 +86,8 @@ export default function SettingsRow({
             success: "已保存",
             error: e => `保存失败: ${e instanceof Error ? e.message : String(e)}`,
           },
-        ).catch(() => {})
+        )
+        targetId = result.id
       }
       else {
         const payload: Parameters<typeof updateConfig.mutateAsync>[0] = {
@@ -92,14 +108,26 @@ export default function SettingsRow({
             success: "已保存",
             error: e => `保存失败: ${e instanceof Error ? e.message : String(e)}`,
           },
-        ).catch(() => {})
+        )
+        targetId = config!.id
       }
-      setKey("")
-      onSaved?.()
     }
     catch {
-      // toast 已经展示
+      return
     }
+
+    if (trial && persistKeyTouched && targetId) {
+      try {
+        await localServer.ai.setPersistKey(targetId, persistKey)
+      }
+      catch (e) {
+        t.error(`持久化偏好未保存: ${e instanceof Error ? e.message : String(e)}`)
+      }
+    }
+
+    setKey("")
+    setPersistKeyTouched(false)
+    onSaved?.()
   }
 
   async function handleActivate() {
@@ -189,6 +217,24 @@ export default function SettingsRow({
           className="h-7 text-xs"
           disabled={busy}
         />
+        {trial && (
+          <>
+            <span className="text-muted-foreground">持久化</span>
+            <label className="flex items-center gap-2 text-xs">
+              <input
+                type="checkbox"
+                checked={persistKey}
+                disabled={busy}
+                onChange={(e) => {
+                  setPersistKey(e.target.checked)
+                  setPersistKeyTouched(true)
+                }}
+                className="size-3.5 accent-primary"
+              />
+              <span className="text-muted-foreground text-[10px]">允许写入 localStorage</span>
+            </label>
+          </>
+        )}
       </div>
       <div className="flex justify-end">
         <Button type="button" size="sm" disabled={busy} onClick={handleSave}>
