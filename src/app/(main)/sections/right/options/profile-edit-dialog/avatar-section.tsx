@@ -1,38 +1,87 @@
 "use client"
 
 import type { ProfileNode } from "@shared/model/node"
+import type { ChangeEvent } from "react"
 import { IconUser, IconX } from "@tabler/icons-react"
 import Image from "next/image"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import AvatarPickerDialog from "@/app/(main)/sections/right/options/profile-edit-dialog/avatar-picker-dialog"
+import ImageEditor from "@/components/image-editor"
 import { Button } from "@/components/ui/button"
+import { AVATAR_CONTENT_TYPES, AVATAR_MAX_BYTES } from "@/config/avatar"
 import { useHistory } from "@/hooks/history"
 import { useNode } from "@/hooks/node"
+import { t } from "@/lib/toast"
+import { isTrialMode } from "@/lib/trial-mode"
 import { cn } from "@/lib/utils"
 
 /**
- * @description BaseInfo 里的头像区块: 当前头像预览 + "选择头像"/"移除头像"按钮, 点击触发 Picker 弹窗
+ * @description BaseInfo 里的头像区块: trial 走 file input / FileReader → data URL 写编辑树; remote 走槽位 Picker 弹窗
  */
 export default function AvatarSection({ id }: Readonly<{ id: string }>) {
   const node = useNode(id) as ProfileNode | undefined
   const { patch } = useHistory()
+  const trial = isTrialMode()
   const [pickerOpen, setPickerOpen] = useState(false)
+  const [editorFile, setEditorFile] = useState<File | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+  const confirmGenRef = useRef(0)
 
   const avatar = node?.self.avatar ?? ""
 
-  function handlePick(url: string) {
+  function triggerSelect(): void {
+    if (trial)
+      fileRef.current?.click()
+    else
+      setPickerOpen(true)
+  }
+
+  function handlePick(url: string): void {
     patch.update(id, "avatar", url)
   }
 
-  function handleClear() {
+  function handleClear(): void {
     patch.update(id, "avatar", "")
+  }
+
+  function handleFileChange(e: ChangeEvent<HTMLInputElement>): void {
+    const file = e.target.files?.[0]
+    e.target.value = ""
+    if (!file)
+      return
+    if (!AVATAR_CONTENT_TYPES.includes(file.type)) {
+      t.error("图片格式不支持 (仅 png / jpeg / webp)")
+      return
+    }
+    if (file.size > AVATAR_MAX_BYTES) {
+      t.error("图片超过 1MB")
+      return
+    }
+    setEditorFile(file)
+  }
+
+  function handleEditorConfirm(processed: File): void {
+    const gen = ++confirmGenRef.current
+    const reader = new FileReader()
+    reader.onload = () => {
+      if (gen !== confirmGenRef.current)
+        return
+      if (typeof reader.result === "string")
+        patch.update(id, "avatar", reader.result)
+    }
+    reader.onerror = () => {
+      if (gen !== confirmGenRef.current)
+        return
+      t.error("读取图片失败")
+    }
+    reader.readAsDataURL(processed)
   }
 
   return (
     <div className="flex items-center gap-3">
       <button
         type="button"
-        onClick={() => setPickerOpen(true)}
+        onClick={triggerSelect}
         aria-label="选择头像"
         className={cn(
           "flex w-14 h-16 shrink-0 items-center justify-center overflow-hidden rounded-md border border-dashed border-border bg-muted",
@@ -60,7 +109,7 @@ export default function AvatarSection({ id }: Readonly<{ id: string }>) {
             variant="ghost"
             size="sm"
             className="h-7 px-2 text-xs"
-            onClick={() => setPickerOpen(true)}
+            onClick={triggerSelect}
           >
             选择头像
           </Button>
@@ -79,12 +128,36 @@ export default function AvatarSection({ id }: Readonly<{ id: string }>) {
         </div>
       </div>
 
-      <AvatarPickerDialog
-        open={pickerOpen}
-        onOpenChange={setPickerOpen}
-        currentAvatar={avatar}
-        onPick={handlePick}
-      />
+      {trial && (
+        <input
+          ref={fileRef}
+          type="file"
+          accept={AVATAR_CONTENT_TYPES.join(",")}
+          className="hidden"
+          onChange={handleFileChange}
+        />
+      )}
+
+      {!trial && (
+        <AvatarPickerDialog
+          open={pickerOpen}
+          onOpenChange={setPickerOpen}
+          currentAvatar={avatar}
+          onPick={handlePick}
+        />
+      )}
+
+      {trial && (
+        <ImageEditor
+          open={editorFile !== null}
+          onOpenChange={(o) => {
+            if (!o)
+              setEditorFile(null)
+          }}
+          file={editorFile}
+          onConfirm={handleEditorConfirm}
+        />
+      )}
     </div>
   )
 }
